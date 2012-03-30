@@ -5,7 +5,7 @@ module View
   where
 
 -- External libraries
-import Data.IORef
+import Data.CBRef
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
@@ -15,6 +15,9 @@ import Hails.MVC.View.GtkView as Exported
 import View.Objects
 import View.InitAnimationArea
 import View.InitArtwork
+
+import Graphics.Samples
+import Graphics.MultiCoreStatus
 
 instance GtkGUI View where
   initialise = createView
@@ -26,24 +29,21 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , messageQueue :: IORef [InteractionMessage]
+  , mcs          :: CBRef MultiCoreStatus
   }
 
 createView :: IO View
 createView = do
   bldr <- loadInterface
-  msgQ <- newIORef []
+  msc  <- newCBRef diagram
 
   w <- window1 bldr
   widgetShowAll w
-  initialiseAnimationArea msgQ bldr
+  initialiseAnimationArea msc bldr
   initialiseArtwork       bldr
 
   return
     View
       { uiBuilder    = bldr
-      , messageQueue = msgQ
-      -- , languageListStore = langs
-      -- , camerasListStore = cams
-      -- , statusIcon = icon
+      , mcs          = msc
       }

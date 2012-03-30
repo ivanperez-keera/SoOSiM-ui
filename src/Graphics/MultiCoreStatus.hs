@@ -122,3 +122,40 @@ moveRunningElement q1 q2 d = maybe d transport mre
  where mre          = findRunningElement q1 d
        transport re = updateRunningElement (fst q1) (re { elementGhost = Just q2 })
                       $ addRunningElement (fst q2) (re { elementName = snd q2 }) d
+
+toggleStatus :: (Name, Name) -> MultiCoreStatus -> MultiCoreStatus
+toggleStatus qname (MultiCoreStatus ps ms) = MultiCoreStatus ps' ms
+ where ps' = map (toggleStatusPU qname) ps
+
+toggleStatusPU :: (Name, Name) -> ProcessingUnit -> ProcessingUnit
+toggleStatusPU (pName, cName) pu
+ | unitName pu == pName = ProcessingUnit pName us' st
+ | otherwise            = pu
+ where us' = map (toggleStatusRE cName) (unitElements pu)
+       st  = unitStatus pu
+
+toggleStatusRE :: Name -> RunningElement -> RunningElement
+toggleStatusRE n re
+ | elementName re == n = re { elementState = toggleStatusS (elementState re) }
+ | otherwise           = re
+
+toggleStatusS :: ElementState -> ElementState
+toggleStatusS Active  = Waiting
+toggleStatusS Waiting = Idle
+toggleStatusS Idle    = Active
+
+toggleVisibility :: [Name] -> MultiCoreStatus -> MultiCoreStatus
+toggleVisibility [n] st = st { processingUnits = pu' }
+ where pu  = processingUnits st
+       pu' = map (toggleVisibilityPU n) pu
+toggleVisibility _   st = st
+
+toggleVisibilityPU :: Name -> ProcessingUnit -> ProcessingUnit
+toggleVisibilityPU n pu = if n == unitName pu then pu' else pu
+ where pu' = pu { unitStatus = toggleVisibilityS st }
+       st  = unitStatus pu
+
+toggleVisibilityS :: UnitStatus -> UnitStatus
+toggleVisibilityS UnitCollapsed = UnitExpanded
+toggleVisibilityS UnitExpanded  = UnitCollapsed
+toggleVisibilityS UnitIgnored   = UnitIgnored
