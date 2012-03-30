@@ -1,16 +1,12 @@
-{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards #-}
-module View.InitAnimationArea where
+{-# LANGUAGE PackageImports #-}
 
--- External imports
-import             Data.IORef
+import             Control.Monad.Trans
 import             Data.Maybe
-import "gloss-gtk" Graphics.Gloss
-import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
-import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton)
-
--- Local imports
-import View.Objects
+-- import             Debug.Trace
+import "gloss-gtk" Graphics.Gloss.Interface.Pure.Game
+import qualified   Graphics.UI.Gtk as Gtk
+import             Graphics.UI.Gtk (AttrOp((:=)))
 
 -- Local imports: basic types
 import Graphics.MultiCoreStatus
@@ -23,24 +19,42 @@ import Graphics.Diagram2PlainDiagram
 import Graphics.MultiCoreStatus2Diagram
 import Graphics.PlainDiagram2Picture
 
-initialiseAnimationArea :: IORef [InteractionMessage] -> Builder -> IO ()
-initialiseAnimationArea msgs bldr = do
-    drawPic msgs =<< viewport1 bldr
+main :: IO ()
+main = do
+  _ <- Gtk.initGUI
 
-drawPic :: ContainerClass a => IORef [InteractionMessage] -> a -> IO ()
-drawPic msgs e = 
-  playIO (InWidget e (800, 600))
+  window <- Gtk.windowNew
+  vbox   <- Gtk.vBoxNew False 0
+  ebox   <- Gtk.eventBoxNew 
+  btn    <- Gtk.buttonNewWithLabel "Press me"
+
+  Gtk.boxPackStart vbox ebox Gtk.PackNatural 0
+  Gtk.boxPackStart vbox btn Gtk.PackNatural 0
+
+  Gtk.set window [ Gtk.containerBorderWidth := 0, Gtk.containerChild := vbox ]
+
+  window `Gtk.on` Gtk.deleteEvent $ liftIO Gtk.mainQuit >> return False
+
+  Gtk.widgetShowAll window
+  drawPic ebox
+  Gtk.mainGUI
+
+drawPic :: Gtk.ContainerClass a => a -> IO ()
+drawPic e = 
+  play (InWidget e (600, 600))
        white 100 state
-       makePicture handleEvent (stepWorld msgs)
+       makePicture handleEvent stepWorld
  where state = State diagram 0
+
 
 -- | The internal state is defined by the system's status and the time
 -- elapsed since the last update
 data State = State MultiCoreStatus Float
 
 -- | Convert our state to a picture.
-makePicture :: State -> IO Picture
-makePicture (State dg _) = return $ paintMultiCoreStatus dg
+makePicture :: State -> Picture
+makePicture (State dg _)
+  = paintMultiCoreStatus dg
 
 -- | Handle mouse click and motion events.
 handleEvent :: Event -> State -> State
@@ -54,7 +68,8 @@ handleEvent event state
   = state
 
 updateMenuClicks :: Point -> MultiCoreStatus -> MultiCoreStatus
-updateMenuClicks p st = maybe st (`toggleVisibility` st) ns
+updateMenuClicks p st = 
+   maybe st (`toggleVisibility` st) ns
  where ns = checkToggleVisibility p st
 
 toggleVisibility :: [Name] -> MultiCoreStatus -> MultiCoreStatus
@@ -92,15 +107,12 @@ isMenuOf (p11, p12) (p2, (_,th)) =
  where (p21, p22) = addPos p2 (0,th-20)
        (w,h)      = (20,20)
 
-stepWorld :: IORef [InteractionMessage] -> Float -> State -> IO State
-stepWorld msgs n st = do
-   msgs' <- readIORef msgs
-   writeIORef msgs []
-   return $ foldr processInteractionMessage st msgs'
-
-processInteractionMessage :: InteractionMessage -> State -> State
-processInteractionMessage (Toggle (n1, n2)) (State mcs t) =
-  State (toggleStatus (n1, n2) mcs) t
+stepWorld :: Float -> State -> State
+stepWorld n (State dg t)
+ | t' > 0.9  = State dg' (t' - 0.9)
+ | otherwise = State dg t'
+ where dg' = toggleStatus ("PU1", "P2") dg
+       t'  = n + t
 
 toggleStatus :: (Name, Name) -> MultiCoreStatus -> MultiCoreStatus
 toggleStatus qname (MultiCoreStatus ps ms) = MultiCoreStatus ps' ms
@@ -132,5 +144,3 @@ unScale p = multPos p (1 / progScale, 1 / progScale)
 
 progScale :: Float
 progScale = 0.5
-
-data InteractionMessage = Toggle (Name, Name)

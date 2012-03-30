@@ -5,6 +5,7 @@ module View
   where
 
 -- External libraries
+import Data.IORef
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
@@ -24,20 +25,24 @@ instance GladeView View where
 -- | This datatype should hold the elements that we must track in the future
 -- (for instance, treeview models)
 data View = View
-  { uiBuilder :: Builder }
+  { uiBuilder    :: Builder
+  , messageQueue :: IORef [InteractionMessage]
+  }
 
 createView :: IO View
 createView = do
   bldr <- loadInterface
+  msgQ <- newIORef []
 
   w <- window1 bldr
   widgetShowAll w
-  initialiseAnimationArea bldr
+  initialiseAnimationArea msgQ bldr
   initialiseArtwork       bldr
 
   return
     View
-      { uiBuilder = bldr
+      { uiBuilder    = bldr
+      , messageQueue = msgQ
       -- , languageListStore = langs
       -- , camerasListStore = cams
       -- , statusIcon = icon
