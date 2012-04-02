@@ -60,10 +60,10 @@ handleEvent event dg
   = dg
 
 updateMenuClicks :: Point -> MultiCoreStatus -> MultiCoreStatus
-updateMenuClicks p st = setSelection ss st'
- where ns  = checkToggleVisibility p st
-       st' = maybe st (`toggleVisibility` st) ns
-       ss  = fromMaybe [] $ checkSetSelection p st'
+updateMenuClicks p st = st'
+ where ns    = checkToggleVisibility p st
+       st'   = maybe st'' (`toggleVisibility` st) ns
+       st''  = setSelection (fromMaybe [] (checkSetSelection p st')) st
 
 checkToggleVisibility :: Point -> MultiCoreStatus -> Maybe [Name]
 checkToggleVisibility p st = listToMaybe l
