@@ -1,5 +1,4 @@
 #!/usr/bin/env runhaskell
-{-# LANGUAGE BangPatterns #-}
 
 import Distribution.Simple
 import Distribution.Simple.Setup
