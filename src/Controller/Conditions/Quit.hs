@@ -9,4 +9,10 @@ import CombinedEnvironment
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
   window <- window1 $ uiBuilder $ view cenv
-  onDestroy window mainQuit
+  onDestroy window quit
+
+  mn <- quitMenuItem $ uiBuilder $ view cenv
+  mn `on` menuItemActivate $ quit
+
+quit :: IO ()
+quit = mainQuit

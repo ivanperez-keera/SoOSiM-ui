@@ -15,5 +15,6 @@ import Model.ProtectedModel.ProtectedModelInternals
 -- protectedField {- Model field -} {- Field type -}    {- Model name -} {- event name -}
 -- protectedField "Language"        [t|Maybe Language|] "Model"          "ModelEvent"
 
-protectedField "Speed"  [t|Float|]  "Model" "ModelEvent"
-protectedField "Status" [t|Status|] "Model" "ModelEvent"
+protectedField "Speed"      [t|Float|]  "Model" "ModelEvent"
+protectedField "Status"     [t|Status|] "Model" "ModelEvent"
+protectedField "Fullscreen" [t|Bool|]   "Model" "ModelEvent"

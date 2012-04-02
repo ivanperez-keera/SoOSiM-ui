@@ -17,5 +17,6 @@ import Model.ReactiveModel.ModelEvents
 type Field a = RFs.Field a Model ModelEvent
 
 -- reactiveField {- Field name -} {- Field type -}
-reactiveField "Status"         [t|Status|]
-reactiveField "Speed" [t|Float|]
+reactiveField "Status"     [t|Status|]
+reactiveField "Speed"      [t|Float|]
+reactiveField "Fullscreen" [t|Bool|]
