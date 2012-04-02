@@ -52,7 +52,6 @@ conditionStop cenv = do
 conditionSpeedUp :: CEnv -> IO()
 conditionSpeedUp cenv = do
   let pm = model cenv
-  curSt <- getter statusField pm
   curSp <- getter speedField pm
   if curSp == 0.0
     then setter speedField pm (0.1 :: Float)
@@ -61,7 +60,6 @@ conditionSpeedUp cenv = do
 conditionSlowDown :: CEnv -> IO()
 conditionSlowDown cenv = do 
   let pm = model cenv
-  curSt <- getter statusField pm
   curSp <- getter speedField pm
   when (curSp >= 0.2) $
     setter speedField pm (curSp / 2)
