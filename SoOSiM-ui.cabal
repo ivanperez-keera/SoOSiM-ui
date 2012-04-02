@@ -66,7 +66,37 @@ Executable SoOSiM-ui
                , mtl
   
   -- Modules not exported by this package.
-  -- Other-modules:       
+  Other-modules:    View
+                    Model.Model
+                    Model.ProtectedModel
+                    Model.ReactiveModel
+                    Model.ReactiveModel.ReactiveFields
+                    Model.ReactiveModel.ModelEvents
+                    Model.ReactiveModel.ReactiveModelInternals
+                    Model.ProtectedModel.ProtectedModelInternals
+                    Model.ProtectedModel.ProtectedFields
+                    Controller
+                    View.InitArtwork
+                    View.Objects
+                    View.InitAnimationArea
+                    Graphics.PlainDiagram
+                    Graphics.PlainDiagramLayout
+                    Graphics.Samples
+                    Graphics.MultiCoreStatus
+                    Graphics.Diagram
+                    Graphics.GlossShapes
+                    Graphics.PlainDiagram2Picture
+                    Graphics.Types
+                    Graphics.Diagram2PlainDiagram
+                    Graphics.MultiCoreStatus2Diagram
+                    Paths
+                    CombinedEnvironment
+                    Paths.CustomPaths
+                    Controller.Conditions.Speed
+                    Controller.Conditions.Quit
+                    Controller.Conditions.UpdatePicture
+                    Controller.Conditions
+                    Data.CBRef
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
