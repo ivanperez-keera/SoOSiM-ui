@@ -3,7 +3,7 @@
 module View.InitAnimationArea where
 
 -- External imports
-import             Data.CBRef
+import             Data.CBMVar
 import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
@@ -23,10 +23,10 @@ import Graphics.Diagram2PlainDiagram
 import Graphics.MultiCoreStatus2Diagram
 import Graphics.PlainDiagram2Picture
 
-initialiseAnimationArea :: CBRef MultiCoreStatus -> Builder -> IO ()
+initialiseAnimationArea :: CBMVar MultiCoreStatus -> Builder -> IO ()
 initialiseAnimationArea mcs bldr = drawPic mcs =<< viewport1 bldr
 
-drawPic :: ContainerClass a => CBRef MultiCoreStatus -> a -> IO ()
+drawPic :: ContainerClass a => CBMVar MultiCoreStatus -> a -> IO ()
 drawPic mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
@@ -37,8 +37,8 @@ drawPic mcs e =
 data State = State [Event]
 
 -- | Convert our state to a picture.
-makePicture :: CBRef MultiCoreStatus -> State -> IO Picture
-makePicture mcs _ = fmap paintMultiCoreStatus $ readCBRef mcs
+makePicture :: CBMVar MultiCoreStatus -> State -> IO Picture
+makePicture mcs _ = fmap paintMultiCoreStatus $ readCBMVar mcs
 
 queueEvent :: Event -> State -> State
 queueEvent event state
@@ -84,9 +84,9 @@ isMenuOf (p11, p12) (p2, (_,th)) =
        (w,h)      = (20,20)
 
 -- Process the event queue and return an empty state
-stepWorld :: CBRef MultiCoreStatus -> Float -> State -> IO State
+stepWorld :: CBMVar MultiCoreStatus -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs) = do
-  mapM_ (\ev -> atomicModifyCBRef mcsRef (\mcs -> (handleEvent ev mcs, ()))) evs
+  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
   return (State [])
 
 paintMultiCoreStatus :: MultiCoreStatus -> Picture

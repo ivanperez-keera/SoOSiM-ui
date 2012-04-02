@@ -38,28 +38,23 @@ conditionPause cenv = do
  where pm = model cenv
 
 conditionRun :: CEnv -> IO()
-conditionRun cenv = do
-  let pm = model cenv
-  setter speedField  pm (1.0 :: Float)
+conditionRun cenv =
   setter statusField pm Running
+ where pm = model cenv
 
 conditionStop :: CEnv -> IO()
-conditionStop cenv = do
-  let pm = model cenv
-  setter speedField  pm (0.0 :: Float)
+conditionStop cenv =
   setter statusField pm Stopped
+ where pm = model cenv
 
 conditionSpeedUp :: CEnv -> IO()
 conditionSpeedUp cenv = do
-  let pm = model cenv
   curSp <- getter speedField pm
-  if curSp == 0.0
-    then setter speedField pm (0.1 :: Float)
-    else setter speedField pm (curSp * 2)
+  setter speedField pm (curSp * 2)
+ where pm = model cenv
 
 conditionSlowDown :: CEnv -> IO()
 conditionSlowDown cenv = do 
-  let pm = model cenv
   curSp <- getter speedField pm
-  when (curSp >= 0.2) $
-    setter speedField pm (curSp / 2)
+  when (curSp >= 0.2) $ setter speedField pm (curSp / 2)
+ where pm = model cenv

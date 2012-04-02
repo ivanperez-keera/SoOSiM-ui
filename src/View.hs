@@ -5,7 +5,7 @@ module View
   where
 
 -- External libraries
-import Data.CBRef
+import Data.CBMVar
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
@@ -29,13 +29,13 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: CBRef MultiCoreStatus
+  , mcs          :: CBMVar MultiCoreStatus
   }
 
 createView :: IO View
 createView = do
   bldr <- loadInterface
-  msc  <- newCBRef diagram
+  msc  <- newCBMVar diagram
 
   w <- window1 bldr
   widgetShowAll w

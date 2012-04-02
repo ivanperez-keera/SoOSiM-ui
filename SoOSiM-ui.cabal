@@ -94,9 +94,10 @@ Executable SoOSiM-ui
                     Paths.CustomPaths
                     Controller.Conditions.Speed
                     Controller.Conditions.Quit
-                    Controller.Conditions.UpdatePicture
+                    Controller.Conditions.UpdateStatus
                     Controller.Conditions
                     Data.CBRef
+                    Data.CBMVar
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
