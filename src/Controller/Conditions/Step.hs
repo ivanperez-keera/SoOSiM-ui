@@ -20,7 +20,7 @@ condition :: CEnv -> IO()
 condition cenv = void $ do
   st <- getter statusField pm
 
-  when (st == Paused) $ do
+  when (st == Paused) $
     modifyCBMVar mcsRef (return.nextStep)
 
   where mcsRef = mcs (view cenv)
