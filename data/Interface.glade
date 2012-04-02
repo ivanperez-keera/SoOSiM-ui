@@ -175,7 +175,7 @@
                     <property name="can_focus">False</property>
                     <property name="ubuntu_local">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="menuitem5">
+                      <object class="GtkImageMenuItem" id="fullScreenMenuItem">
                         <property name="label">gtk-fullscreen</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -255,7 +255,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton8">
+              <object class="GtkToolButton" id="fullScreenToolBtn">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="use_action_appearance">False</property>
@@ -483,7 +483,7 @@
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Simulation control</property>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton1">
+                      <object class="GtkToolButton" id="runToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
@@ -493,7 +493,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton2">
+                      <object class="GtkToolButton" id="pauseToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
@@ -506,7 +506,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton3">
+                      <object class="GtkToolButton" id="stopToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
@@ -519,7 +519,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton5">
+                      <object class="GtkToolButton" id="slowDownToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
@@ -532,7 +532,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton4">
+                      <object class="GtkToolButton" id="speedUpToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
@@ -555,7 +555,7 @@
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Debugging</property>
                     <child>
-                      <object class="GtkToolButton" id="toolbutton9">
+                      <object class="GtkToolButton" id="stepForwardToolBtn">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_action_appearance">False</property>
