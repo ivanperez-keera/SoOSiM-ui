@@ -14,9 +14,8 @@ import View.Objects
 
 -- Local imports: basic types
 import Graphics.MultiCoreStatus
--- import Graphics.Samples
 import Graphics.PlainDiagram
-import Graphics.Types (Name, Position, addPos, Size, multPos)
+import Graphics.Types (Name, Position, addPos, Size, multPos, subPos)
 
 -- Local imports: transformation functions: Status ~> Picture
 import Graphics.Diagram2PlainDiagram
@@ -61,12 +60,19 @@ handleEvent event dg
   = dg
 
 updateMenuClicks :: Point -> MultiCoreStatus -> MultiCoreStatus
-updateMenuClicks p st = maybe st (`toggleVisibility` st) ns
- where ns = checkToggleVisibility p st
+updateMenuClicks p st = setSelection ss st'
+ where ns  = checkToggleVisibility p st
+       st' = maybe st (`toggleVisibility` st) ns
+       ss  = fromMaybe [] $ checkSetSelection p st'
 
 checkToggleVisibility :: Point -> MultiCoreStatus -> Maybe [Name]
 checkToggleVisibility p st = listToMaybe l
  where l = mapMaybe (isMenuOfB p) boxes
+       (PlainDiagram boxes _) = transformDiagram $ transformStatus st
+  
+checkSetSelection :: Point -> MultiCoreStatus -> Maybe [Name]
+checkSetSelection p st = listToMaybe l
+ where l = mapMaybe (isAreaOfB p) boxes
        (PlainDiagram boxes _) = transformDiagram $ transformStatus st
   
 isMenuOfB :: Position -> PBox -> Maybe [Name]
@@ -74,7 +80,8 @@ isMenuOfB p1 (PBox n p2 s _) = if isMenuOf p1 (p2, s) then Just [n] else Nothing
 isMenuOfB p1 (PGroupBox n p2 s bs _)
  | isMenuOf p1 (p2,s) = Just [n]
  | otherwise          = fmap (n:) $ listToMaybe l
- where l = mapMaybe (isMenuOfB p1) bs
+ where l   = mapMaybe (isMenuOfB p1') bs
+       p1' = subPos p1 p2
 
 isMenuOf :: Position -> (Position, Size) -> Bool
 isMenuOf (p11, p12) (p2, (_,th)) =
@@ -82,6 +89,21 @@ isMenuOf (p11, p12) (p2, (_,th)) =
   && p12 >= p22 && p12 <= (p22 + h))
  where (p21, p22) = addPos p2 (0,th-20)
        (w,h)      = (20,20)
+
+isAreaOfB :: Position -> PBox -> Maybe [Name]
+isAreaOfB p1 (PBox n p2 s _) = if isAreaOf p1 (p2, s) then Just [n] else Nothing
+isAreaOfB p1 (PGroupBox n p2 s bs _)
+ | not (null l)        = fmap (n:) $ listToMaybe l
+ | isAreaOf p1 (p2, s) = Just [n]
+ | otherwise           = Nothing
+ where l   = mapMaybe (isAreaOfB p1') bs
+       p1' = subPos p1 p2
+
+isAreaOf :: Position -> (Position, Size) -> Bool
+isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
+  (p11 >= p21 && p11 <= (p21 + w)
+   && p12 >= p22 && p12 <= (p22 + h))
+  && not (isMenuOf p1 d)
 
 -- Process the event queue and return an empty state
 stepWorld :: CBMVar MultiCoreStatus -> Float -> State -> IO State

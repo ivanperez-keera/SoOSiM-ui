@@ -6,6 +6,7 @@ import Graphics.Types
 data MultiCoreStatus = MultiCoreStatus
   { processingUnits :: [ ProcessingUnit ]
   , messages        :: [ Message ]
+  , selection       :: [ Name ]
   }
  deriving (Eq, Show)
 
@@ -124,7 +125,7 @@ moveRunningElement q1 q2 d = maybe d transport mre
                       $ addRunningElement (fst q2) (re { elementName = snd q2 }) d
 
 toggleStatus :: (Name, Name) -> MultiCoreStatus -> MultiCoreStatus
-toggleStatus qname (MultiCoreStatus ps ms) = MultiCoreStatus ps' ms
+toggleStatus qname (MultiCoreStatus ps ms s) = MultiCoreStatus ps' ms s
  where ps' = map (toggleStatusPU qname) ps
 
 toggleStatusPU :: (Name, Name) -> ProcessingUnit -> ProcessingUnit
@@ -143,6 +144,9 @@ toggleStatusS :: ElementState -> ElementState
 toggleStatusS Active  = Waiting
 toggleStatusS Waiting = Idle
 toggleStatusS Idle    = Active
+
+setSelection :: [Name] -> MultiCoreStatus -> MultiCoreStatus
+setSelection n m = m { selection = n }
 
 toggleVisibility :: [Name] -> MultiCoreStatus -> MultiCoreStatus
 toggleVisibility [n] st = st { processingUnits = pu' }

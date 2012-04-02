@@ -3,7 +3,7 @@ module Graphics.Samples where
 import Graphics.MultiCoreStatus
 
 diagram :: MultiCoreStatus
-diagram = MultiCoreStatus [pu1, pu2, pu3] [m1, m2]
+diagram = MultiCoreStatus [pu1, pu2, pu3] [m1, m2] []
 
 pu1 :: ProcessingUnit
 pu1 = ProcessingUnit "PU1" [pu1c1, pu1c2, pu1app1] UnitExpanded

@@ -30,5 +30,8 @@ makeColor = G.makeColor
 addPos :: Position -> Position -> Position
 addPos (p11,p12) (p21, p22) = (p11+p21, p12+p22)
 
+subPos :: Position -> Position -> Position
+subPos (p11,p12) (p21, p22) = (p11-p21, p12-p22)
+
 multPos :: Position -> Position -> Position
 multPos (p11,p12) (p21, p22) = (p11*p21, p12*p22)
