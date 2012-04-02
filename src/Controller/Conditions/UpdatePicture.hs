@@ -3,15 +3,31 @@ module Controller.Conditions.UpdatePicture where
 import Data.CBRef
 import Control.Monad
 import Graphics.UI.Gtk
+import Hails.MVC.Model.ProtectedModel.Reactive
 
 import CombinedEnvironment
 import Graphics.MultiCoreStatus
+import Model.Model
 
 -- For now, this simply changes the state of a component every two seconds
 installHandlers :: CEnv -> IO()
-installHandlers cenv = void $ timeoutAdd (toggleSt mcsRef >> return True) 2000
-  where mcsRef = mcs (view cenv)
+installHandlers cenv = void $ do
+  timeoutAdd (toggleSt cenv) 1000
+  model cenv `onEvent` StatusChanged $ void $ toggleSt cenv
 
-toggleSt :: CBRef MultiCoreStatus -> IO()
-toggleSt mcsRef =
-  atomicModifyCBRef mcsRef (\m -> (toggleStatus ("PU1", "P2") m, ()))
+toggleSt :: CEnv -> IO Bool
+toggleSt cenv = do
+  st <- getter statusField pm
+  sp <- getter speedField pm
+
+  when (st == Running && sp > 0) $ do
+    atomicModifyCBRef mcsRef (\m -> (toggleStatus ("PU1", "P2") m, ()))
+
+  when (st == Running) $ void $
+    let wt = if sp == 0 then 2 else sp
+    in timeoutAdd (toggleSt cenv) (round (1000 / wt))
+
+  return False
+
+  where mcsRef = mcs (view cenv)
+        pm     = model cenv

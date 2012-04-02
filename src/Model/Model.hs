@@ -11,5 +11,6 @@ emptyBM = Model { speed  = 1
                 }
 
 data Status = Running
+            | Paused
             | Stopped
- deriving (Eq)
+ deriving (Eq, Show)
