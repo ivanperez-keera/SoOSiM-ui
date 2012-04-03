@@ -30,15 +30,14 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: CBMVar (MultiCoreStatus, Maybe SimState)
+  , mcs          :: CBMVar (MultiCoreStatus, SimState)
   }
 
 createView :: IO View
 createView = do
   bldr <- loadInterface
-  -- msc  <- newCBMVar (diagram, Nothing)
   ss <- simstate 
-  msc <- newCBMVar (emptyMultiCoreStatus, Just ss)
+  msc <- newCBMVar (emptyMultiCoreStatus, ss)
 
   w <- window1 bldr
   widgetShowAll w

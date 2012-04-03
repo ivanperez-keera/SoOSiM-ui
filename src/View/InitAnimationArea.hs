@@ -25,7 +25,7 @@ import Graphics.SimState2MultiCoreStatus
 import SoOSiM.Types
 
 type StVar = CBMVar St
-type St = (MultiCoreStatus, Maybe SimState)
+type St = (MultiCoreStatus, SimState)
 
 initialiseAnimationArea :: StVar -> Builder -> IO ()
 initialiseAnimationArea mcs bldr = drawPic mcs =<< viewport1 bldr
@@ -43,9 +43,7 @@ data State = State [Event]
 -- | Convert our state to a picture.
 makePicture :: StVar -> State -> IO Picture
 makePicture st _ = fmap paint $ readCBMVar st
- where paint (mcs, ss) = case ss of
-                          Nothing -> paintMultiCoreStatus mcs
-                          Just s  -> paintMultiCoreStatus (updateFromSimState mcs s)
+ where paint = paintMultiCoreStatus . uncurry updateFromSimState
 
 queueEvent :: Event -> State -> State
 queueEvent event state
