@@ -21,11 +21,16 @@ import Graphics.Types (Name, Position, addPos, Size, multPos, subPos)
 import Graphics.Diagram2PlainDiagram
 import Graphics.MultiCoreStatus2Diagram
 import Graphics.PlainDiagram2Picture
+import Graphics.SimState2MultiCoreStatus
+import SoOSiM.Types
 
-initialiseAnimationArea :: CBMVar MultiCoreStatus -> Builder -> IO ()
+type StVar = CBMVar St
+type St = (MultiCoreStatus, Maybe SimState)
+
+initialiseAnimationArea :: StVar -> Builder -> IO ()
 initialiseAnimationArea mcs bldr = drawPic mcs =<< viewport1 bldr
 
-drawPic :: ContainerClass a => CBMVar MultiCoreStatus -> a -> IO ()
+drawPic :: ContainerClass a => StVar -> a -> IO ()
 drawPic mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
@@ -36,8 +41,11 @@ drawPic mcs e =
 data State = State [Event]
 
 -- | Convert our state to a picture.
-makePicture :: CBMVar MultiCoreStatus -> State -> IO Picture
-makePicture mcs _ = fmap paintMultiCoreStatus $ readCBMVar mcs
+makePicture :: StVar -> State -> IO Picture
+makePicture st _ = fmap paint $ readCBMVar st
+ where paint (mcs, ss) = case ss of
+                          Nothing -> paintMultiCoreStatus mcs
+                          Just s  -> paintMultiCoreStatus (updateFromSimState mcs s)
 
 queueEvent :: Event -> State -> State
 queueEvent event state
@@ -50,7 +58,7 @@ queueEvent event state
   = state
 
 -- | Handle mouse click and motion events.
-handleEvent :: Event -> MultiCoreStatus -> MultiCoreStatus
+handleEvent :: Event -> St -> St
 handleEvent event dg
   -- Finish drawing a line, and add it to the picture.
   | EventKey (MouseButton LeftButton) Up _ pt <- event
@@ -59,8 +67,8 @@ handleEvent event dg
   | otherwise
   = dg
 
-updateMenuClicks :: Point -> MultiCoreStatus -> MultiCoreStatus
-updateMenuClicks p st = st'
+updateMenuClicks :: Point -> St -> St
+updateMenuClicks p (st,s) = (st',s)
  where ns    = checkToggleVisibility p st
        st'   = maybe st'' (`toggleVisibility` st) ns
        st''  = setSelection (fromMaybe [] (checkSetSelection p st')) st
@@ -106,9 +114,9 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
   && not (isMenuOf p1 d)
 
 -- Process the event queue and return an empty state
-stepWorld :: CBMVar MultiCoreStatus -> Float -> State -> IO State
+stepWorld :: StVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs) = do
-  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
+  mapM_ (\ev -> modifyCBMVar mcsRef (return .handleEvent ev)) evs
   return (State [])
 
 paintMultiCoreStatus :: MultiCoreStatus -> Picture

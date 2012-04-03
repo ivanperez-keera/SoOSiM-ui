@@ -9,6 +9,9 @@ import Hails.MVC.Model.ProtectedModel.Reactive
 import CombinedEnvironment
 import Graphics.MultiCoreStatus
 import Model.Model
+-- import SoOSiM (execStep, SimState)
+import SoOSiM.Simulator (execStep)
+import SoOSiM.Types (SimState)
 
 -- For now, this simply changes the state of a component every two seconds
 installHandlers :: CEnv -> IO()
@@ -22,7 +25,7 @@ toggleSt cenv = do
   sp <- getter speedField pm
 
   when (st == Running && sp > 0) $ do
-    modifyCBMVar mcsRef (return.nextStep)
+    modifyCBMVar mcsRef nextStep
 
   when (st == Running) $ void $
     let wt = if sp == 0 then 2 else sp
@@ -33,5 +36,8 @@ toggleSt cenv = do
   where mcsRef = mcs (view cenv)
         pm     = model cenv
 
-nextStep :: MultiCoreStatus -> MultiCoreStatus
-nextStep = toggleStatus ("PU1", "P2")
+nextStep :: (MultiCoreStatus,Maybe SimState) -> IO (MultiCoreStatus, Maybe SimState)
+nextStep (x,y) = do
+ ns <- maybe (return Nothing) (fmap Just . execStep) y
+ -- return (toggleStatus ("PU1", "P2") x, ns)
+ return (x,ns)

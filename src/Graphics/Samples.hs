@@ -1,6 +1,14 @@
 module Graphics.Samples where
 
-import Graphics.MultiCoreStatus
+import Graphics.MultiCoreStatus as M
+import Data.Maybe
+import qualified Data.IntMap as IM
+import qualified Data.Map as Map
+import SoOSiM
+import SoOSiM.Simulator
+import SoOSiM.Types
+import UniqSupply
+import Unique
 
 diagram :: MultiCoreStatus
 diagram = MultiCoreStatus [pu1, pu2, pu3] [m1, m2] []
@@ -15,13 +23,13 @@ pu2 :: ProcessingUnit
 pu2 = ProcessingUnit "PU2" [pu2c1, pu2c2, pu2app2] UnitExpanded
 
 pu1c1 :: RunningElement
-pu1c1 = Component "P2" "C1" Idle Nothing
+pu1c1 = Component "P2" "C1" M.Idle Nothing
 
 pu1c2 :: RunningElement
 pu1c2 = Component "P9" "C2" Active  Nothing
 
 pu1app1 :: RunningElement
-pu1app1 = Application "P11" "App1" Idle Nothing
+pu1app1 = Application "P11" "App1" M.Idle Nothing
 
 pu2c1 :: RunningElement
 pu2c1 = Component "P12" "C1" Active Nothing
@@ -41,3 +49,30 @@ m2 :: Message
 m2 = Message ("PU2", "C1")
              ("PU2", "App2")
              "Super Fantastich"
+
+simstate :: IO SimState
+simstate = do
+  supply <- mkSplitUniqSupply 'z'
+  let (supply',supply'') = splitUniqSupply supply
+  let (node0id:component0id:_) = uniqsFromSupply supply'
+  let component0CC = CC Running Initializer (error "no parent") [Initialize]
+  let node0 = Node node0id NodeInfo (Map.fromList [("Initializer",component0id)]) (IM.fromList [(getKey component0id,component0CC)]) IM.empty
+  let simState = SimState node0id component0id (IM.fromList [(getKey node0id,node0)]) supply'' (Map.fromList [("Initializer",component0CC)])
+
+  return simState
+
+data Initializer = Initializer
+
+initializer ::
+  Initializer
+  -> ComponentInput
+  -> SimM Initializer
+initializer s Initialize = do
+  yield s
+
+initializer s _ = yield s
+
+instance ComponentIface Initializer where
+  initState = Initializer
+  componentName _ = "Initializer"
+  componentBehaviour = initializer

@@ -3,6 +3,9 @@ module Graphics.MultiCoreStatus where
 import Data.Maybe
 import Graphics.Types
 
+emptyMultiCoreStatus :: MultiCoreStatus
+emptyMultiCoreStatus = MultiCoreStatus [] [] []
+
 data MultiCoreStatus = MultiCoreStatus
   { processingUnits :: [ ProcessingUnit ]
   , messages        :: [ Message ]

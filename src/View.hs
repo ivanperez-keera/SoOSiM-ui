@@ -10,6 +10,7 @@ import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
 import Hails.MVC.View.GtkView as Exported
+import SoOSiM.Types (SimState)
 
 -- Internal libraries
 import View.Objects
@@ -29,13 +30,15 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: CBMVar MultiCoreStatus
+  , mcs          :: CBMVar (MultiCoreStatus, Maybe SimState)
   }
 
 createView :: IO View
 createView = do
   bldr <- loadInterface
-  msc  <- newCBMVar diagram
+  -- msc  <- newCBMVar (diagram, Nothing)
+  ss <- simstate 
+  msc <- newCBMVar (emptyMultiCoreStatus, Just ss)
 
   w <- window1 bldr
   widgetShowAll w

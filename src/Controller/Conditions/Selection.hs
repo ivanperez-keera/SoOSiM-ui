@@ -19,5 +19,5 @@ installHandlers cenv = void $
 condition :: CEnv -> IO()
 condition cenv = do
   c <- readCBMVar mcsRef
-  print (selection c)
+  print (selection (fst c))
   where mcsRef = mcs (view cenv)
