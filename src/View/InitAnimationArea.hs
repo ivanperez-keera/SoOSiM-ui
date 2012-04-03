@@ -71,7 +71,8 @@ updateMenuClicks :: Point -> St -> St
 updateMenuClicks p (st,s) = (st',s)
  where ns    = checkToggleVisibility p st
        st'   = maybe st'' (`toggleVisibility` st) ns
-       st''  = setSelection (fromMaybe [] (checkSetSelection p st')) st
+       ss    = checkSetSelection p st
+       st''  = setSelection (fromMaybe [] ss) st
 
 checkToggleVisibility :: Point -> MultiCoreStatus -> Maybe [Name]
 checkToggleVisibility p st = listToMaybe l

@@ -8,6 +8,7 @@ import Hails.MVC.Model.ProtectedModel.Reactive
 
 import CombinedEnvironment
 import Graphics.MultiCoreStatus
+import Graphics.SimState2MultiCoreStatus
 import Model.Model
 -- import SoOSiM (execStep, SimState)
 import SoOSiM.Simulator (execStep)
@@ -40,4 +41,5 @@ nextStep :: (MultiCoreStatus,Maybe SimState) -> IO (MultiCoreStatus, Maybe SimSt
 nextStep (x,y) = do
  ns <- maybe (return Nothing) (fmap Just . execStep) y
  -- return (toggleStatus ("PU1", "P2") x, ns)
- return (x,ns)
+ let nmcs = maybe x (updateFromSimState x) ns
+ return (nmcs,ns)
