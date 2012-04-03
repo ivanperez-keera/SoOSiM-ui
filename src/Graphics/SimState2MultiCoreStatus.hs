@@ -1,14 +1,10 @@
 {-# LANGUAGE PackageImports #-}
 module Graphics.SimState2MultiCoreStatus where
 
-import           Data.Maybe
 import qualified Data.IntMap as I
-import qualified Data.Map    as M
 import qualified SoOSiM.Types as S
 
 import Graphics.MultiCoreStatus
-import Graphics.Diagram
-import Graphics.Types (Color, makeColor, Name)
 
 updateFromSimState :: MultiCoreStatus -> S.SimState -> MultiCoreStatus
 updateFromSimState mcs ss = 

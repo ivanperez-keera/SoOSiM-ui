@@ -1,14 +1,15 @@
 module Graphics.Samples where
 
-import Graphics.MultiCoreStatus as M
-import Data.Maybe
+-- External imports
 import qualified Data.IntMap as IM
 import qualified Data.Map as Map
-import SoOSiM
-import SoOSiM.Simulator
 import SoOSiM.Types
 import UniqSupply
 import Unique
+
+-- Local imports
+import Graphics.MultiCoreStatus      as M
+import SoOSiM.Components.Initializer
 
 diagram :: MultiCoreStatus
 diagram = MultiCoreStatus [pu1, pu2, pu3] [m1, m2] []
@@ -61,18 +62,3 @@ simstate = do
 
   return simState
 
-data Initializer = Initializer
-
-initializer ::
-  Initializer
-  -> ComponentInput
-  -> SimM Initializer
-initializer s Initialize = do
-  yield s
-
-initializer s _ = yield s
-
-instance ComponentIface Initializer where
-  initState = Initializer
-  componentName _ = "Initializer"
-  componentBehaviour = initializer

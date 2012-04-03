@@ -7,7 +7,6 @@ import Hails.MVC.Model.ProtectedModel.Reactive
 import Hails.MVC.Controller.ConditionDirection
 
 import CombinedEnvironment
-import Graphics.MultiCoreStatus
 import Model.Model
 
 -- For now, this simply changes the state of a component every two seconds

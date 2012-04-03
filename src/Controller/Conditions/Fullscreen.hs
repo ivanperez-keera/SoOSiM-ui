@@ -1,17 +1,14 @@
 module Controller.Conditions.Fullscreen where
 
---- import Data.CBRef
-import Data.CBMVar
+-- External imports
 import Control.Monad
-import Graphics.UI.Gtk
 import Control.Monad.Trans
+import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
 
+-- Local imports
 import CombinedEnvironment
-import Graphics.MultiCoreStatus
--- import Model.Model
 
--- For now, this simply changes the state of a component every two seconds
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
   w <- window1 $ uiBuilder $ view cenv
@@ -36,7 +33,6 @@ conditionToggle :: CEnv -> IO()
 conditionToggle cenv = do
   mfs    <- getter fullscreenField pm
   window <- window1 $ uiBuilder $ view cenv
-  if mfs
-   then windowUnfullscreen window
-   else windowFullscreen window
+  let toggle = if mfs then windowUnfullscreen else windowFullscreen
+  toggle window
  where pm = model cenv

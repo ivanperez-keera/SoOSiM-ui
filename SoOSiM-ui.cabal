@@ -70,6 +70,11 @@ Executable SoOSiM-ui
   
   -- Modules not exported by this package.
   Other-modules:    View
+                    View.InitArtwork
+                    View.Objects
+                    View.InitAnimationArea
+                    Paths
+                    Paths.CustomPaths
                     Model.Model
                     Model.ProtectedModel
                     Model.ReactiveModel
@@ -78,10 +83,7 @@ Executable SoOSiM-ui
                     Model.ReactiveModel.ReactiveModelInternals
                     Model.ProtectedModel.ProtectedModelInternals
                     Model.ProtectedModel.ProtectedFields
-                    Controller
-                    View.InitArtwork
-                    View.Objects
-                    View.InitAnimationArea
+                    SoOSiM.Components.Initializer
                     Graphics.PlainDiagram
                     Graphics.PlainDiagramLayout
                     Graphics.Samples
@@ -93,9 +95,8 @@ Executable SoOSiM-ui
                     Graphics.Diagram2PlainDiagram
                     Graphics.MultiCoreStatus2Diagram
                     Graphics.SimState2MultiCoreStatus
-                    Paths
                     CombinedEnvironment
-                    Paths.CustomPaths
+                    Controller
                     Controller.Conditions.Speed
                     Controller.Conditions.Quit
                     Controller.Conditions.UpdateStatus
