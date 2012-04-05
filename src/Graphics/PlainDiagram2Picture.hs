@@ -6,7 +6,7 @@ import "gloss-gtk" Graphics.Gloss
 
 -- Local imports
 import Graphics.PlainDiagram
-import Graphics.GlossShapes
+import Graphics.Gloss.AdvancedShapes
 
 paintDiagram :: PlainDiagram -> Picture
 paintDiagram (PlainDiagram bs as) = Pictures [pbs, pas]

@@ -1,7 +1,7 @@
 {-# LANGUAGE PackageImports #-}
 --  This module contains several gloss shapes, including boxes,
 --  labelled boxes, shadows and arrows.
-module Graphics.GlossShapes where
+module Graphics.Gloss.AdvancedShapes where
 
 import "gloss-gtk" Graphics.Gloss
 

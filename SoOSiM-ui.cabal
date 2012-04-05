@@ -86,15 +86,15 @@ Executable SoOSiM-ui
                     Model.ProtectedModel.ProtectedFields
                     SoOSiM.Components.Initializer
                     SoOSiM.Samples.Initializer
-                    Graphics.PlainDiagram
-                    Graphics.PlainDiagramLayout
-                    Graphics.MultiCoreStatus
+                    Graphics.Gloss.AdvancedShapes
                     Graphics.Diagram
-                    Graphics.GlossShapes
-                    Graphics.PlainDiagram2Picture
-                    Graphics.Types
                     Graphics.Diagram2PlainDiagram
                     Graphics.MultiCoreStatus2Diagram
+                    Graphics.PlainDiagram
+                    Graphics.PlainDiagram2Picture
+                    Graphics.PlainDiagramLayout
+                    Graphics.MultiCoreStatus
+                    Graphics.Types
                     Graphics.SimState2MultiCoreStatus
                     CombinedEnvironment
                     Controller
