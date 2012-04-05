@@ -1,4 +1,3 @@
-{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards  #-}
 module Graphics.Diagram2PlainDiagram where
 
@@ -21,7 +20,7 @@ transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
        g''     = pboxColumnLayout boxSep w HCenter g'
        (w,h)   = (fromIntegral $ 40 * length s, 70)
        (w',h') = pboxListSize g''
-       wM      = (max w' w) + 2 * boxSep
+       wM      = max w' w + 2 * boxSep
        hP      = h + h' + boxSep 
 
 arrowToPArrow :: [PBox] -> Arrow -> Maybe PArrow

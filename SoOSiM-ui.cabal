@@ -61,6 +61,7 @@ Executable SoOSiM-ui
                , gtk
                , glade
                , gloss-gtk
+               , keera-callbacks
                , SoOSiM
 
                , base >= 4.0 && < 5.0
@@ -101,8 +102,6 @@ Executable SoOSiM-ui
                     Controller.Conditions.Quit
                     Controller.Conditions.UpdateStatus
                     Controller.Conditions
-                    Data.CBRef
-                    Data.CBMVar
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
