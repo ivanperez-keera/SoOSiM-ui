@@ -1,4 +1,5 @@
 {-# LANGUAGE PackageImports #-}
+{-# LANGUAGE PatternGuards  #-}
 module Graphics.Diagram2PlainDiagram where
 
 import Data.Maybe
