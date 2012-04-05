@@ -14,7 +14,7 @@ transformStatus (MultiCoreStatus ps ms s) = Diagram ps' ms'
 
 transformProcessingUnit :: [Name] -> ProcessingUnit -> Maybe Box
 transformProcessingUnit sel (ProcessingUnit n cs UnitExpanded) =
-   Just $ GroupBox n cs' col
+   Just $ GroupBox n cs' col True
  where cs' = map (transformRunningElement sel') cs
        col = if sel == [n]
               then makeColor 0.1 0.5 0.9 1.0
@@ -22,7 +22,7 @@ transformProcessingUnit sel (ProcessingUnit n cs UnitExpanded) =
        sel' = if not (null sel) && head sel == n then tail sel else []
 
 transformProcessingUnit sel (ProcessingUnit n cs UnitCollapsed) =
-   Just $ Box n col
+   Just $ GroupBox n [] col False
   where col = if sel == [n]
                 then makeColor 0.1 0.5 0.9 1.0
                 else makeColor 0.9 0.9 0.9 1.0

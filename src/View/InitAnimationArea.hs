@@ -83,8 +83,8 @@ checkSetSelection p st = listToMaybe l
        (PlainDiagram boxes _) = transformDiagram $ transformStatus st
   
 isMenuOfB :: Position -> PBox -> Maybe [Name]
-isMenuOfB p1 (PBox n p2 s _) = if isMenuOf p1 (p2, s) then Just [n] else Nothing
-isMenuOfB p1 (PGroupBox n p2 s bs _)
+isMenuOfB p1 (PBox n p2 s _) = Nothing -- if isMenuOf p1 (p2, s) then Just [n] else Nothing
+isMenuOfB p1 (PGroupBox n p2 s bs _ _)
  | isMenuOf p1 (p2,s) = Just [n]
  | otherwise          = fmap (n:) $ listToMaybe l
  where l   = mapMaybe (isMenuOfB p1') bs
@@ -99,7 +99,7 @@ isMenuOf (p11, p12) (p2, (_,th)) =
 
 isAreaOfB :: Position -> PBox -> Maybe [Name]
 isAreaOfB p1 (PBox n p2 s _) = if isAreaOf p1 (p2, s) then Just [n] else Nothing
-isAreaOfB p1 (PGroupBox n p2 s bs _)
+isAreaOfB p1 (PGroupBox n p2 s bs _ _)
  | not (null l)        = fmap (n:) $ listToMaybe l
  | isAreaOf p1 (p2, s) = Just [n]
  | otherwise           = Nothing

@@ -1,4 +1,3 @@
-{-# LANGUAGE PackageImports #-}
 module Graphics.SimState2MultiCoreStatus where
 
 import qualified Data.IntMap as I

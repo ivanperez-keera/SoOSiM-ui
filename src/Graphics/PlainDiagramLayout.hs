@@ -14,8 +14,8 @@ pboxColumnLayout' left  top  maxWidth  align (b:bs) = b':bs'
  where bs' = pboxColumnLayout' left top' maxWidth align bs
        sz  = pboxSize b
        b'  = case b of
-               PBox n _ sz@(w,_) c         -> PBox n ((left + newX w),top) sz c
-               PGroupBox n _ sz@(w,_) gs c -> PGroupBox n ((left + newX w),top) sz gs c
+               PBox n _ sz@(w,_) c           -> PBox n ((left + newX w),top) sz c
+               PGroupBox n _ sz@(w,_) gs c e -> PGroupBox n ((left + newX w),top) sz gs c e
        top' = top + boxSep + snd sz
        newX w = case align of
                  HLeft   -> 0
@@ -32,8 +32,8 @@ pboxRowLayout' left  maxHeight  align  (b:bs) = b':bs'
   where bs' = pboxRowLayout' left' maxHeight align bs
         sz  = pboxSize b
         b'  = case b of
-               PBox n _ sz@(_,h) c         -> PBox n (left,(newY h)) sz c
-               PGroupBox n _ sz@(_,h) gs c -> PGroupBox n (left,(newY h)) sz gs c
+               PBox n _ sz@(_,h) c           -> PBox n (left,(newY h)) sz c
+               PGroupBox n _ sz@(_,h) gs c e -> PGroupBox n (left,(newY h)) sz gs c e
         left' = left + boxSep + 40 + fst sz
         newY h = case align of
                   VTop    -> maxHeight - h

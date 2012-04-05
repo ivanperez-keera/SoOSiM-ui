@@ -14,9 +14,9 @@ paintDiagram (PlainDiagram bs as) = Pictures [pbs, pas]
         pas = Pictures $ map paintArrow as
 
 paintBox :: PBox -> Picture
-paintBox (PBox n position size c)         = labelledBox n (position, size) c
-paintBox (PGroupBox n position size bs c) = Pictures [b', bs']
-  where b'  = labelledBox n (position, size) c
+paintBox (PBox n position size c)           = labelledBox n Nothing (position, size) c
+paintBox (PGroupBox n position size bs c e) = Pictures [b', bs']
+  where b'  = labelledBox n (Just e) (position, size) c
         bs' = translate (fst position) (snd position) $ Pictures $ map paintBox bs
 
 paintArrow :: PArrow -> Picture

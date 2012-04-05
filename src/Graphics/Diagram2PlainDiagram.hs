@@ -15,8 +15,8 @@ transformDiagram (Diagram boxes arrows) = PlainDiagram pboxes parrows
        parrows = mapMaybe (arrowToPArrow pboxes) arrows
 
 transformBox :: Box -> PBox
-transformBox (Box s c)        = PBox s (0,0) (fromIntegral $ 40 * length s, 70) c
-transformBox (GroupBox s g c) = PGroupBox s (0,0) (wM,hP) g'' c
+transformBox (Box s c)          = PBox s (0,0) (fromIntegral $ 40 * length s, 70) c
+transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
  where g'      = map transformBox g
        g''     = pboxColumnLayout boxSep w HCenter g'
        (w,h)   = (fromIntegral $ 40 * length s, 70)
@@ -36,7 +36,7 @@ findPosition _  [] = Nothing
 findPosition n1 ((PBox n2 p _ _):bs) 
   | (n11:_) <- n1 , n11 == n2 = Just p
   | otherwise                 = findPosition n1 bs
-findPosition n1 ((PGroupBox n2 p _ bs _):bss)
+findPosition n1 ((PGroupBox n2 p _ bs _ _):bss)
  | n1 == [n2]                = Just p
  | head n1 == n2 && isJust l = fmap (addPos p) l
  | head n1 == n2             = Nothing

@@ -5,7 +5,7 @@ import Graphics.Types
 data PlainDiagram = PlainDiagram [PBox] [PArrow]
  deriving Show
 data PBox = PBox Name Position Size Color
-          | PGroupBox Name Position Size [PBox] Color
+          | PGroupBox Name Position Size [PBox] Color Bool
  deriving Show
 data PArrow = PArrow Position Position
  deriving Show
@@ -20,9 +20,9 @@ pboxLimits b = ((boxMinX, boxMinY), (boxMaxX, boxMaxY))
         (boxMaxX, boxMaxY) = (boxMinX + sizeX, boxMinY + sizeY)
 
 pboxSize :: PBox -> Size
-pboxSize (PBox _ _ s _)        = s
-pboxSize (PGroupBox _ _ s _ _) = s
+pboxSize (PBox _ _ s _)          = s
+pboxSize (PGroupBox _ _ s _ _ _) = s
 
 pboxPos :: PBox -> Position
-pboxPos (PBox _ p _ _)        = p
-pboxPos (PGroupBox _ p _ _ _) = p
+pboxPos (PBox _ p _ _)          = p
+pboxPos (PGroupBox _ p _ _ _ _) = p
