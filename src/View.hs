@@ -13,12 +13,11 @@ import Hails.MVC.View.GtkView as Exported
 import SoOSiM.Types (SimState)
 
 -- Internal libraries
+import Graphics.MultiCoreStatus
+import SoOSiM.Samples.Initializer
 import View.Objects
 import View.InitAnimationArea
 import View.InitArtwork
-
-import Graphics.Samples
-import Graphics.MultiCoreStatus
 
 instance GtkGUI View where
   initialise = createView

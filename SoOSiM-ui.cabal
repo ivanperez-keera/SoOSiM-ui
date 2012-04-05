@@ -85,9 +85,9 @@ Executable SoOSiM-ui
                     Model.ProtectedModel.ProtectedModelInternals
                     Model.ProtectedModel.ProtectedFields
                     SoOSiM.Components.Initializer
+                    SoOSiM.Samples.Initializer
                     Graphics.PlainDiagram
                     Graphics.PlainDiagramLayout
-                    Graphics.Samples
                     Graphics.MultiCoreStatus
                     Graphics.Diagram
                     Graphics.GlossShapes
