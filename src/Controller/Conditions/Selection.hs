@@ -1,23 +1,23 @@
-module Controller.Conditions.Selection where
+-- | Reacts to changes in the selection in the gloss diagram
+module Controller.Conditions.Selection
+   (installHandlers)
+  where
 
---- import Data.CBRef
-import Data.CBMVar
+-- External imports
 import Control.Monad
--- import Graphics.UI.Gtk
--- import Hails.MVC.Model.ProtectedModel.Reactive
+import Data.CBMVar
 
+-- Internal imports
 import CombinedEnvironment
-import Graphics.MultiCoreStatus
--- import Model.Model
+import Graphics.Diagrams.MultiCoreStatus
 
--- For now, this simply changes the state of a component every two seconds
+-- | Handles changes in the box selection in the gloss diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
    installCallbackCBMVar mcsRef $ condition cenv
   where mcsRef = mcs (view cenv)
   
+-- | Prints the current selection to stdout
 condition :: CEnv -> IO()
-condition cenv = do
-  c <- readCBMVar mcsRef
-  print (selection (fst c))
-  where mcsRef = mcs (view cenv)
+condition =
+ print . selection . fst <=< readCBMVar . mcs . view

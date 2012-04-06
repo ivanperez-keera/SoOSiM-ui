@@ -1,5 +1,5 @@
--- | A helper module to layout elements in columns or rows 
-module Graphics.PlainDiagramLayout
+-- | A helper module to lay elements out in columns or rows 
+module Graphics.Diagrams.Positioned.Layout
     ( pboxColumnLayout
     , pboxRowLayout
     )
@@ -9,8 +9,8 @@ module Graphics.PlainDiagramLayout
 import Data.List (mapAccumL)
 
 -- Internal imports
-import Graphics.Types
-import Graphics.PlainDiagram
+import Graphics.Diagrams.Types
+import Graphics.Diagrams.Positioned.PositionedDiagram
 
 -- | Arranges boxes in a column
 pboxColumnLayout :: Float -> Float -> HAlign -> [PBox] -> [PBox]

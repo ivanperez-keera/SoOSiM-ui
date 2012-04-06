@@ -1,7 +1,10 @@
 -- | Contains basic operations related to the GUI
 module View
-  (module View
-  , module Exported)
+  ( module View
+  , module Exported
+  , SimGlVar
+  , SimGlSt
+  )
   where
 
 -- External libraries
@@ -10,14 +13,12 @@ import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
 import Hails.MVC.View.GtkView as Exported
-import SoOSiM.Types (SimState)
 
 -- Internal libraries
-import Graphics.MultiCoreStatus
+import Graphics.Diagrams.MultiCoreStatus
 import SoOSiM.Samples.Initializer
 import View.Objects
 import View.InitAnimationArea
-import View.InitArtwork
 
 instance GtkGUI View where
   initialise = createView
@@ -29,19 +30,20 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: CBMVar (MultiCoreStatus, SimState)
+  , mcs          :: SimGlVar
   }
 
+-- | Initialised the glade GUI and all the view components that are not
+-- included directly in it
 createView :: IO View
 createView = do
   bldr <- loadInterface
-  ss <- simstate 
-  msc <- newCBMVar (emptyMultiCoreStatus, ss)
+  ss   <- simstate 
+  msc  <- newCBMVar (emptyMultiCoreStatus, ss)
 
   w <- window1 bldr
   widgetShowAll w
   initialiseAnimationArea msc bldr
-  initialiseArtwork       bldr
 
   return
     View

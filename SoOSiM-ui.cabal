@@ -71,7 +71,6 @@ Executable SoOSiM-ui
   
   -- Modules not exported by this package.
   Other-modules:    View
-                    View.InitArtwork
                     View.Objects
                     View.InitAnimationArea
                     Paths
@@ -87,15 +86,18 @@ Executable SoOSiM-ui
                     SoOSiM.Components.Initializer
                     SoOSiM.Samples.Initializer
                     Graphics.Gloss.AdvancedShapes
-                    Graphics.Diagram
-                    Graphics.Diagram2PlainDiagram
-                    Graphics.MultiCoreStatus2Diagram
-                    Graphics.PlainDiagram
-                    Graphics.PlainDiagram2Picture
-                    Graphics.PlainDiagramLayout
-                    Graphics.MultiCoreStatus
-                    Graphics.Types
-                    Graphics.SimState2MultiCoreStatus
+                    Graphics.Gloss.AdvancedShapes.Arrows
+                    Graphics.Gloss.AdvancedShapes.Boxes
+                    Graphics.Gloss.AdvancedShapes.Shadows
+                    Graphics.Diagrams.MultiCoreStatus
+                    Graphics.Diagrams.Positioned.Layout
+                    Graphics.Diagrams.Positioned.PositionedDiagram
+                    Graphics.Diagrams.Simple.Diagram
+                    Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
+                    Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
+                    Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
+                    Graphics.Diagrams.Transformations.PositionedDiagram2Picture
+                    Graphics.Diagrams.Types
                     CombinedEnvironment
                     Controller
                     Controller.Conditions.Speed

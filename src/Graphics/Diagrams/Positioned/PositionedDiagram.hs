@@ -2,17 +2,17 @@
 -- Every element has a position, meaning that
 -- arrows are not given as connectors between boxes
 -- but between points.
-module Graphics.PlainDiagram
-  ( PlainDiagram(..) , PBox(..) , PArrow(..)
+module Graphics.Diagrams.Positioned.PositionedDiagram
+  ( PositionedDiagram(..) , PBox(..) , PArrow(..)
   , boxSep , pboxPos , pboxLimits
   , pboxSize , pboxListSize
   )
  where
 
-import Graphics.Types
+import Graphics.Diagrams.Types
 
 -- | A diagram is just a collection of boxes and arrows
-data PlainDiagram = PlainDiagram [PBox] [PArrow]
+data PositionedDiagram = PositionedDiagram [PBox] [PArrow]
  deriving Show
 
 -- | A box can be just a simple box, or a box with other boxes inside. The

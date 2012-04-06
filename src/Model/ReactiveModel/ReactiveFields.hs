@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+-- | Reactive fields accessible in the model
 module Model.ReactiveModel.ReactiveFields where
 
 -- External imports
@@ -17,6 +18,12 @@ import Model.ReactiveModel.ModelEvents
 type Field a = RFs.Field a Model ModelEvent
 
 -- reactiveField {- Field name -} {- Field type -}
+
+-- | Simulation status (running, paused, halted)
 reactiveField "Status"     [t|Status|]
+
+-- | Simulation speed (>= 0)
 reactiveField "Speed"      [t|Float|]
+
+-- | Fullscreen/windowed mode
 reactiveField "Fullscreen" [t|Bool|]

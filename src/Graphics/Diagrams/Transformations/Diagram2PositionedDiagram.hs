@@ -1,18 +1,28 @@
 {-# LANGUAGE PatternGuards  #-}
-module Graphics.Diagram2PlainDiagram where
+-- | Transforms a diagram with no positions into a diagram with
+-- positions
+module Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
+   ( transformDiagram )
+  where
 
 import Data.Maybe
 
-import Graphics.Types
-import Graphics.Diagram
-import Graphics.PlainDiagram
-import Graphics.PlainDiagramLayout
+import Graphics.Diagrams.Types
+import Graphics.Diagrams.Simple.Diagram
+import Graphics.Diagrams.Positioned.Layout
+import Graphics.Diagrams.Positioned.PositionedDiagram
 
-transformDiagram :: Diagram -> PlainDiagram
-transformDiagram (Diagram boxes arrows) = PlainDiagram pboxes parrows
+
+-- | Transforms a diagram into a diagram with positions and
+-- sizes for all elements
+--
+-- FIXME: This is a lousy name
+transformDiagram :: Diagram -> PositionedDiagram
+transformDiagram (Diagram boxes arrows) = PositionedDiagram pboxes parrows
  where pboxes  = pboxRowLayout VTop $ map transformBox boxes
        parrows = mapMaybe (arrowToPArrow pboxes) arrows
 
+-- | Transforms a box into a box with a position and a size
 transformBox :: Box -> PBox
 transformBox (Box s c)          = PBox s (0,0) (fromIntegral $ 40 * length s, 70) c
 transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
@@ -23,12 +33,14 @@ transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
        wM      = max w' w + 2 * boxSep
        hP      = h + h' + boxSep 
 
+-- | Transforms an arrow between names into an arrow between positions
 arrowToPArrow :: [PBox] -> Arrow -> Maybe PArrow
 arrowToPArrow bs (Arrow n1 n2) = do
   p1 <- findPosition n1 bs
   p2 <- findPosition n2 bs
   return $ PArrow p1 p2
 
+-- | Finds the position of a box by its name
 findPosition :: [Name] -> [PBox] -> Maybe Position
 findPosition [] _  = Nothing
 findPosition _  [] = Nothing

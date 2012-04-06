@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
--- | This module holds the functions to access and modify the project name
--- in a reactive model.
+-- | Protected reactive fields accessible in the model
 module Model.ProtectedModel.ProtectedFields where
 
 -- Internal imports
@@ -15,6 +14,11 @@ import Model.ProtectedModel.ProtectedModelInternals
 -- protectedField {- Model field -} {- Field type -}    {- Model name -} {- event name -}
 -- protectedField "Language"        [t|Maybe Language|] "Model"          "ModelEvent"
 
-protectedField "Speed"      [t|Float|]  "Model" "ModelEvent"
+-- | Simulation status (running, paused, halted)
 protectedField "Status"     [t|Status|] "Model" "ModelEvent"
+
+-- | Simulation speed (>= 0)
+protectedField "Speed"      [t|Float|]  "Model" "ModelEvent"
+
+-- | Fullscreen/windowed mode
 protectedField "Fullscreen" [t|Bool|]   "Model" "ModelEvent"

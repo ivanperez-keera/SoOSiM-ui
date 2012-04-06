@@ -1,3 +1,4 @@
+-- | Events triggered by changes to the model
 module Model.ReactiveModel.ModelEvents where
 
 import qualified Hails.MVC.Model.ReactiveModel as GRM

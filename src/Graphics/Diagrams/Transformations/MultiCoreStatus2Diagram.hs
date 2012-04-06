@@ -1,19 +1,15 @@
 -- | Transforms MultiCoreStatus' into diagrams
-module Graphics.MultiCoreStatus2Diagram
-   ( transformStatus
-   , transformProcessingUnit
-   , transformRunningElement
-   , transformMessage
-   )
+module Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
+   ( transformStatus )
   where
 
 -- External imports
 import Data.Maybe
 
 -- Internal imports
-import Graphics.Diagram
-import Graphics.MultiCoreStatus
-import Graphics.Types (Color, makeColor, Name)
+import Graphics.Diagrams.Simple.Diagram
+import Graphics.Diagrams.MultiCoreStatus
+import Graphics.Diagrams.Types (Color, makeColor, Name)
 
 -- | Transform a multicore status into a diagram
 transformStatus :: MultiCoreStatus -> Diagram
