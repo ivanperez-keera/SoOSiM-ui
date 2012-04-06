@@ -99,6 +99,7 @@ Executable SoOSiM-ui
                     Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
                     Graphics.Diagrams.Transformations.PositionedDiagram2Picture
                     Graphics.Diagrams.Types
+                    Config.Preferences
                     CombinedEnvironment
                     Controller
                     Controller.Conditions.Speed

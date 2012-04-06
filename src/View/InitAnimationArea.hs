@@ -52,8 +52,7 @@ makePicture st oldSt = do
   st'  <- readCBMVar st
   mcs' <- uncurry updateFromSimState st'
   return $ paintMultiCoreStatus sc orig mcs'
- -- where paint = paintMultiCoreStatus . uncurry updateFromSimState
- where (State _ sc orig newO) = oldSt
+ where (State _ sc orig _) = oldSt
  
 -- | Transform the abstract status into a picture
 paintMultiCoreStatus :: Float -> Point -> MultiCoreStatus -> Picture
@@ -83,7 +82,7 @@ queueEvent event state
 
   -- Start moving
   | EventKey (MouseButton RightButton) Down _ p <- event
-  , State evs sc o no <- state
+  , State evs sc o _ <- state
   = State evs sc o (Just p)
 
   -- Finish moving
