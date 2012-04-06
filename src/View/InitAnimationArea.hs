@@ -40,7 +40,7 @@ drawPic mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
        (makePicture mcs) queueEvent (stepWorld mcs)
- where state = State [] 0.5 (0,0) Nothing
+ where state = State [] 0.5 (-100,-100) Nothing
 
 -- | In the gloss internal state we just keep the pending events
 --   and the current scaling
