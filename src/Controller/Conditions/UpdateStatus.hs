@@ -23,7 +23,7 @@ condition cenv = do
   sp <- getter speedField pm
 
   -- If the system is actually running, update the state
-  when (st == Running && sp > 0) $ do
+  when (st == Running && sp > 0) $
     modifyCBMVar mcsRef nextStep
 
   -- If the system is not paused or stopped,
