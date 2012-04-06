@@ -14,5 +14,6 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 -- recent changes into account.
 nextStep :: (MultiCoreStatus, SimState) -> IO (MultiCoreStatus, SimState)
 nextStep (mcs,ss) = do
- ns <- execStep ss
- return (updateFromSimState mcs ns,ns)
+ ns   <- execStep ss
+ mcs' <- updateFromSimState mcs ns
+ return (mcs',ns)

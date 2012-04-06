@@ -68,6 +68,7 @@ Executable SoOSiM-ui
                , ghc  
                , containers
                , mtl
+               , stm
   
   -- Modules not exported by this package.
   Other-modules:    View

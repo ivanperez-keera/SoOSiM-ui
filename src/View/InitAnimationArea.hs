@@ -47,8 +47,11 @@ data State = State [Event]
 
 -- | Convert our state to a picture.
 makePicture :: SimGlVar -> State -> IO Picture
-makePicture st _ = fmap paint $ readCBMVar st
- where paint = paintMultiCoreStatus . uncurry updateFromSimState
+makePicture st _ = do
+  st'  <- readCBMVar st
+  mcs' <- uncurry updateFromSimState st'
+  return $ paintMultiCoreStatus mcs'
+ -- where paint = paintMultiCoreStatus . uncurry updateFromSimState
  
 -- | Transform the abstract status into a picture
 paintMultiCoreStatus :: MultiCoreStatus -> Picture
