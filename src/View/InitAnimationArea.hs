@@ -181,7 +181,3 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 -- dimensions)
 unScale :: Float -> Point -> Point
 unScale progScale p = multPos p (1 / progScale, 1 / progScale)
-
--- -- | The default scale
--- progScale :: Float
--- progScale = 0.5

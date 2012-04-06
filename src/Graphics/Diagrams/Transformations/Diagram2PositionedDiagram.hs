@@ -48,9 +48,10 @@ findPosition _  [] = Nothing
 findPosition n1 ((PBox n2 _ p _ _):bs) 
   | (n11:_) <- n1 , n11 == n2 = Just p
   | otherwise                 = findPosition n1 bs
-findPosition n1 ((PGroupBox n2 p _ bs _ _):bss)
- | n1 == [n2]                = Just p
- | head n1 == n2 && isJust l = fmap (addPos p) l
- | head n1 == n2             = Nothing
- | otherwise                 = findPosition n1 bss
+findPosition n1 ((PGroupBox n2 p _ bs _ e):bss)
+ | n1 == [n2]                     = Just p
+ | head n1 == n2 && isJust l && e = fmap (addPos p) l
+ | head n1 == n2 && not e         = Just p
+ | head n1 == n2                  = Nothing
+ | otherwise                      = findPosition n1 bss
  where l = listToMaybe $ mapMaybe (findPosition (tail n1).(:[])) bs

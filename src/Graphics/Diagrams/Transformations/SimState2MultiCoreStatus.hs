@@ -7,6 +7,7 @@ module Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 
 -- External imports
 import           Control.Concurrent.STM
+import           Data.Maybe             (listToMaybe)
 import qualified Data.IntMap            as I
 import qualified SoOSiM.Types           as S
 import           Unique
@@ -66,12 +67,14 @@ collectMessages nodes (nid,n) = do
   msgs <- mapM (collectMessagesCC nodes nid) $ I.toList $ S.nodeComponents n
   return $ concat msgs
 
+-- | Gets the list of messages from a given node and component
 collectMessagesCC :: [(Int, S.Node)] -> Int -> (Int, S.ComponentContext) -> IO [Message]
 collectMessagesCC nodes nid (cid, cc) = do
   inputs <- compPendingInputs cc
   msgs   <- mapM (collectMessagesInput nodes nid cid) inputs
   return $ concat msgs
 
+-- | Transforms an input SoOSiM message into a MCS message
 collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.ComponentInput -> IO [Message]
 collectMessagesInput nodes nid cid (S.ComponentMsg sid _)
  | Just x <- findComponentNode sid nodes
@@ -80,11 +83,16 @@ collectMessagesInput nodes nid cid (S.NodeMsg sid _) =
   return [ Message [show sid] [show (getUnique nid), show (getUnique cid)] "" ]
 collectMessagesInput _ _ _ _ = return []
 
+-- | Gets the list of pending inputs from a component context
 compPendingInputs :: S.ComponentContext -> IO [S.ComponentInput]
 compPendingInputs (S.CC _ _ _ _ b) = readTVarIO b
 
+-- | Returns the node id of the node that the given component is running in,
+-- if any.
 findComponentNode :: S.ComponentId -> [(Int, S.Node)] -> Maybe S.NodeId
-findComponentNode cid [] = Nothing
-findComponentNode cid ((i,n):ns)
- | I.member (getKey cid) (S.nodeComponents n) = Just (S.nodeId n)
- | otherwise                                  = findComponentNode cid ns
+findComponentNode cid ns = listToMaybe
+  [ S.nodeId n | (_,n) <- ns, I.member (getKey cid) (S.nodeComponents n) ]
+-- findComponentNode cid [] = Nothing
+-- findComponentNode cid ((i,n):ns)
+--  | I.member (getKey cid) (S.nodeComponents n) = Just (S.nodeId n)
+--  | otherwise                                  = findComponentNode cid ns
