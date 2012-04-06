@@ -29,13 +29,12 @@ transformProcessingUnit sel (ProcessingUnit n cs e) =
 
 -- | Transforms a running element (component, application) into a box
 transformRunningElement :: [Name] -> RunningElement -> Box
-transformRunningElement ns (Component _ n s _)   = Box n (reStatusToColor (ns == [n]) s)
-transformRunningElement ns (Application _ n s _) = Box n (reStatusToColor (ns == [n]) s)
+transformRunningElement ns (Component n k s _)   = Box n k (reStatusToColor (ns == [n]) s)
+transformRunningElement ns (Application n k s _) = Box n k (reStatusToColor (ns == [n]) s)
 
 -- | Transforms a message into an arrow
 transformMessage :: Message -> Arrow
-transformMessage m = Arrow (qNames (sender m)) (qNames (receiver m))
-  where qNames (n1, n2) = [n1, n2]
+transformMessage m = Arrow (sender m) (receiver m)
 
 -- | Transforms the current processing unit status (selected) into a colour
 puStatusToColor :: Bool -> Color

@@ -142,7 +142,7 @@ checkSetSelection p st = listToMaybe l
 -- | Returns the qualified name of the box who's menu
 -- icon is in the given position (if any)
 isMenuOfB :: Position -> PBox -> Maybe [Name]
-isMenuOfB _  (PBox _ __ _ _) = Nothing
+isMenuOfB _  (PBox _ __ _ _ _) = Nothing
 isMenuOfB p1 (PGroupBox n p2 s bs _ _)
  | isMenuOf p1 (p2,s) = Just [n]
  | otherwise          = fmap (n:) $ listToMaybe l
@@ -161,7 +161,7 @@ isMenuOf (p11, p12) (p2, (_,th)) =
 -- | Returns the qualified name of a box that is in
 -- the given position
 isAreaOfB :: Position -> PBox -> Maybe [Name]
-isAreaOfB p1 (PBox n p2 s _) = if isAreaOf p1 (p2, s) then Just [n] else Nothing
+isAreaOfB p1 (PBox n k p2 s _) = if isAreaOf p1 (p2, s) then Just [n] else Nothing
 isAreaOfB p1 (PGroupBox n p2 s bs _ _)
  | not (null l)        = fmap (n:) $ listToMaybe l
  | isAreaOf p1 (p2, s) = Just [n]

@@ -23,7 +23,7 @@ pboxColumnLayoutP :: Float -> Float -> HAlign -> Float -> PBox -> (Float, PBox)
 pboxColumnLayoutP left maxWidth align top b = (top', b')
  where top' = top + boxSep + snd (pboxSize b)
        b'   = case b of
-                PBox n _ sz@(w,_) c           -> PBox n (left + newX w, top) sz c
+                PBox n k _ sz@(w,_) c         -> PBox n k (left + newX w, top) sz c
                 PGroupBox n _ sz@(w,_) gs c e -> PGroupBox n (left + newX w, top) sz gs c e
 
        -- Align
@@ -42,7 +42,7 @@ pboxRowLayoutP :: Float -> VAlign -> Float -> PBox -> (Float, PBox)
 pboxRowLayoutP maxHeight  align  left b = (left', b')
   where left' = left + boxSep + 40 + fst (pboxSize b)
         b'    = case b of
-                 PBox n _ sz@(_,h) c           -> PBox n (left, newY h) sz c
+                 PBox n k _ sz@(_,h) c         -> PBox n k (left, newY h) sz c
                  PGroupBox n _ sz@(_,h) gs c e -> PGroupBox n (left, newY h) sz gs c e
         
         -- Align

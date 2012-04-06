@@ -20,7 +20,8 @@ paintDiagram (PositionedDiagram bs as) = Pictures [pbs, pas]
 
 -- | Transforms a Plain Box into a Gloss Picture
 paintBox :: PBox -> Picture
-paintBox (PBox n position size c)           = labelledBox n Nothing (position, size) c
+paintBox (PBox n k position size c) =
+  labelledBox (n ++ " : " ++ k) Nothing (position, size) c
 paintBox (PGroupBox n position size bs c e) = Pictures [b', bs']
   where b'  = labelledBox n (Just e) (position, size) c
         bs' = uncurry translate position $ Pictures $ map paintBox bs

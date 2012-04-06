@@ -81,8 +81,8 @@ data ElementState = Active
 --  deriving (Eq, Show)
 
 -- | A message has an origin, a destination, and a label
-data Message = Message { sender   :: QElementName
-                       , receiver :: QElementName
+data Message = Message { sender   :: [Name]
+                       , receiver :: [Name]
                        , kind     :: String
                        }
  deriving (Eq, Show)

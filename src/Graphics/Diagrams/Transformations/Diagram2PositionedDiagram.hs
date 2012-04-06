@@ -24,7 +24,8 @@ transformDiagram (Diagram boxes arrows) = PositionedDiagram pboxes parrows
 
 -- | Transforms a box into a box with a position and a size
 transformBox :: Box -> PBox
-transformBox (Box s c)          = PBox s (0,0) (fromIntegral $ 40 * length s, 70) c
+transformBox (Box s k c)        = PBox s k (0,0) (fromIntegral $ 40 * l, 70) c
+ where l = length (s ++ " : " ++ k)
 transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
  where g'      = map transformBox g
        g''     = pboxColumnLayout boxSep w HCenter g'
@@ -44,7 +45,7 @@ arrowToPArrow bs (Arrow n1 n2) = do
 findPosition :: [Name] -> [PBox] -> Maybe Position
 findPosition [] _  = Nothing
 findPosition _  [] = Nothing
-findPosition n1 ((PBox n2 p _ _):bs) 
+findPosition n1 ((PBox n2 _ p _ _):bs) 
   | (n11:_) <- n1 , n11 == n2 = Just p
   | otherwise                 = findPosition n1 bs
 findPosition n1 ((PGroupBox n2 p _ bs _ _):bss)

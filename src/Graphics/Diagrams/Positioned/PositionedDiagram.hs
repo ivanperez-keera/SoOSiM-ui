@@ -17,7 +17,7 @@ data PositionedDiagram = PositionedDiagram [PBox] [PArrow]
 
 -- | A box can be just a simple box, or a box with other boxes inside. The
 -- positions of the boxes inside a box are relative to the (parent) box.
-data PBox = PBox Name Position Size Color
+data PBox = PBox Name Name Position Size Color
           | PGroupBox Name Position Size [PBox] Color Bool
  deriving Show
 
@@ -38,12 +38,12 @@ pboxLimits b = ((boxMinX, boxMinY), (boxMaxX, boxMaxY))
 
 -- | Returns the position of a box
 pboxPos :: PBox -> Position
-pboxPos (PBox _ p _ _)          = p
+pboxPos (PBox _ _ p _ _)          = p
 pboxPos (PGroupBox _ p _ _ _ _) = p
 
 -- | Returns the size of a box
 pboxSize :: PBox -> Size
-pboxSize (PBox _ _ s _)          = s
+pboxSize (PBox _ _ _ s _)          = s
 pboxSize (PGroupBox _ _ s _ _ _) = s
 
 -- | Calculates the size of the minimal area that encloses a list of boxes
