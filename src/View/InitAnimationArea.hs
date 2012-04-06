@@ -8,7 +8,7 @@ import             Data.CBMVar
 import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
-import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton)
+import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, RightButton)
 
 -- Local imports
 import View.Objects
@@ -40,48 +40,77 @@ drawPic mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
        (makePicture mcs) queueEvent (stepWorld mcs)
- where state = State []
+ where state = State [] 0.5 (0,0) Nothing
 
 -- | In the gloss internal state we just keep the pending events
-data State = State [Event]
+--   and the current scaling
+data State = State [Event] Float Point (Maybe Point)
 
 -- | Convert our state to a picture.
 makePicture :: SimGlVar -> State -> IO Picture
-makePicture st _ = do
+makePicture st oldSt = do
   st'  <- readCBMVar st
   mcs' <- uncurry updateFromSimState st'
-  return $ paintMultiCoreStatus mcs'
+  return $ paintMultiCoreStatus sc orig mcs'
  -- where paint = paintMultiCoreStatus . uncurry updateFromSimState
+ where (State _ sc orig newO) = oldSt
  
 -- | Transform the abstract status into a picture
-paintMultiCoreStatus :: MultiCoreStatus -> Picture
-paintMultiCoreStatus =
-  scale progScale progScale .  paintDiagram . transformDiagram . transformStatus
+paintMultiCoreStatus :: Float -> Point -> MultiCoreStatus -> Picture
+paintMultiCoreStatus progScale orig =
+  uncurry translate orig . scale progScale progScale .  paintDiagram . transformDiagram . transformStatus
 
 -- | Queues an input event into the state's event queue
 -- to be processed later
 queueEvent :: Event -> State -> State
 queueEvent event state
-  -- Finish drawing a line, and add it to the picture.
-  | EventKey (MouseButton LeftButton) Up _ _ <- event
-  , State evs <- state
-  = State (evs ++ [event])
+  -- Adds a click event to the event queue
+  | EventKey (MouseButton LeftButton) Up m p <- event
+  , State evs sc o no <- state
+  = let p'     = unScale sc $ subPos p o 
+        event' = EventKey (MouseButton LeftButton) Up m p'
+    in State (evs ++ [event']) sc o no
+
+  -- Zoom in
+  | EventKey (MouseButton WheelUp) Down _ _ <- event
+  , State evs sc o no <- state
+  = State evs (sc * 0.9) o no
+
+  -- Zoom out
+  | EventKey (MouseButton WheelDown) Down _ _ <- event
+  , State evs sc o no <- state
+  = State evs (sc * 1.1) o no
+
+  -- Start moving
+  | EventKey (MouseButton RightButton) Down _ p <- event
+  , State evs sc o no <- state
+  = State evs sc o (Just p)
+
+  -- Finish moving
+  | EventKey (MouseButton RightButton) Up _ _ <- event
+  , State evs sc p _ <- state
+  = State evs sc p Nothing
+
+  -- Keep moving
+  | EventMotion p <- event
+  , State evs sc o (Just p') <- state
+  = State evs sc (addPos o (subPos p p')) (Just p)
 
   | otherwise
   = state
 
 -- Process the event queue and return an empty state
 stepWorld :: SimGlVar -> Float -> State -> IO State
-stepWorld mcsRef _ (State evs) = do
-  mapM_ (\ev -> modifyCBMVar mcsRef (return .handleEvent ev)) evs
-  return (State [])
+stepWorld mcsRef _ (State evs sc o no) = do
+  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
+  return (State [] sc o no)
 
 -- | Handle mouse click and motion events.
-handleEvent :: Event -> SimGlSt -> SimGlSt
-handleEvent event st
+handleEvent :: Float -> Event -> SimGlSt -> SimGlSt
+handleEvent sc event st
   -- Queue event
   | EventKey (MouseButton LeftButton) Up _ pt <- event
-  = handleClicks (unScale pt) st
+  = handleClicks pt st
 
   | otherwise
   = st
@@ -150,9 +179,9 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 
 -- | Unscales a point (adjusts value from user input dimensions to gloss
 -- dimensions)
-unScale :: Point -> Point
-unScale p = multPos p (1 / progScale, 1 / progScale)
+unScale :: Float -> Point -> Point
+unScale progScale p = multPos p (1 / progScale, 1 / progScale)
 
--- | The default scale
-progScale :: Float
-progScale = 0.5
+-- -- | The default scale
+-- progScale :: Float
+-- progScale = 0.5
