@@ -19,7 +19,7 @@ shadowColor = makeColor 0.8 0.8 0.8 1
 -- | Transforms the current processing unit status (selected) into a colour
 processingUnitColor :: Bool -> Color
 processingUnitColor True  = makeColor 0.1 0.5 0.9 1.0 
-processingUnitColor False = makeColor 0.9 0.9 0.9 1.0
+processingUnitColor False = makeColor 0.4 0.4 0.9 0.9
 
 -- | Transforms the current running element status (Selected, State) into a
 -- colour

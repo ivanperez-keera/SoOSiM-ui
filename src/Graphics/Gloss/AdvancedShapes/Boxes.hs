@@ -1,7 +1,7 @@
 {-# LANGUAGE PackageImports #-}
 -- | Several kinds of Gloss boxes
 module Graphics.Gloss.AdvancedShapes.Boxes
-   (box, fullBox, labelledBox, plusBox, minusBox)
+   (box, fullBox, labelledBox, plusBox, minusBox, roundBox, semiRoundBox, roundBoxSolid, semiRoundBoxSolid)
   where
 
 import "gloss-gtk" Graphics.Gloss
@@ -22,9 +22,7 @@ fullBox = polygon . boxCorners
 labelledBox :: String -> Maybe Bool -> BoxDescription -> Color -> Picture
 labelledBox n expandable ((x,y),(w,h)) c = shadowed $
  translate x y $ Pictures
-  [ color c $ fullBox d
-  , box d
-  , sign
+  [ drawBox
   , translate xc yc $ scale 0.1 0.1 $ text n
   ]
  where tw  = 0.1 * fromIntegral (40 * length n) -- semi-fixed width :(
@@ -36,6 +34,85 @@ labelledBox n expandable ((x,y),(w,h)) c = shadowed $
                Nothing    -> blank
                Just True  -> minusBox ((0,h - 20),(20,20))
                Just False -> plusBox ((0,h - 20),(20,20))
+       drawBox = case expandable of
+                  Nothing -> Pictures [ color c $ roundBoxSolid d 10
+                                      , roundBox d 10
+                                      ]
+                  _       -> Pictures [ color c $ semiRoundBoxSolid d 10
+                                      , semiRoundBox d 10
+                                      , sign
+                                      ]
+
+-- | Draws a solid box with round corners, except for the top-left corner
+semiRoundBoxSolid :: BoxDescription -> Float -> Picture
+semiRoundBoxSolid ((x,y),(w,h)) d =
+   Pictures $ polygon ls' : arcs
+  where ls'  = [ (x + d, y), (x + w - d, y), (x + w - d, y+d)
+               , (x + w, y + d), (x+w, y + h - d), (x + w -d, y + h -d)
+               , (x + w - d, y + h), (x, y + h)
+               , (x, y + d), (x + d, y + d), (x + d, y)
+               ]
+        arcs = [ translate (x + d)     (y + d)     $ myArcSolid 180 270 d
+               , translate (x + w - d) (y + d)     $ myArcSolid 270 360 d
+               , translate (x + w - d) (y + h - d) $ myArcSolid 0   90  d
+               -- , translate (x + d)     (y + h - d) $ arcSolid 90  180 d
+               ]
+
+-- | Draws a box with round corners, except for the top-left corner
+semiRoundBox :: BoxDescription -> Float -> Picture
+semiRoundBox ((x,y),(w,h)) d =
+   Pictures $ map line ls' ++ arcs
+  where ls'  = [ [ (x + d, y),         (x + w - d, y)   ]
+               , [ (x + w, y + d),     (x+w, y + h - d) ]
+               , [ (x + w - d, y + h), (x, y + h)       ]
+               , [ (x, y + h),         (x, y + d)       ]
+               ]
+        arcs = [ translate (x + d)     (y + d)     $ arc 180 270 d
+               , translate (x + w - d) (y + d)     $ arc 270 360 d
+               , translate (x + w - d) (y + h - d) $ arc 0   90  d
+               -- , translate (x + d)     (y + h - d) $ arc 90  180 d
+               ]
+
+-- | Draws a solid box with round corners
+roundBoxSolid :: BoxDescription -> Float -> Picture
+roundBoxSolid ((x,y),(w,h)) d =
+   Pictures $ polygon ls' : arcs
+  where ls'  = [ (x + d, y), (x + w - d, y), (x + w - d, y+d)
+               , (x + w, y + d), (x+w, y + h - d), (x + w -d, y + h -d)
+               , (x + w - d, y + h), (x+d, y + h), (x+d,y+h-d), (x, y+h-d)
+               , (x, y + d), (x + d, y + d), (x + d, y)
+               ]
+        arcs = [ translate (x + d)     (y + d)     $ myArcSolid 180 270 d
+               , translate (x + w - d) (y + d)     $ myArcSolid 270 360 d
+               , translate (x + w - d) (y + h - d) $ myArcSolid 0   90  d
+               , translate (x + d)     (y + h - d) $ myArcSolid 90  180 d
+               ]
+
+-- | Draws a box with round corners
+roundBox :: BoxDescription -> Float -> Picture
+roundBox ((x,y),(w,h)) d =
+   Pictures $ map line ls' ++ arcs
+  where ls'  = [ [ (x + d, y),         (x + w - d, y)   ]
+               , [ (x + w, y + d),     (x+w, y + h - d) ]
+               , [ (x + w - d, y + h), (x+d, y + h)     ]
+               , [ (x, y + h-d),       (x, y + d)       ]
+               ]
+        arcs = [ translate (x + d)     (y + d)     $ arc 180 270 d
+               , translate (x + w - d) (y + d)     $ arc 270 360 d
+               , translate (x + w - d) (y + h - d) $ arc 0   90  d
+               , translate (x + d)     (y + h - d) $ arc 90  180 d
+               ]
+
+-- | A better arcSolid (this one is actually solid)
+myArcSolid :: Float -> Float -> Float -> Picture
+myArcSolid a1 a2 r = polygon $
+  [orig, p1] ++ ls ++ [p2, orig]
+ where orig = (0,0)
+       p1   = toP $ toA a1
+       p2   = toP $ toA a2
+       ls   = [ toP $ toA $ x | x <- [a1..a2]]
+       toP x = (cos x * r, sin x * r)
+       toA x = x * pi * 2 / 360
 
 -- | The corners of a box (given an origin and the dimensions)
 boxCorners :: BoxDescription -> Path
