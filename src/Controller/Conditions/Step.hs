@@ -28,7 +28,8 @@ condition cenv = void $ do
   st <- getter statusField pm
 
   when (st == Paused) $
-    modifyCBMVar mcsRef nextStep
+    modifyCBMVar mcsRef $ \(a,b,c) -> do (a',b') <- nextStep (a,b)
+                                         return (a',b',c)
 
   where mcsRef = mcs (view cenv)
         pm     = model cenv

@@ -8,6 +8,7 @@ import             Data.CBMVar
 import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
+import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
 import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, RightButton)
 
 -- Local imports
@@ -16,8 +17,9 @@ import SoOSiM.Types
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
-import Graphics.Diagrams.Types (Name, Position, addPos, Size, multPos, subPos)
+import Graphics.Diagrams.Types (Name, Position, addPos, Size, multPos, subPos, BoxDescription)
 import Graphics.Diagrams.Positioned.PositionedDiagram
+import Graphics.Gloss.AdvancedShapes.Boxes
 
 -- Local imports: transformation functions: Status ~> Picture
 import Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
@@ -27,12 +29,24 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 
 -- Auxiliary types. We use an MVar with callbacks to communicate
 -- with the rest of the program
-type SimGlVar = CBMVar SimGlSt
-type SimGlSt = (MultiCoreStatus, SimState)
+type SimGlVar  = CBMVar SimGlSt
+type SimGlSt   = (MultiCoreStatus, SimState, ViewState)
+
+type ViewState = (Float, Point)
+
+initialViewState = (0.5, (-400, -100))
 
 -- | Initialises the opengl area with a picture
 initialiseAnimationArea :: SimGlVar -> Builder -> IO ()
-initialiseAnimationArea mcs bldr = drawPic mcs =<< viewport1 bldr
+initialiseAnimationArea mcs bldr = do
+  vp <- viewport1 bldr
+  ev <- eventbox1 bldr
+
+  -- Paint animation inside viewport
+  drawPic mcs vp
+
+  -- Paint thumbnail inside eventbox with the viewport size for reference
+  drawThumb mcs ev vp
 
 -- | Initialises the gloss animation
 drawPic :: ContainerClass a => SimGlVar -> a -> IO ()
@@ -40,7 +54,12 @@ drawPic mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
        (makePicture mcs) queueEvent (stepWorld mcs)
- where state = State [] 0.5 (-100,-100) Nothing
+ where state = State [] (fst initialViewState) (snd initialViewState) Nothing
+
+-- | Draws a thumbnail of the main animation
+drawThumb :: (ContainerClass a, ContainerClass b) => SimGlVar -> a -> b -> IO()
+drawThumb mcs e be =
+  animateIO (InWidget e (200, 150)) white (makeThumbnail (widgetGetSize be) mcs)
 
 -- | In the gloss internal state we just keep the pending events
 --   and the current scaling
@@ -50,15 +69,60 @@ data State = State [Event] Float Point (Maybe Point)
 makePicture :: SimGlVar -> State -> IO Picture
 makePicture st oldSt = do
   st'  <- readCBMVar st
-  mcs' <- uncurry updateFromSimState st'
+  mcs' <- updateFromSimState (fst3 st') (snd3 st')
   return $ paintMultiCoreStatus sc orig mcs'
  where (State _ sc orig _) = oldSt
+
+-- | Convert our state to a smaller thumbnail 
+makeThumbnail :: IO (Int, Int) -> SimGlVar -> a -> IO Picture
+makeThumbnail getSz st _ = do
+  st' <- readCBMVar st
+  sz  <- getSz
+  return $ Pictures [ paintMultiCoreStatus thumbScale thumbCoords $ fst3 st'
+                    , translate thumbX thumbY $ paintZoomBox (trd3 st') sz
+                    ]
+
+-- | Default thumbnail zoom level
+thumbScale :: Float
+thumbScale = 0.05
+
+-- | Thumbnail base coords
+thumbCoords :: Point
+thumbCoords = (thumbX, thumbY)
+
+-- | Thumbnail base X coord
+thumbX :: Float
+thumbX = (-90)
+
+-- | Thumbnail base Y coord
+thumbY :: Float
+thumbY = 0
+
+-- Paints the zoom box for a given scale, origin and container size
+paintZoomBox :: (Float, Point) -> (Int, Int) -> Picture
+paintZoomBox o (w',h') =
+   box ((p1 * thumbScale, p2 * thumbScale), (w * thumbScale, h * thumbScale))
+ where ((p1,p2),(w,h)) = zoomBoxDescription o sz
+       sz              = (fromIntegral w', fromIntegral h')
+
+-- | Builds the box description for the zoom box from the scale, origin and container size
+zoomBoxDescription :: (Float, Point) -> (Float, Float) -> BoxDescription
+zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
+ where p1' = - (w / 2 + p1)
+       p2' = - (h / 2 + p2)
  
 -- | Transform the abstract status into a picture
 paintMultiCoreStatus :: Float -> Point -> MultiCoreStatus -> Picture
 paintMultiCoreStatus progScale orig =
-  uncurry translate orig . scale progScale progScale .  paintDiagram . transformDiagram . transformStatus
+  uncurry translate orig . scale progScale progScale . paintDiagram . transformDiagram . transformStatus
 
+-- | Zooms in a state with a specific zoom
+zoomWith :: Float -> Point -> State -> State
+zoomWith f (p1, p2) (State evs sc (o1,o2) no) = State evs (sc * f) o' no
+ where p1' = p1 * (1 - f)
+       p2' = p2 * (1 - f)
+       o'  = (o1 * f + p1', o2 * f + p2')
+ 
 -- | Queues an input event into the state's event queue
 -- to be processed later
 queueEvent :: Event -> State -> State
@@ -71,14 +135,12 @@ queueEvent event state
     in State (evs ++ [event']) sc o no
 
   -- Zoom in
-  | EventKey (MouseButton WheelUp) Down _ _ <- event
-  , State evs sc o no <- state
-  = State evs (sc * 0.9) o no
+  | EventKey (MouseButton WheelUp) Down _ p <- event
+  = zoomWith 0.9 p state
 
   -- Zoom out
-  | EventKey (MouseButton WheelDown) Down _ _ <- event
-  , State evs sc o no <- state
-  = State evs (sc * 1.1) o no
+  | EventKey (MouseButton WheelDown) Down _ p <- event
+  = zoomWith 1.1 p state
 
   -- Start moving
   | EventKey (MouseButton RightButton) Down _ p <- event
@@ -102,6 +164,7 @@ queueEvent event state
 stepWorld :: SimGlVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs sc o no) = do
   mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
+  modifyCBMVar mcsRef (\(a,b,c) -> return (a,b,(sc,o))) 
   return (State [] sc o no)
 
 -- | Handle mouse click and motion events.
@@ -116,7 +179,7 @@ handleEvent sc event st
 
 -- | Process clicks in the boxes or menu icons
 handleClicks :: Point -> SimGlSt -> SimGlSt
-handleClicks p (st,s) = (st',s)
+handleClicks p (st,s,v) = (st',s,v)
  where -- Expand/collapse when necessary
        st'   = maybe st'' (`toggleVisibility` st) ns
        -- Update selection
@@ -180,3 +243,12 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 -- dimensions)
 unScale :: Float -> Point -> Point
 unScale progScale p = multPos p (1 / progScale, 1 / progScale)
+
+fst3 :: (a,b,c) -> a
+fst3 (a,_,_) = a
+
+snd3 :: (a,b,c) -> b
+snd3 (_,b,_) = b
+
+trd3 :: (a,b,c) -> c
+trd3 (_,_,c) = c

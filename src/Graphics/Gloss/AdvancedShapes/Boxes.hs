@@ -4,10 +4,12 @@ module Graphics.Gloss.AdvancedShapes.Boxes
    (box, fullBox, labelledBox, plusBox, minusBox, roundBox, semiRoundBox, roundBoxSolid, semiRoundBoxSolid)
   where
 
+import Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 
 -- Local imports
 import Graphics.Diagrams.Types hiding (Color, makeColor)
+import Graphics.Diagrams.Positioned.PositionedDiagram
 import Graphics.Gloss.AdvancedShapes.Shadows
 
 -- | A simple box
@@ -23,17 +25,20 @@ labelledBox :: String -> Maybe Bool -> BoxDescription -> Color -> Picture
 labelledBox n expandable ((x,y),(w,h)) c = shadowed $
  translate x y $ Pictures
   [ drawBox
-  , translate xc yc $ scale 0.1 0.1 $ text n
+  , translate xc yc $ scale 0.11 0.11 $ text n
   ]
- where tw  = 0.1 * fromIntegral (40 * length n) -- semi-fixed width :(
-       w'  = max w tw
-       d   = ((0,0),(20 + w',h))
-       xc  = (w' - tw) / 2
+ where tw  = fontWidth * fromIntegral (length n)
+       w'  = (max w tw) + 2 * boxPadding
+       -- nw  = w' + (if ex then 20 else 0)
+       d   = ((0,0),(w,h))
+       xc  = if ex then (w' - tw) / 2 else boxPadding
        yc  = h - 40
+       ex  = isJust expandable
+       menuBoxPos = (0, h - snd stdMenuBoxSize)
        sign = case expandable of
                Nothing    -> blank
-               Just True  -> minusBox ((0,h - 20),(20,20))
-               Just False -> plusBox ((0,h - 20),(20,20))
+               Just True  -> minusBox (menuBoxPos,stdMenuBoxSize)
+               Just False -> plusBox  (menuBoxPos,stdMenuBoxSize)
        drawBox = case expandable of
                   Nothing -> Pictures [ color c $ roundBoxSolid d 10
                                       , roundBox d 10

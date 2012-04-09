@@ -35,7 +35,9 @@ condition cenv = do
 
   -- If the system is actually running, update the state
   when (st == Running && sp > 0) $
-    modifyCBMVar mcsRef nextStep
+    -- modifyCBMVar mcsRef nextStep
+    modifyCBMVar mcsRef $ \(a,b,c) -> do (a',b') <- nextStep (a,b)
+                                         return (a',b',c)
 
   -- If the system is not paused or stopped,
   -- reupdate after a delay

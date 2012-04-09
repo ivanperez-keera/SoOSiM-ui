@@ -4,7 +4,7 @@
 -- but between points.
 module Graphics.Diagrams.Positioned.PositionedDiagram
   ( PositionedDiagram(..) , PBox(..) , PArrow(..)
-  , boxSep , pboxPos , pboxLimits
+  , boxSep, boxPadding, fontWidth, fontHeight, pboxPos , pboxLimits, stdMenuBoxSize
   , pboxSize , pboxListSize
   )
  where
@@ -28,6 +28,19 @@ data PArrow = PArrow Position Position
 -- | Standard box separation
 boxSep :: Float
 boxSep = 15
+
+-- | Standard box padding
+boxPadding :: Float
+boxPadding = 5
+
+fontWidth :: Float
+fontWidth = 15
+
+fontHeight :: Float
+fontHeight = 70
+
+stdMenuBoxSize :: (Float, Float)
+stdMenuBoxSize = (20, 20)
 
 -- | Returns the bottom-left and upper-right corner of a box
 pboxLimits :: PBox -> (Position, Position)

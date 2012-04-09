@@ -20,4 +20,5 @@ installHandlers cenv = void $
 -- | Prints the current selection to stdout
 condition :: CEnv -> IO()
 condition =
- print . selection . fst <=< readCBMVar . mcs . view
+ print . selection . fst3 <=< readCBMVar . mcs . view
+ where fst3 (a,b,c) = a
