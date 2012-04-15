@@ -12,16 +12,18 @@ import qualified Controller.Conditions.Step              as Step
 import qualified Controller.Conditions.UpdateStatus      as Update
 import qualified Controller.Conditions.InfoSelectionArea as InfoSel
 import qualified Controller.Conditions.InfoBasicInfo     as InfoBasic
+import qualified Controller.Conditions.InfoTooltip       as InfoTooltip
 
 -- | Installs the condition handlers that enforce the system's conditions both
 -- from the view to the model and from the model to the view.
 installHandlers :: CEnv -> IO ()
 installHandlers cenv = do
-  Fullscreen.installHandlers cenv
-  Quit.installHandlers       cenv
-  Selection.installHandlers  cenv
-  Speed.installHandlers      cenv
-  Step.installHandlers       cenv
-  Update.installHandlers     cenv
-  InfoSel.installHandlers    cenv
-  InfoBasic.installHandlers  cenv
+  Fullscreen.installHandlers  cenv
+  Quit.installHandlers        cenv
+  Selection.installHandlers   cenv
+  Speed.installHandlers       cenv
+  Step.installHandlers        cenv
+  Update.installHandlers      cenv
+  InfoSel.installHandlers     cenv
+  InfoBasic.installHandlers   cenv
+  InfoTooltip.installHandlers cenv

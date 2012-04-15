@@ -42,11 +42,11 @@ initialiseAnimationArea mcs bldr = do
   vp <- viewport1 bldr
   ev <- eventbox1 bldr
 
-  -- Paint animation inside viewport
-  drawPic mcs vp
-
   -- Paint thumbnail inside eventbox with the viewport size for reference
   drawThumb mcs ev vp
+
+  -- Paint animation inside viewport
+  drawPic mcs vp
 
 -- | Initialises the gloss animation
 drawPic :: ContainerClass a => SimGlVar -> a -> IO ()
@@ -164,6 +164,12 @@ queueEvent event state
   , State evs sc o (Just p') <- state
   = State evs sc (addPos o (subPos p p')) (Just p)
 
+  -- Moving over the diagram
+  | EventMotion p <- event
+  , State evs sc o Nothing <- state
+  = let p'     = unScale sc $ subPos p o 
+        event' = EventMotion p'
+    in State (evs ++ [event']) sc o Nothing
   | otherwise
   = state
 
@@ -184,6 +190,9 @@ handleEvent sc event st
   | EventKey (MouseButton LeftButtonDouble) Up _ pt <- event
   = handleDoubleClicks pt st
 
+  | EventMotion pt <- event
+  = handleMouseOver pt st
+
   | otherwise
   = st
 
@@ -197,13 +206,20 @@ handleClicks p (st,s,v,op) = (st',s,v,op)
 
 -- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
-handleDoubleClicks p (st,s,v,_) = (st',s,v,fromMaybe [] ss)
+handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
  where ss = case checkSetSelection p st of
              Just [x,y] -> Just [x,y]
              _          -> Nothing
        ns = checkToggleVisibility p st
        st' | isNothing ns = st { selection = fromMaybe [] ss }
            | otherwise    = st
+
+-- | Process moving the mouse over component boxes
+handleMouseOver :: Point -> SimGlSt -> SimGlSt
+handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
+ where ss = case checkSetSelection p st of
+             Just [x,y] -> Just [x,y]
+             _          -> Nothing
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
