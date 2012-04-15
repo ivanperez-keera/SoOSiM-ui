@@ -6,6 +6,7 @@ module Controller.Conditions.Selection
 -- External imports
 import Control.Monad
 import Data.CBMVar
+import Data.Tuple4
 import Graphics.UI.Gtk
 
 -- Internal imports
@@ -27,4 +28,3 @@ conditionShowPage cenv = do
  case sel of
   [] -> notebookSetCurrentPage nb 0
   _  -> notebookSetCurrentPage nb 1
- where fst4 (a,b,c,d) = a

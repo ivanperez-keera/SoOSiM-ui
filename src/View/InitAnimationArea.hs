@@ -12,9 +12,10 @@ import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
 import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, RightButton)
 
 -- Local imports
-import View.Objects
-import SoOSiM.Types
 import Config.Config
+import Data.Tuple4
+import SoOSiM.Types
+import View.Objects
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
@@ -41,7 +42,7 @@ initialViewState = (0.5, (-400, -100))
 initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
 initialiseAnimationArea cfg mcs bldr = do
   vp <- viewport1 bldr
-  ev <- eventbox1 bldr
+  ev <- overviewEventBox bldr
 
   -- Paint thumbnail inside eventbox with the viewport size for reference
   drawThumb cfg mcs ev vp
@@ -278,12 +279,3 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 -- dimensions)
 unScale :: Float -> Point -> Point
 unScale progScale p = multPos p (1 / progScale, 1 / progScale)
-
-fst4 :: (a,b,c,d) -> a
-fst4 (a,_,_,_) = a
-
-snd4 :: (a,b,c,d) -> b
-snd4 (_,b,_,_) = b
-
-trd4 :: (a,b,c,d) -> c
-trd4 (_,_,c,_) = c

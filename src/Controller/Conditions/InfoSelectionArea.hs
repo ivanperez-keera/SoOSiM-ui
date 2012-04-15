@@ -6,9 +6,7 @@ module Controller.Conditions.InfoSelectionArea
 
 -- External imports
 import Control.Monad
-import Control.Monad.Trans
 import Graphics.UI.Gtk
-import Hails.MVC.Model.ProtectedModel.Reactive
 
 -- Local imports
 import CombinedEnvironment
@@ -17,16 +15,20 @@ import CombinedEnvironment
 -- chooses between basic info and component trace
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  iv <- iconview1 $ uiBuilder $ view cenv
+  iv <- infoIconView $ uiBuilder $ view cenv
   iv `on` selectionChanged $ condition cenv
   model cenv `onEvent` Initialised $ condition cenv
 
 -- | Shows appropriate page based on current selection
 condition :: CEnv -> IO()
 condition cenv = do
-  iv        <- iconview1 $ uiBuilder $ view cenv
-  nb        <- notebook3 $ uiBuilder $ view cenv
+  iv        <- infoIconView ui
+  nb        <- infoSelNotebook ui
   (path, _) <- iconViewGetCursor iv
-  case path of
-   [x] -> notebookSetCurrentPage nb (x + 1)
-   _   -> notebookSetCurrentPage nb 0
+  let page = case path of { [x] -> x + 1; _ -> 0 }
+  
+  notebookSetCurrentPage nb page
+  -- case path of
+  --  [x] -> notebookSetCurrentPage nb (x + 1)
+  --  _   -> notebookSetCurrentPage nb 0
+ where ui = uiBuilder $ view cenv
