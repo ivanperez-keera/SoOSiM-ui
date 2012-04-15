@@ -49,12 +49,12 @@ component2RunningElement mcs (i, c) = do
 
 -- | Obtains the component name from its context
 compStateName :: S.ComponentContext -> IO String
-compStateName (S.CC _ _ s _ _) = do
+compStateName (S.CC _ _ s _ _ _ _) = do
   fmap S.componentName $ readTVarIO s
 
 -- | Obtains the component state from its context
 compStateState :: S.ComponentContext -> IO ElementState
-compStateState (S.CC _ s _ _ _) = do
+compStateState (S.CC _ s _ _ _ _ _) = do
   s' <- readTVarIO s
   case s' of
     S.Running           -> return Active
@@ -85,7 +85,7 @@ collectMessagesInput _ _ _ _ = return []
 
 -- | Gets the list of pending inputs from a component context
 compPendingInputs :: S.ComponentContext -> IO [S.ComponentInput]
-compPendingInputs (S.CC _ _ _ _ b) = readTVarIO b
+compPendingInputs (S.CC _ _ _ _ b _ _) = readTVarIO b
 
 -- | Returns the node id of the node that the given component is running in,
 -- if any.

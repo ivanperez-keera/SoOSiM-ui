@@ -33,20 +33,18 @@ module SoOSiM.Samples.Initializer where
 --   return simState
 
 import Control.Concurrent.STM
-import Data.Maybe
 import qualified Data.IntMap as IM
 import qualified Data.Map    as Map
 import SoOSiM
-import SoOSiM.Simulator
+-- import SoOSiM.Simulator
 import SoOSiM.Types
 import UniqSupply
-import Unique
 -- import Text.PrettyPrint.HughesPJ
 
-import SoOSiM.Components.HeatMap.Application
+import SoOSiM.Components.HeatMap.Application ()
 import SoOSiM.Components.HeatMap.Types
 
-import SoOSiM.Components.MemoryManager
+import SoOSiM.Components.MemoryManager ()
 import SoOSiM.Components.MemoryManager.Types
 
 simstate :: IO SimState
@@ -57,8 +55,9 @@ simstate = do
     statusTV <- newTVarIO Running
     stateTV  <- newTVarIO Initializer
     bufferTV <- newTVarIO [Initialize]
-    let component0CC             = CC component0id statusTV stateTV component0id bufferTV
-    let node0                    = Node node0id NodeInfo Map.empty (IM.fromList [(getKey component0id,component0CC)]) IM.empty []
+    meta     <- newTVarIO $ SimMetaData 0 0 0 Map.empty Map.empty
+    let component0CC             = CC component0id statusTV stateTV component0id bufferTV [] meta
+    let node0                    = Node node0id NodeInfo Map.empty (IM.fromList [(getKey component0id,component0CC)]) IM.empty
     let simState                 = SimState node0id component0id (IM.fromList [(getKey node0id,node0)]) supply'' Map.empty
     return simState
 
