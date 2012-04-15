@@ -143,11 +143,11 @@ queueEvent event state
 
   -- Zoom in
   | EventKey (MouseButton WheelUp) Down _ p <- event
-  = zoomWith 0.9 p state
+  = zoomWith 0.8 p state
 
   -- Zoom out
   | EventKey (MouseButton WheelDown) Down _ p <- event
-  = zoomWith 1.1 p state
+  = zoomWith (1/0.8) p state
 
   -- Start moving
   | EventKey (MouseButton RightButton) Down _ p <- event
