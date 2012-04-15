@@ -115,7 +115,7 @@ myArcSolid a1 a2 r = polygon $
  where orig = (0,0)
        p1   = toP $ toA a1
        p2   = toP $ toA a2
-       ls   = [ toP $ toA $ x | x <- [a1..a2]]
+       ls   = [ toP $ toA x | x <- [a1..a2]]
        toP x = (cos x * r, sin x * r)
        toA x = x * pi * 2 / 360
 

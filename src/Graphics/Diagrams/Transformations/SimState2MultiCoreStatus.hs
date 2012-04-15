@@ -49,7 +49,7 @@ component2RunningElement mcs (i, c) = do
 
 -- | Obtains the component name from its context
 compStateName :: S.ComponentContext -> IO String
-compStateName (S.CC _ _ s _ _ _ _) = do
+compStateName (S.CC _ _ s _ _ _ _) =
   fmap S.componentName $ readTVarIO s
 
 -- | Obtains the component state from its context
@@ -76,12 +76,19 @@ collectMessagesCC nodes nid (cid, cc) = do
 
 -- | Transforms an input SoOSiM message into a MCS message
 collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.ComponentInput -> IO [Message]
-collectMessagesInput nodes nid cid (S.ComponentMsg sid _)
- | Just x <- findComponentNode sid nodes
- = return $ [ Message [show x, show sid] [show (getUnique nid), show (getUnique cid)] "" ]
-collectMessagesInput nodes nid cid (S.NodeMsg sid _) =
-  return [ Message [show sid] [show (getUnique nid), show (getUnique cid)] "" ]
-collectMessagesInput _ _ _ _ = return []
+collectMessagesInput nodes nid cid input
+
+ | (S.ComponentMsg sid _) <- input
+ , Just senderNode <- findComponentNode sid nodes
+ = return [ Message [show senderNode, show sid] dest "" ]
+
+ | (S.NodeMsg sid _) <- input
+ = return [ Message [show sid] dest "" ]
+
+ | otherwise
+ = return []
+
+ where dest = map (show . getUnique) [nid, cid]
 
 -- | Gets the list of pending inputs from a component context
 compPendingInputs :: S.ComponentContext -> IO [S.ComponentInput]
