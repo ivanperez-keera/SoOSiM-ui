@@ -92,7 +92,3 @@ compPendingInputs (S.CC _ _ _ _ b _ _) = readTVarIO b
 findComponentNode :: S.ComponentId -> [(Int, S.Node)] -> Maybe S.NodeId
 findComponentNode cid ns = listToMaybe
   [ S.nodeId n | (_,n) <- ns, I.member (getKey cid) (S.nodeComponents n) ]
--- findComponentNode cid [] = Nothing
--- findComponentNode cid ((i,n):ns)
---  | I.member (getKey cid) (S.nodeComponents n) = Just (S.nodeId n)
---  | otherwise                                  = findComponentNode cid ns
