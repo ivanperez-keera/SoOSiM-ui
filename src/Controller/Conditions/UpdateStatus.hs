@@ -50,4 +50,3 @@ condition cenv = do
 
   where mcsRef = mcs (view cenv)
         pm     = model cenv
-

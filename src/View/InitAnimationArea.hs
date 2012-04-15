@@ -6,7 +6,6 @@ module View.InitAnimationArea where
 -- External imports
 import             Data.CBMVar
 import             Data.Maybe
-import             Debug.Trace
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
@@ -192,16 +191,19 @@ handleEvent sc event st
 handleClicks :: Point -> SimGlSt -> SimGlSt
 handleClicks p (st,s,v,op) = (st',s,v,op)
  where -- Expand/collapse when necessary
-       st'   = maybe st'' (`toggleVisibility` st) ns
+       st'   = maybe st (`toggleVisibility` st) ns
        -- Update selection
-       st''  = st { selection = fromMaybe [] ss }
        ns    = checkToggleVisibility p st
-       ss    = checkSetSelection p st
 
--- | Process double clicks in the boxes or menu icons
+-- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
-handleDoubleClicks p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
- where ss = checkSetSelection p st
+handleDoubleClicks p (st,s,v,_) = (st',s,v,fromMaybe [] ss)
+ where ss = case checkSetSelection p st of
+             Just [x,y] -> Just [x,y]
+             _          -> Nothing
+       ns = checkToggleVisibility p st
+       st' | isNothing ns = st { selection = fromMaybe [] ss }
+           | otherwise    = st
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)

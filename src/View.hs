@@ -19,6 +19,7 @@ import Graphics.Diagrams.MultiCoreStatus
 import SoOSiM.Samples.Initializer
 import View.Objects
 import View.InitAnimationArea
+import View.InitIconsInfoArea
 
 instance GtkGUI View where
   initialise = createView
@@ -41,44 +42,12 @@ createView = do
   ss   <- simstate 
   msc  <- newCBMVar (emptyMultiCoreStatus, ss, initialViewState, [])
 
-
-  -- nb <- closeableNotebookNew
-  -- lbl1 <- labelNew $ Just "Heiiiiii"
-  -- lbl2 <- labelNew $ Just "Haiiiiii"
-  -- closeableNotebookAppendPage nb lbl1 "Test1"
-  -- closeableNotebookAppendPage nb lbl2 "Test2"
-
-  -- widgetShowAll nb
-
-  -- vp <- vpaned1 bldr
-
-  -- panedAdd2 vp nb
-  -- widgetShowAll nb
-
-  -- btn <- buttonNewWithLabel "Hi"
-
-  -- widgetSetSizeRequest btn 30 20
-  -- widgetShow btn
-
-  -- nb <- notebook1 bldr
-
-  -- mwdgt <- notebookGetNthPage nb 0
-  -- case mwdgt of
-  --  Nothing   -> putStrLn "No 0 page"
-  --  Just wdgt -> do notebookSetTabLabelPacking nb wdgt PackRepel PackStart
-  --                  notebookSetTabLabel nb wdgt btn
-  --                  putStrLn . show =<< notebookQueryTabLabelPacking nb wdgt 
-  --                  widgetSetSizeRequest btn 30 20
-  --                  -- notebookSetTabLabelPacking nb wdgt PackNatural PackStart
-
-  -- containerResizeChildren nb
-  -- -- widgetQueueResize nb
-  -- -- widgetQueueResize btn
-
   w <- window1 bldr
   widgetShowAll w
 
   initialiseAnimationArea msc bldr
+
+  initIconsInfoArea bldr
 
   return
     View

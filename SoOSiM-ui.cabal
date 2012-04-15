@@ -41,6 +41,7 @@ Build-type:          Custom
 
 Data-files: data/Interface.glade
             data/*.png
+            data/images/icons/*.png
 
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2

@@ -6,6 +6,7 @@ module Controller.Conditions.Selection
 -- External imports
 import Control.Monad
 import Data.CBMVar
+import Graphics.UI.Gtk
 
 -- Internal imports
 import CombinedEnvironment
@@ -14,13 +15,16 @@ import Graphics.Diagrams.MultiCoreStatus
 -- | Handles changes in the box selection in the gloss diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
-   installCallbackCBMVar mcsRef $ condition cenv
+   installCallbackCBMVar mcsRef $ conditionShowPage cenv
   where mcsRef = mcs (view cenv)
   
--- | Prints the current selection to stdout
-condition :: CEnv -> IO()
-condition cenv = do
+-- | Shows component info only when a component is selected
+conditionShowPage :: CEnv -> IO()
+conditionShowPage cenv = do
  st <- readCBMVar $ mcs $ view cenv
- print $ fth4 st
+ nb <- notebook1 $ uiBuilder $ view cenv
+ let sel = selection $ fst4 st
+ case sel of
+  [] -> notebookSetCurrentPage nb 0
+  _  -> notebookSetCurrentPage nb 1
  where fst4 (a,b,c,d) = a
-       fth4 (a,b,c,d) = d
