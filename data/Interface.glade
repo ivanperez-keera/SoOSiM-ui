@@ -565,7 +565,6 @@
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkAlignment" id="alignment4">
-                                    <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="yalign">0</property>
@@ -585,6 +584,7 @@
                                     </child>
                                   </object>
                                   <packing>
+                                    <property name="left_attach">1</property>
                                     <property name="right_attach">2</property>
                                   </packing>
                                 </child>
@@ -592,6 +592,7 @@
                                   <object class="GtkNotebook" id="notebook2">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="show_tabs">False</property>
                                     <child>
                                       <object class="GtkHBox" id="hbox2">
                                         <property name="visible">True</property>
@@ -656,34 +657,6 @@
                                         <property name="label" translatable="yes">page 1</property>
                                       </object>
                                       <packing>
-                                        <property name="tab_fill">False</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child type="tab">
-                                      <object class="GtkLabel" id="label7">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">page 2</property>
-                                      </object>
-                                      <packing>
-                                        <property name="position">1</property>
-                                        <property name="tab_fill">False</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child type="tab">
-                                      <object class="GtkLabel" id="label8">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">page 3</property>
-                                      </object>
-                                      <packing>
-                                        <property name="position">2</property>
                                         <property name="tab_fill">False</property>
                                       </packing>
                                     </child>

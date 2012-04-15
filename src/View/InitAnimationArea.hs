@@ -6,6 +6,7 @@ module View.InitAnimationArea where
 -- External imports
 import             Data.CBMVar
 import             Data.Maybe
+import             Debug.Trace
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
@@ -30,7 +31,7 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 -- Auxiliary types. We use an MVar with callbacks to communicate
 -- with the rest of the program
 type SimGlVar  = CBMVar SimGlSt
-type SimGlSt   = (MultiCoreStatus, SimState, ViewState)
+type SimGlSt   = (MultiCoreStatus, SimState, ViewState, [Name])
 
 type ViewState = (Float, Point)
 
@@ -69,7 +70,7 @@ data State = State [Event] Float Point (Maybe Point)
 makePicture :: SimGlVar -> State -> IO Picture
 makePicture st oldSt = do
   st'  <- readCBMVar st
-  mcs' <- updateFromSimState (fst3 st') (snd3 st')
+  mcs' <- updateFromSimState (fst4 st') (snd4 st')
   return $ paintMultiCoreStatus sc orig mcs'
  where (State _ sc orig _) = oldSt
 
@@ -78,8 +79,8 @@ makeThumbnail :: IO (Int, Int) -> SimGlVar -> a -> IO Picture
 makeThumbnail getSz st _ = do
   st' <- readCBMVar st
   sz  <- getSz
-  return $ Pictures [ paintMultiCoreStatus thumbScale thumbCoords $ fst3 st'
-                    , translate thumbX thumbY $ paintZoomBox (trd3 st') sz
+  return $ Pictures [ paintMultiCoreStatus thumbScale thumbCoords $ fst4 st'
+                    , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
                     ]
 
 -- | Default thumbnail zoom level
@@ -134,6 +135,13 @@ queueEvent event state
         event' = EventKey (MouseButton LeftButton) Up m p'
     in State (evs ++ [event']) sc o no
 
+  -- Only Down presses will be received for double clicks
+  | EventKey (MouseButton LeftButtonDouble) Down m p <- event
+  , State evs sc o no <- state
+  = let p'     = unScale sc $ subPos p o 
+        event' = EventKey (MouseButton LeftButtonDouble) Up m p'
+    in State (evs ++ [event']) sc o no
+
   -- Zoom in
   | EventKey (MouseButton WheelUp) Down _ p <- event
   = zoomWith 0.9 p state
@@ -164,7 +172,7 @@ queueEvent event state
 stepWorld :: SimGlVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs sc o no) = do
   mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
-  modifyCBMVar mcsRef (\(a,b,c) -> return (a,b,(sc,o))) 
+  modifyCBMVar mcsRef (\(a,b,c,s) -> return (a,b,(sc,o),s)) 
   return (State [] sc o no)
 
 -- | Handle mouse click and motion events.
@@ -174,18 +182,26 @@ handleEvent sc event st
   | EventKey (MouseButton LeftButton) Up _ pt <- event
   = handleClicks pt st
 
+  | EventKey (MouseButton LeftButtonDouble) Up _ pt <- event
+  = handleDoubleClicks pt st
+
   | otherwise
   = st
 
 -- | Process clicks in the boxes or menu icons
 handleClicks :: Point -> SimGlSt -> SimGlSt
-handleClicks p (st,s,v) = (st',s,v)
+handleClicks p (st,s,v,op) = (st',s,v,op)
  where -- Expand/collapse when necessary
        st'   = maybe st'' (`toggleVisibility` st) ns
        -- Update selection
        st''  = st { selection = fromMaybe [] ss }
        ns    = checkToggleVisibility p st
        ss    = checkSetSelection p st
+
+-- | Process double clicks in the boxes or menu icons
+handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
+handleDoubleClicks p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
+ where ss = checkSetSelection p st
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
@@ -244,11 +260,11 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 unScale :: Float -> Point -> Point
 unScale progScale p = multPos p (1 / progScale, 1 / progScale)
 
-fst3 :: (a,b,c) -> a
-fst3 (a,_,_) = a
+fst4 :: (a,b,c,d) -> a
+fst4 (a,_,_,_) = a
 
-snd3 :: (a,b,c) -> b
-snd3 (_,b,_) = b
+snd4 :: (a,b,c,d) -> b
+snd4 (_,b,_,_) = b
 
-trd3 :: (a,b,c) -> c
-trd3 (_,_,c) = c
+trd4 :: (a,b,c,d) -> c
+trd4 (_,_,c,_) = c

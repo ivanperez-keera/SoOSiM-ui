@@ -39,7 +39,7 @@ createView :: IO View
 createView = do
   bldr <- loadInterface
   ss   <- simstate 
-  msc  <- newCBMVar (emptyMultiCoreStatus, ss, initialViewState)
+  msc  <- newCBMVar (emptyMultiCoreStatus, ss, initialViewState, [])
 
 
   -- nb <- closeableNotebookNew
