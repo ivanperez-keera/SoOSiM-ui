@@ -17,13 +17,16 @@ import qualified Controller.Conditions.InfoTooltip       as InfoTooltip
 -- | Installs the condition handlers that enforce the system's conditions both
 -- from the view to the model and from the model to the view.
 installHandlers :: CEnv -> IO ()
-installHandlers cenv = do
-  Fullscreen.installHandlers  cenv
-  Quit.installHandlers        cenv
-  Selection.installHandlers   cenv
-  Speed.installHandlers       cenv
-  Step.installHandlers        cenv
-  Update.installHandlers      cenv
-  InfoSel.installHandlers     cenv
-  InfoBasic.installHandlers   cenv
-  InfoTooltip.installHandlers cenv
+installHandlers =
+  Fullscreen.installHandlers ## 
+  Quit.installHandlers       ## 
+  Selection.installHandlers  ## 
+  Speed.installHandlers      ## 
+  Step.installHandlers       ## 
+  Update.installHandlers     ## 
+  InfoSel.installHandlers    ## 
+  InfoBasic.installHandlers  ## 
+  InfoTooltip.installHandlers 
+
+(##) :: Monad m => (a -> m b) -> (a -> m c) -> a -> m c
+(##) f1 f2 x = f1 x >> f2 x
