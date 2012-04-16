@@ -14,10 +14,12 @@ data MemorySource
 
 data MemState =
   MemState { addressLookup :: [MemorySource]
+           , fallback      :: ComponentId
            }
   deriving Show
 
 data MemCommand = Register Int Int (Maybe ComponentId)
                 | Read     Int
                 | Write    Int Dynamic
+                | NewState MemState
   deriving Typeable

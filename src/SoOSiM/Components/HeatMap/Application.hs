@@ -13,7 +13,7 @@ import SoOSiM.Components.HeatMap.Util
 
 heatMapApplication :: HMState -> ComponentInput -> SimM HMState
 -- Initialization behaviour
-heatMapApplication hmState Initialize = do
+heatMapApplication hmState (ComponentMsg senderId content) | (Just Compute) <- fromDynamic content = do
   let (w,h) = arraySize hmState
 
   -- Calculate read locations for worker threads
@@ -32,17 +32,20 @@ heatMapApplication hmState Initialize = do
   mapM_ (\wloc -> invokeNoWait Nothing memManagerId (toDyn (Write wloc (toDyn (0::Float))))) [0..(2*w*h-1)]
 
   -- Set every 3rd location to 1
-  mapM_ (\wloc -> invokeNoWait Nothing memManagerId (toDyn (Write wloc (toDyn (1::Float))))) [ x | x <- [0..(2*w*h-1)], x `mod` 4 == 0]
+  mapM_ (\wloc -> invokeNoWait Nothing memManagerId (toDyn (Write wloc (toDyn (1::Float))))) [ x | x <- [0..(w*h-1)], x `mod` 4 == 0]
 
   -- Instantiate worker threads
   registerComponent (initState :: HMWorker)
-  schedulerId <- fmap fromJust $ componentLookup Nothing "Scheduler"
-  workerIDs <- mapM (\(wloc,rloc) -> do
-                        workerIDdyn <- invoke Nothing schedulerId (toDyn $ Execute "HeatMapWorker" [Register 0 (2 * w * h) (Just memManagerId)])
-                        let workerID = fromJust $ fromDynamic workerIDdyn
-                        invokeNoWait Nothing workerID (toDyn $ HeatMap.NewState (HMWorker wloc rloc (transfer hmState)))
-                        return workerID
-                    ) (zip wlocs rlocs)
+  schedulerId <- fmap fromJust $ componentLookup Nothing "ProcessManager"
+  workerIDs   <- fmap (fromJust . fromDynamic) $ invoke Nothing schedulerId (toDyn $ Instantiate True (length wlocs) "HeatMapWorker")
+  mapM_ (\(wId,wloc,rloc) -> invokeNoWait Nothing wId (toDyn $ HeatMap.NewState (HMWorker wloc rloc (transfer hmState)))) (zip3 workerIDs (reverse wlocs) (reverse rlocs))
+
+  --workerIDs <- mapM (\(wloc,rloc) -> do
+  --                      workerIDdyn <- invoke Nothing schedulerId (toDyn $ Execute "HeatMapWorker" [Register 0 (2 * w * h) (Just memManagerId)])
+  --                      let workerID = fromJust $ fromDynamic workerIDdyn
+  --                      invokeNoWait Nothing workerID (toDyn $ HeatMap.NewState (HMWorker wloc rloc (transfer hmState)))
+  --                      return workerID
+  --                  ) (zip wlocs rlocs)
 
   -- Make the worker threads do actual work
   let workers' = IM.fromList (zip (map getKey workerIDs) (repeat Compute))

@@ -6,7 +6,7 @@ import SoOSiM.Components.MemoryManager.Types
 
 data SchedulerMsg
   = NewState SchedulerState
-  | Execute String [MemCommand]
+  | Instantiate Bool Int String
   deriving Typeable
 
 data SchedulerState
