@@ -15,12 +15,13 @@ import Hails.MVC.View.GladeView
 import Hails.MVC.View.GtkView as Exported
 
 -- Internal libraries
+import Config.Config
 import Graphics.Diagrams.MultiCoreStatus
 import SoOSiM.Samples.Initializer
-import View.Objects
 import View.InitAnimationArea
 import View.InitIconsInfoArea
-import Config.Config
+import View.Tooltips
+import View.Objects
 
 instance GtkGUI View where
   initialise = createView
@@ -53,6 +54,8 @@ createView = do
   initialiseAnimationArea cfg msc bldr
 
   initIconsInfoArea bldr
+
+  _ <- initialiseTooltips bldr
 
   return
     View
