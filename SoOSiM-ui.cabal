@@ -90,6 +90,7 @@ Executable SoOSiM-ui
                     Controller.Conditions.UpdateStatus
                     Controller.Helpers.NextSimState
                     Data.Tuple4
+                    Data.History
                     Graphics.Diagrams.MultiCoreStatus
                     Graphics.Diagrams.Positioned.Layout
                     Graphics.Diagrams.Positioned.PositionedDiagram
@@ -105,6 +106,7 @@ Executable SoOSiM-ui
                     Graphics.Gloss.AdvancedShapes.Shadows
                     Graphics.UI.Gtk.Multiline.TextBufferHelpers
                     Model.Model
+                    Model.SystemStatus
                     Model.ProtectedModel
                     Model.ProtectedModel.ProtectedFields
                     Model.ProtectedModel.ProtectedModelInternals
