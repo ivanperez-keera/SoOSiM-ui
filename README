@@ -43,3 +43,12 @@ The colours used to paint the diagrams are specified in a config file.
 In *nix OSs, this should be located in ~/.cabal/share/SoOSiM-ui-0.1/data/config.
 This will change in the future (it's the wrong location, as changes are
 lost once the version number is increased).
+
+That file descibes 4 pairs of colours. The first element in each
+pair is always the colour when selected. The second element is the
+colour when not selected. The colours are, in order:
+
+ - Processing units (nodes).
+ - Running components
+ - Waiting components
+ - Idle components
