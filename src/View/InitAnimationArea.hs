@@ -14,8 +14,10 @@ import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, Right
 -- Local imports
 import Config.Config
 import Data.Tuple4
+import Data.History
 import SoOSiM.Types
 import View.Objects
+import Model.SystemStatus
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
@@ -32,7 +34,7 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 -- Auxiliary types. We use an MVar with callbacks to communicate
 -- with the rest of the program
 type SimGlVar  = CBMVar SimGlSt
-type SimGlSt   = (MultiCoreStatus, SimState, ViewState, [Name])
+type SimGlSt   = (SystemStatus, SimState, ViewState, [Name])
 
 type ViewState = (Float, Point)
 
@@ -71,8 +73,13 @@ data State = State [Event] Float Point (Maybe Point)
 makePicture :: Config -> SimGlVar -> State -> IO Picture
 makePicture cfg st oldSt = do
   st'  <- readCBMVar st
-  mcs' <- updateFromSimState (fst4 st') (snd4 st')
-  return $ paintMultiCoreStatus cfg sc orig mcs'
+  let hist = multiCoreStatus $ fst4 st'
+      fut  = future hist
+  mcs' <- case fut of
+           [] -> updateFromSimState (historyPresent hist) (snd4 st')
+           _  -> return (present hist)
+  let newSt = (fst4 st') { multiCoreStatus = hist { present = mcs' } }
+  return $ paintMultiCoreStatus cfg sc orig newSt
  where (State _ sc orig _) = oldSt
 
 -- | Convert our state to a smaller thumbnail 
@@ -114,7 +121,7 @@ zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
        p2' = - (h / 2 + p2)
  
 -- | Transform the abstract status into a picture
-paintMultiCoreStatus :: Config -> Float -> Point -> MultiCoreStatus -> Picture
+paintMultiCoreStatus :: Config -> Float -> Point -> SystemStatus -> Picture
 paintMultiCoreStatus cfg progScale orig =
   uncurry translate orig . scale progScale progScale . paintDiagram . transformDiagram . transformStatus cfg
 
@@ -202,7 +209,7 @@ handleEvent sc event st
 handleClicks :: Point -> SimGlSt -> SimGlSt
 handleClicks p (st,s,v,op) = (st',s,v,op)
  where -- Expand/collapse when necessary
-       st'   = maybe st (`toggleVisibility` st) ns
+       st'   = maybe st (\n -> updateCurrentStatus st (toggleVisibility n)) ns
        -- Update selection
        ns    = checkToggleVisibility p st
 
@@ -225,14 +232,14 @@ handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
-checkToggleVisibility :: Point -> MultiCoreStatus -> Maybe [Name]
+checkToggleVisibility :: Point -> SystemStatus -> Maybe [Name]
 checkToggleVisibility p st = listToMaybe l
  where l = mapMaybe (isMenuOfB p) boxes
        (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box that the user
 -- selected (if any)
-checkSetSelection :: Point -> MultiCoreStatus -> Maybe [Name]
+checkSetSelection :: Point -> SystemStatus -> Maybe [Name]
 checkSetSelection p st = listToMaybe l
  where l = mapMaybe (isAreaOfB p) boxes
        (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st

@@ -20,10 +20,9 @@ import Graphics.Diagrams.MultiCoreStatus
 updateFromSimState :: MultiCoreStatus -> S.SimState -> IO MultiCoreStatus
 updateFromSimState mcs ss = do
    let ns = I.toList $ S.nodes ss
-       s  = selection mcs
    ms <- mapM (collectMessages ns) ns
    ps <- mapM (updateNode mcs) ns
-   return $ MultiCoreStatus ps (concat ms) s
+   return $ MultiCoreStatus ps (concat ms)
 
 -- | Updates a node in a MultiCore System from a SoOSiM node
 updateNode :: MultiCoreStatus -> (Int, S.Node) -> IO ProcessingUnit
@@ -44,7 +43,8 @@ component2RunningElement :: MultiCoreStatus -> (Int, S.ComponentContext) -> IO R
 component2RunningElement mcs (i, c) = do
   name  <- compStateName c
   state <- compStateState c
-  return $ Component pid name state Nothing
+  stats <- compStatistics c
+  return $ Component pid name state Nothing stats
  where pid = show (getUnique i)
 
 -- | Obtains the component name from its context
@@ -63,6 +63,16 @@ compStateState (S.CC _ s _ _ mb _ _) = do
     S.Idle              -> if (null mb')
                               then (return Idle)
                               else (return Active)
+
+compStatistics :: S.ComponentContext -> IO Statistics
+compStatistics (S.CC _cid csu cse _cr _buf trc smd) = do
+    metaData <- readTVarIO smd
+
+    return $ Statistics (S.cyclesRunning metaData)
+                        (S.cyclesWaiting metaData)
+                        (S.cyclesIdling metaData)
+                        trc
+
 
 -- | Transforms the SoOSiM messages into MultiCore description messages
 collectMessages :: [(Int, S.Node)] -> (Int, S.Node) -> IO [Message]
