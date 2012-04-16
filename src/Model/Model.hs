@@ -22,6 +22,6 @@ data Status = Running
 -- in windowed mode
 emptyBM :: Model
 emptyBM = Model { speed      = 1
-                , status     = Running
+                , status     = Paused
                 , fullscreen = False
                 }

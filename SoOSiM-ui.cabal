@@ -130,6 +130,7 @@ Executable SoOSiM-ui
                     View.InitAnimationArea
                     View.InitIconsInfoArea
                     View.Objects
+                    View.Tooltips
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         

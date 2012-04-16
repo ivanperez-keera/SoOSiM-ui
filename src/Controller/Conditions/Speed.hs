@@ -16,6 +16,7 @@ module Controller.Conditions.Speed
 
 -- External imports
 import Control.Monad
+import Data.CBMVar
 import GHC.Float
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
@@ -23,7 +24,10 @@ import Hails.MVC.Controller.ConditionDirection
 
 -- Internal imports
 import CombinedEnvironment
+import Graphics.Diagrams.MultiCoreStatus
 import Model.Model
+import SoOSiM.Samples.Initializer
+import View.InitAnimationArea
 
 -- | Adjusts the system speed and running/paused status
 -- to the user selection
@@ -69,11 +73,19 @@ conditionPause cenv = do
    Stopped -> return ()
  where pm = model cenv
 
--- | Halts the simulation
+-- | Halts and restarts the simulation
 conditionStop :: CEnv -> IO()
-conditionStop cenv =
+conditionStop cenv = do
   setter statusField pm Stopped
- where pm = model cenv
+
+  -- Starts a fresh new simulation
+  ss <- simstate 
+  let mcs' = (emptyMultiCoreStatus, ss, initialViewState, [])
+  modifyCBMVar mcsRef $ \_ -> return mcs'
+
+  setter statusField pm Paused
+ where pm     = model cenv
+       mcsRef = mcs $ view cenv
 
 -- | Increases the simulation speed by a factor of 2
 conditionSpeedUp :: CEnv -> IO()
