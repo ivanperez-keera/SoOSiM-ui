@@ -1,6 +1,8 @@
 This is the UI for the SoOSiM simulator.
 
-There are two ways of installing this package:
+There are two ways of installing this package. In both cases, you need
+to have your cabal bin directory in your path. In *nix OSs, this usually
+means adding $HOME/.cabal/bin to your PATH.
 
 1) Download all the dependencies, unpack each one of them and install.
 You will need:
