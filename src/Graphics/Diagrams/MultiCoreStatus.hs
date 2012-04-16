@@ -14,6 +14,7 @@ module Graphics.Diagrams.MultiCoreStatus
 
    -- * Access and manipulation
    , findProcessingUnit
+   , findRunningElement
    , toggleVisibility
    )
   where
@@ -145,15 +146,15 @@ toggleVisibilityS UnitIgnored   = UnitIgnored
 -- removeMessage m d = d { messages = ms' }
 --   where ms' = filter (m /=) $ messages d
 
--- -- | Finds a running element by name
--- findRunningElement :: QElementName -> MultiCoreStatus -> Maybe RunningElement
--- findRunningElement (pn,en) d =
---   findRunningElementInPU en =<< findProcessingUnit pn d
---   
--- -- | Finds a running element by name in a PU
--- findRunningElementInPU :: Name -> ProcessingUnit -> Maybe RunningElement
--- findRunningElementInPU en =
---   listToMaybe . filter ((en ==) . elementName) . unitElements
+-- | Finds a running element by name
+findRunningElement :: QElementName -> MultiCoreStatus -> Maybe RunningElement
+findRunningElement (pn,en) d =
+  findRunningElementInPU en =<< findProcessingUnit pn d
+  
+-- | Finds a running element by name in a PU
+findRunningElementInPU :: Name -> ProcessingUnit -> Maybe RunningElement
+findRunningElementInPU en =
+  listToMaybe . filter ((en ==) . elementName) . unitElements
 
 -- -- | Updates a processing unit in a system
 -- updateProcessingUnit :: ProcessingUnit -> MultiCoreStatus -> MultiCoreStatus

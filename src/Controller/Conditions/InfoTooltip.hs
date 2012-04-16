@@ -17,6 +17,9 @@ import qualified SoOSiM.Types           as S
 -- Internal imports
 import CombinedEnvironment
 import Graphics.Diagrams.Types
+import Data.History
+import Model.SystemStatus
+import Graphics.Diagrams.MultiCoreStatus
 
 -- | Handles changes in the box selection in the gloss diagram
 installHandlers :: CEnv -> IO()
@@ -29,56 +32,42 @@ conditionShowPage :: CEnv -> IO()
 conditionShowPage cenv = do
  -- Get elem info if possible
  st <- readCBMVar $ mcs $ view cenv
- tt <- getElemInfo (fth4 st) (snd4 st)
+ let tt = getElemInfo (fth4 st) $ present $ multiCoreStatus $ fst4 st
 
  -- Update label text
  lbl <- statusLbl $ uiBuilder $ view cenv
  labelSetText lbl $ fromMaybe "" tt
 
--- | Gets the summarised info from components only
-getElemInfo :: [Name] -> S.SimState -> IO (Maybe String)
+-- | Renders the info relative to a given element (both basic info and a trace)
+getElemInfo :: [Name]          -- ^ The qualified name of the element whose info we need
+            -> MultiCoreStatus -- ^ The current SimState
+            -> Maybe String    -- ^ If the element exists, it's associated info, and
+                               --   Nothing otherwise
 getElemInfo [x,y] ss = getCompInfo x y ss
-getElemInfo _     _  = return Nothing
+getElemInfo _     _  = Nothing
 
 -- | Compiles the component info
-getCompInfo :: Name -> Name -> S.SimState -> IO (Maybe String)
-getCompInfo nn cn ss =
-  case ctx of
-   Nothing   -> return Nothing
-   Just ctx' -> fmap Just $ showCompBasicInfo nn cn ss ctx'
- where ctx = getCompCtx nn cn ss
+getCompInfo :: Name -> Name -> MultiCoreStatus -> Maybe String
+getCompInfo nn cn ss = do
+  re <- findRunningElement (nn, cn) ss
+  return $ showCompInfo nn cn re
 
--- | Gets the component context for a given node+name combination
-getCompCtx :: Name -> Name -> S.SimState -> Maybe S.ComponentContext
-getCompCtx nn cn ss = do
+-- | Renders two strings with the basic component info and the trace
+showCompInfo :: Name -> Name -> RunningElement -> String
+showCompInfo nn cn re = 
+  map (\x -> if x == '\n' then ' ' else x) $ unlines
+   [ show cn
+   , ": "   ++ cKind
+   , "| " ++ st
+   , "| Cycle count: " ++ show (compCyclesRunning stats) ++ "(R)"
+     ++ "/" ++ show (compCyclesWaiting stats) ++ "(W)"
+     ++ "/" ++ show (compCyclesIdling stats) ++ "(I)"
+   ]
+ where stats   = elementStatistics re
+       cKind   = elementKind re
+       cStatus = elementState re
 
-   -- Find node by name
-   (_,e) <- find ((nn ==) . show . S.nodeId . snd) ns
-
-   -- Find component in node by name
-   (_,c) <- find ((cn ==) . show . S.componentId . snd) $ I.toList $ S.nodeComponents e
-
-   -- Return component
-   return c
-  where ns = I.toList $ S.nodes ss
-
--- | Creates a string with the basic component info for a given S.ComponentContext
-showCompBasicInfo :: Name -> Name -> S.SimState -> S.ComponentContext -> IO String
-showCompBasicInfo nn cn ss (S.CC cid csu cse cr buf trc smd) = do
-    metaData <- readTVarIO smd
-    cKind    <- fmap S.componentName $ readTVarIO cse
-    cStatus  <- readTVarIO csu
-
-    let st = case cStatus of
-              S.Idle              -> "Idle"
-              S.Running           -> "Running"
-              S.WaitingForMsg _ _ -> "Waiting"
-
-    return $ map (\x -> if x == '\n' then ' ' else x) $ unlines
-     [ show cid
-     , ": "   ++ cKind
-     , "| " ++ st
-     , "| Cycle count: " ++ show (S.cyclesRunning metaData) ++ "(R)"
-       ++ "/" ++ show (S.cyclesWaiting metaData) ++ "(W)"
-       ++ "/" ++ show (S.cyclesIdling metaData) ++ "(I)"
-     ]
+       st = case cStatus of
+              Idle    -> "Idle"
+              Active  -> "Running"
+              Waiting -> "Waiting"
