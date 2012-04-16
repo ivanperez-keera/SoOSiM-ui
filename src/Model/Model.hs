@@ -2,7 +2,7 @@
 module Model.Model where
 
 -- | The system's model can be described by giving:
--- 
+--
 --  * The simulation parameters (speed, status)
 --  * The current view mode (fullscreen, windowed)
 data Model = Model
@@ -14,6 +14,7 @@ data Model = Model
 
 -- | A simulation can be running, paused or halted
 data Status = Running
+            | SlowRunning
             | Paused
             | Stopped
  deriving (Eq, Show)

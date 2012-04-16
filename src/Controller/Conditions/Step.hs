@@ -14,7 +14,7 @@ import CombinedEnvironment
 import Controller.Helpers.NextSimState
 import Data.History
 import Model.Model
-import Model.SystemStatus 
+import Model.SystemStatus
 
 -- | Executes one simulation step when the user clicks on
 -- the Step button
@@ -22,6 +22,9 @@ installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
   stepF <- stepForwardToolBtn ui
   stepF `onToolButtonClicked` conditionF cenv
+
+  stepFS <- stepForwardSmallToolBtn ui
+  stepFS `onToolButtonClicked` conditionFS cenv
 
   stepB <- stepBackToolBtn ui
   stepB `onToolButtonClicked` conditionB cenv
@@ -34,6 +37,18 @@ conditionF cenv = void $ do
 
   when (st == Paused) $
     modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStep (a,b)
+                                           return (a',b',c,d)
+
+  where mcsRef = mcs (view cenv)
+        pm     = model cenv
+
+-- | Updates the state with the next step only if the system is paused
+conditionFS :: CEnv -> IO()
+conditionFS cenv = void $ do
+  st <- getter statusField pm
+
+  when (st == Paused) $
+    modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStepSmall (a,b)
                                            return (a',b',c,d)
 
   where mcsRef = mcs (view cenv)
