@@ -16,7 +16,9 @@ import Hails.MVC.View.GtkView as Exported
 
 -- Internal libraries
 import Config.Config
+import Data.History
 import Graphics.Diagrams.MultiCoreStatus
+import Model.SystemStatus
 import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
 import View.InitIconsInfoArea
@@ -46,7 +48,8 @@ createView = do
 
   bldr <- loadInterface
   ss   <- simstate 
-  msc  <- newCBMVar (emptyMultiCoreStatus, ss, initialViewState, [])
+  let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
+  msc  <- newCBMVar (emptySystemStatus, ss, initialViewState, [])
 
   w <- window1 bldr
   widgetShowAll w

@@ -18,6 +18,7 @@ import qualified SoOSiM.Types           as S
 import CombinedEnvironment
 import Data.Tuple4
 import Graphics.Diagrams.MultiCoreStatus
+import Model.SystemStatus
 import Graphics.Diagrams.Types
 import Graphics.UI.Gtk.Multiline.TextBufferHelpers
 

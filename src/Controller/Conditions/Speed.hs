@@ -24,8 +24,10 @@ import Hails.MVC.Controller.ConditionDirection
 
 -- Internal imports
 import CombinedEnvironment
+import Data.History
 import Graphics.Diagrams.MultiCoreStatus
 import Model.Model
+import Model.SystemStatus
 import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
 
@@ -80,7 +82,8 @@ conditionStop cenv = do
 
   -- Starts a fresh new simulation
   ss <- simstate 
-  let mcs' = (emptyMultiCoreStatus, ss, initialViewState, [])
+  let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
+      mcs'              = (emptySystemStatus, ss, initialViewState, [])
   modifyCBMVar mcsRef $ \_ -> return mcs'
 
   setter statusField pm Paused

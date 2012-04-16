@@ -10,6 +10,7 @@ module Graphics.Diagrams.MultiCoreStatus
    , ElementState(..)
    , RunningElement(..)
    , Message(..)
+   , Statistics(..)
 
    -- * Access and manipulation
    , findProcessingUnit
@@ -28,13 +29,12 @@ import Graphics.Diagrams.Types
 data MultiCoreStatus = MultiCoreStatus
   { processingUnits :: [ ProcessingUnit ]
   , messages        :: [ Message ]
-  , selection       :: [ Name ]
   }
  deriving (Eq, Show)
 
 -- | Empty system with no PUs, no messages and no selection
 emptyMultiCoreStatus :: MultiCoreStatus
-emptyMultiCoreStatus = MultiCoreStatus [] [] []
+emptyMultiCoreStatus = MultiCoreStatus [] []
 
 -- | A processing unit has a name, a list of components
 -- or applications running in it, and a status
@@ -59,13 +59,13 @@ data RunningElement = Component   { elementName       :: Name
                                   , elementKind       :: ElementKind
                                   , elementState      :: ElementState
                                   , elementGhost      :: Maybe QElementName
-                                  -- , elementStatistics :: Statistics
+                                  , elementStatistics :: Statistics
                                   }
                     | Application { elementName       :: Name
                                   , elementKind       :: ElementKind
                                   , elementState      :: ElementState
                                   , elementGhost      :: Maybe QElementName
-                                  -- , elementStatistics :: Statistics
+                                  , elementStatistics :: Statistics
                                   }
  deriving (Eq, Show)
 
@@ -77,8 +77,12 @@ data ElementState = Active
  deriving (Eq, Show)
  
 -- Collected statistics
--- data Statistics = Statistics
---  deriving (Eq, Show)
+data Statistics = Statistics { compCyclesRunning :: Int
+                             , compCyclesWaiting :: Int
+                             , compCyclesIdling  :: Int
+                             , compTrace         :: [String]
+                             }
+ deriving (Eq, Show)
 
 -- | A message has an origin, a destination, and a label
 data Message = Message { sender   :: [Name]

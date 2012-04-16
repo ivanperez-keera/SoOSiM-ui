@@ -11,7 +11,7 @@ import Graphics.UI.Gtk
 
 -- Internal imports
 import CombinedEnvironment
-import Graphics.Diagrams.MultiCoreStatus
+import Model.SystemStatus
 
 -- | Handles changes in the box selection in the gloss diagram
 installHandlers :: CEnv -> IO()
