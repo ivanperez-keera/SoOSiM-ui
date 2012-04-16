@@ -20,6 +20,7 @@ import SoOSiM.Samples.Initializer
 import View.Objects
 import View.InitAnimationArea
 import View.InitIconsInfoArea
+import Config.Config
 
 instance GtkGUI View where
   initialise = createView
@@ -38,6 +39,10 @@ data View = View
 -- included directly in it
 createView :: IO View
 createView = do
+
+  -- Certain aspects of the visual interface can be configured with a config file
+  cfg <- readConfigFile
+
   bldr <- loadInterface
   ss   <- simstate 
   msc  <- newCBMVar (emptyMultiCoreStatus, ss, initialViewState, [])
@@ -45,7 +50,7 @@ createView = do
   w <- window1 bldr
   widgetShowAll w
 
-  initialiseAnimationArea msc bldr
+  initialiseAnimationArea cfg msc bldr
 
   initIconsInfoArea bldr
 

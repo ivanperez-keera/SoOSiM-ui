@@ -11,6 +11,7 @@ data Model = Model
   , fullscreen :: Bool
   }
 
+
 -- | A simulation can be running, paused or halted
 data Status = Running
             | Paused

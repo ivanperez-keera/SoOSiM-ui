@@ -1,3 +1,4 @@
+-- | Loads the icons into the component info icon view
 module View.InitIconsInfoArea where
 
 -- External libraries
@@ -9,11 +10,12 @@ import Paths
 
 type IconsInfoViewStore = ListStore (Pixbuf, String)
 
+-- | Loads the icons into the component info icon view
 initIconsInfoArea :: Builder -> IO IconsInfoViewStore
 initIconsInfoArea bldr = do
 
   m  <- listStoreNew =<< getIconList
-  iv <- iconview1 bldr
+  iv <- infoIconView bldr
 
   iconViewSetModel iv (Just m)
 
@@ -35,18 +37,21 @@ initIconsInfoArea bldr = do
 
   return m
 
+-- | The pixbuf column
 _PIXBUF_COLUMN :: ColumnId (Pixbuf, String) Pixbuf
 _PIXBUF_COLUMN = makeColumnIdPixbuf 0
 
+-- | The string column
 _STRING_COLUMN :: ColumnId (Pixbuf, String) String
 _STRING_COLUMN = makeColumnIdString 1
 
-
+-- | The icon list with proper sizes
 getIconList :: IO [(Pixbuf, String)]
 getIconList = mapM f icons
  where f (x,y) = getDataFileName x >>= \w -> pixbufNewFromFileAtSize w 48 48 >>= \pb -> return (pb, y)
 
+-- | The list of icons and their labels
 icons :: [(String, String)]
-icons = [ ("images/icons/info.png", "Basic info")
+icons = [ ("images/icons/info.png",  "Basic info")
         , ("images/icons/trace.png", "Trace")
         ]

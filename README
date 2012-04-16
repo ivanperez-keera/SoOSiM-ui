@@ -1,0 +1,45 @@
+This is the UI for the SoOSiM simulator.
+
+There are two ways of installing this package. In both cases, you need
+to have your cabal bin directory in your path. In *nix OSs, this usually
+means adding $HOME/.cabal/bin to your PATH.
+
+1) Download all the dependencies, unpack each one of them and install.
+You will need:
+ * keera-hails:     https://github.com/ivanperez-keera/keera-hails
+ * keera-callbacks: https://github.com/ivanperez-keera/keera-callbacks
+ * gloss-gtk:       https://github.com/ivanperez-keera/gloss-gtk
+ * SoOSiM:          https://github.com/ivanperez-keera/SoOSiM
+ * SoOSiM-ui:       https://github.com/ivanperez-keera/SoOSiM-ui
+
+For each one of those, unpack, go into the generated dir, and
+run cabal install (or 'cabal install --reinstall' if you installed
+them before).
+
+2) Use my hackage repo to install all the dependencies.
+
+Add the following line to your .cabal/config file, right below remote-repo:
+hackage.haskell.org [...]
+
+remote-repo: ivanperez-keera:http://ivanperez-keera.github.com/packages/archive
+
+Then run cabal update && cabal install SoOSiM-ui
+
+In any case, you need to have a few dependencies, among them:
+ - gtk:      for which you need to install the gtk development libraries
+ - gtkglext: for which you need to install the gtkgl development libraries
+
+This program has been reported working on Linux and MacOSX.
+It remains untested under windows.
+
+====
+
+Once installed, the program opens the default example in the user interface.
+With the current configuration, that cannot be changed (the reason is not as
+dumb as it may seem: examples are actual haskell code, not just some file
+that's opened and interpreted).
+
+The colours used to paint the diagrams are specified in a config file.
+In *nix OSs, this should be located in ~/.cabal/share/SoOSiM-ui-0.1/data/config.
+This will change in the future (it's the wrong location, as changes are
+lost once the version number is increased).

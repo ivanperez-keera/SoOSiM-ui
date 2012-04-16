@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternGuards #-}
 module SoOSiM.Components.HeatMap.Application where
 
 import Data.Maybe
@@ -56,7 +57,7 @@ heatMapApplication hmState Initialize = do
 -- Keep track of finished workers
 heatMapApplication hmState (ComponentMsg senderId content) | (Just Done) <- fromDynamic content = do
   let workers' = IM.insert (getKey senderId) Done (workers hmState)
-  if (all (== Done) . IM.elems $ workers')
+  if all (== Done) . IM.elems $ workers'
     then do -- All workers are finished
       let (w,h) = arraySize hmState
 
@@ -68,7 +69,7 @@ heatMapApplication hmState (ComponentMsg senderId content) | (Just Done) <- from
       memManagerId <- fmap fromJust $ componentLookup Nothing "MemoryManager"
 
       -- Copy values from 1 array to the other
-      rVals <- mapM (\x -> invoke Nothing memManagerId (toDyn (Read x))) rlocs
+      rVals <- mapM (invoke Nothing memManagerId . toDyn . Read) rlocs
       _ <- mapM (\(x,v) -> invokeNoWait Nothing memManagerId (toDyn (Write x v))) (zip wlocs rVals)
 
       traceMsg (show (map fromDynamic rVals :: [Maybe Float]))
@@ -78,16 +79,19 @@ heatMapApplication hmState (ComponentMsg senderId content) | (Just Done) <- from
       mapM_ (\x -> invokeNoWait Nothing x (toDyn Compute)) workerIDs
 
       yield $ hmState { workers = IM.map (\_ -> Compute) (workers hmState) }
-    else do -- Still waiting for some workers
+    else -- Still waiting for some workers
       yield $ hmState { workers = workers' }
 
 heatMapApplication hmState _ = return hmState
 
 
-heatMapWorker hmwState (ComponentMsg _ content) | (Just (NewState s')) <- fromDynamic content = do
+heatMapWorker :: HMWorker -> ComponentInput -> SimM HMWorker
+heatMapWorker hmwState (ComponentMsg _ content)
+ | (Just (NewState s')) <- fromDynamic content =
   yield s'
 
-heatMapWorker hmwState (ComponentMsg _ content) | (Just Compute) <- fromDynamic content = do
+heatMapWorker hmwState (ComponentMsg _ content)
+ | (Just Compute) <- fromDynamic content = do
   -- Extract configuration
   let (c,vert,hor)   = rdLocs hmwState
   let (dy2i,dx2i,dt) = wtransfer hmwState
@@ -97,13 +101,13 @@ heatMapWorker hmwState (ComponentMsg _ content) | (Just Compute) <- fromDynamic 
 
   -- Read array values
   cVal    <- fmap (fromJust . fromDynamic)       $ invoke Nothing memManagerId (toDyn (Read c))
-  vertVal <- fmap (map (fromJust . fromDynamic)) $ mapM (\x -> invoke Nothing memManagerId (toDyn (Read x))) vert
-  horVal  <- fmap (map (fromJust . fromDynamic)) $ mapM (\x -> invoke Nothing memManagerId (toDyn (Read x))) hor
+  vertVal <- fmap (map (fromJust . fromDynamic)) $ mapM (invoke Nothing memManagerId . toDyn . Read) vert
+  horVal  <- fmap (map (fromJust . fromDynamic)) $ mapM (invoke Nothing memManagerId . toDyn . Read) hor
 
   -- Calculate value
-  let newValV = sum ((fromIntegral $ length vert) * cVal:vertVal) * dy2i
-  let newValH = sum ((fromIntegral $ length hor) * cVal:horVal) * dx2i
-  let newVal = (newValV + newValH) * dt
+  let newValV = sum (fromIntegral (length vert) * cVal : vertVal) * dy2i
+  let newValH = sum (fromIntegral (length hor) * cVal : horVal) * dx2i
+  let newVal  = (newValV + newValH) * dt
 
   -- Write array value
   invokeNoWait Nothing memManagerId (toDyn (Write (wrLoc hmwState) (toDyn newVal)))

@@ -12,8 +12,10 @@ import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
 import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, RightButton)
 
 -- Local imports
-import View.Objects
+import Config.Config
+import Data.Tuple4
 import SoOSiM.Types
+import View.Objects
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
@@ -37,48 +39,48 @@ type ViewState = (Float, Point)
 initialViewState = (0.5, (-400, -100))
 
 -- | Initialises the opengl area with a picture
-initialiseAnimationArea :: SimGlVar -> Builder -> IO ()
-initialiseAnimationArea mcs bldr = do
+initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
+initialiseAnimationArea cfg mcs bldr = do
   vp <- viewport1 bldr
-  ev <- eventbox1 bldr
+  ev <- overviewEventBox bldr
 
   -- Paint thumbnail inside eventbox with the viewport size for reference
-  drawThumb mcs ev vp
+  drawThumb cfg mcs ev vp
 
   -- Paint animation inside viewport
-  drawPic mcs vp
+  drawPic cfg mcs vp
 
 -- | Initialises the gloss animation
-drawPic :: ContainerClass a => SimGlVar -> a -> IO ()
-drawPic mcs e =
+drawPic :: ContainerClass a => Config -> SimGlVar -> a -> IO ()
+drawPic cfg mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
-       (makePicture mcs) queueEvent (stepWorld mcs)
+       (makePicture cfg mcs) queueEvent (stepWorld mcs)
  where state = State [] (fst initialViewState) (snd initialViewState) Nothing
 
 -- | Draws a thumbnail of the main animation
-drawThumb :: (ContainerClass a, ContainerClass b) => SimGlVar -> a -> b -> IO()
-drawThumb mcs e be =
-  animateIO (InWidget e (200, 150)) white (makeThumbnail (widgetGetSize be) mcs)
+drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGlVar -> a -> b -> IO()
+drawThumb cfg mcs e be =
+  animateIO (InWidget e (200, 150)) white (makeThumbnail cfg (widgetGetSize be) mcs)
 
 -- | In the gloss internal state we just keep the pending events
 --   and the current scaling
 data State = State [Event] Float Point (Maybe Point)
 
 -- | Convert our state to a picture.
-makePicture :: SimGlVar -> State -> IO Picture
-makePicture st oldSt = do
+makePicture :: Config -> SimGlVar -> State -> IO Picture
+makePicture cfg st oldSt = do
   st'  <- readCBMVar st
   mcs' <- updateFromSimState (fst4 st') (snd4 st')
-  return $ paintMultiCoreStatus sc orig mcs'
+  return $ paintMultiCoreStatus cfg sc orig mcs'
  where (State _ sc orig _) = oldSt
 
 -- | Convert our state to a smaller thumbnail 
-makeThumbnail :: IO (Int, Int) -> SimGlVar -> a -> IO Picture
-makeThumbnail getSz st _ = do
+makeThumbnail :: Config -> IO (Int, Int) -> SimGlVar -> a -> IO Picture
+makeThumbnail cfg getSz st _ = do
   st' <- readCBMVar st
   sz  <- getSz
-  return $ Pictures [ paintMultiCoreStatus thumbScale thumbCoords $ fst4 st'
+  return $ Pictures [ paintMultiCoreStatus cfg thumbScale thumbCoords $ fst4 st'
                     , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
                     ]
 
@@ -112,9 +114,9 @@ zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
        p2' = - (h / 2 + p2)
  
 -- | Transform the abstract status into a picture
-paintMultiCoreStatus :: Float -> Point -> MultiCoreStatus -> Picture
-paintMultiCoreStatus progScale orig =
-  uncurry translate orig . scale progScale progScale . paintDiagram . transformDiagram . transformStatus
+paintMultiCoreStatus :: Config -> Float -> Point -> MultiCoreStatus -> Picture
+paintMultiCoreStatus cfg progScale orig =
+  uncurry translate orig . scale progScale progScale . paintDiagram . transformDiagram . transformStatus cfg
 
 -- | Zooms in a state with a specific zoom
 zoomWith :: Float -> Point -> State -> State
@@ -143,11 +145,11 @@ queueEvent event state
 
   -- Zoom in
   | EventKey (MouseButton WheelUp) Down _ p <- event
-  = zoomWith 0.9 p state
+  = zoomWith 0.8 p state
 
   -- Zoom out
   | EventKey (MouseButton WheelDown) Down _ p <- event
-  = zoomWith 1.1 p state
+  = zoomWith (1/0.8) p state
 
   -- Start moving
   | EventKey (MouseButton RightButton) Down _ p <- event
@@ -226,14 +228,14 @@ handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
 checkToggleVisibility :: Point -> MultiCoreStatus -> Maybe [Name]
 checkToggleVisibility p st = listToMaybe l
  where l = mapMaybe (isMenuOfB p) boxes
-       (PositionedDiagram boxes _) = transformDiagram $ transformStatus st
+       (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box that the user
 -- selected (if any)
 checkSetSelection :: Point -> MultiCoreStatus -> Maybe [Name]
 checkSetSelection p st = listToMaybe l
  where l = mapMaybe (isAreaOfB p) boxes
-       (PositionedDiagram boxes _) = transformDiagram $ transformStatus st
+       (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box who's menu
 -- icon is in the given position (if any)
@@ -277,12 +279,3 @@ isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
 -- dimensions)
 unScale :: Float -> Point -> Point
 unScale progScale p = multPos p (1 / progScale, 1 / progScale)
-
-fst4 :: (a,b,c,d) -> a
-fst4 (a,_,_,_) = a
-
-snd4 :: (a,b,c,d) -> b
-snd4 (_,b,_,_) = b
-
-trd4 :: (a,b,c,d) -> c
-trd4 (_,_,c,_) = c

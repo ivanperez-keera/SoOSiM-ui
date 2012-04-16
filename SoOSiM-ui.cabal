@@ -42,6 +42,7 @@ Build-type:          Custom
 Data-files: data/Interface.glade
             data/*.png
             data/images/icons/*.png
+            data/config
 
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2
@@ -68,45 +69,65 @@ Executable SoOSiM-ui
                , base >= 4.0 && < 5.0
                , ghc  
                , containers
+               , IfElse
                , mtl
                , stm
   
   -- Modules not exported by this package.
-  Other-modules:    View
-                    View.Objects
-                    View.InitAnimationArea
-                    Paths
-                    Paths.CustomPaths
-                    Model.Model
-                    Model.ProtectedModel
-                    Model.ReactiveModel
-                    Model.ReactiveModel.ReactiveFields
-                    Model.ReactiveModel.ModelEvents
-                    Model.ReactiveModel.ReactiveModelInternals
-                    Model.ProtectedModel.ProtectedModelInternals
-                    Model.ProtectedModel.ProtectedFields
-                    SoOSiM.Components.Initializer
-                    SoOSiM.Samples.Initializer
-                    Graphics.Gloss.AdvancedShapes
-                    Graphics.Gloss.AdvancedShapes.Arrows
-                    Graphics.Gloss.AdvancedShapes.Boxes
-                    Graphics.Gloss.AdvancedShapes.Shadows
+  Other-modules:    CombinedEnvironment
+                    Config.Config
+                    Config.Preferences
+                    Controller
+                    Controller.Conditions
+                    Controller.Conditions.Fullscreen
+                    Controller.Conditions.InfoBasicInfo
+                    Controller.Conditions.InfoSelectionArea
+                    Controller.Conditions.InfoTooltip
+                    Controller.Conditions.Quit
+                    Controller.Conditions.Selection
+                    Controller.Conditions.Speed
+                    Controller.Conditions.Step
+                    Controller.Conditions.UpdateStatus
+                    Controller.Helpers.NextSimState
+                    Data.Tuple4
                     Graphics.Diagrams.MultiCoreStatus
                     Graphics.Diagrams.Positioned.Layout
                     Graphics.Diagrams.Positioned.PositionedDiagram
                     Graphics.Diagrams.Simple.Diagram
-                    Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
                     Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
                     Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
                     Graphics.Diagrams.Transformations.PositionedDiagram2Picture
+                    Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
                     Graphics.Diagrams.Types
-                    Config.Preferences
-                    CombinedEnvironment
-                    Controller
-                    Controller.Conditions.Speed
-                    Controller.Conditions.Quit
-                    Controller.Conditions.UpdateStatus
-                    Controller.Conditions
+                    Graphics.Gloss.AdvancedShapes
+                    Graphics.Gloss.AdvancedShapes.Arrows
+                    Graphics.Gloss.AdvancedShapes.Boxes
+                    Graphics.Gloss.AdvancedShapes.Shadows
+                    Graphics.UI.Gtk.Multiline.TextBufferHelpers
+                    Model.Model
+                    Model.ProtectedModel
+                    Model.ProtectedModel.ProtectedFields
+                    Model.ProtectedModel.ProtectedModelInternals
+                    Model.ReactiveModel
+                    Model.ReactiveModel.ModelEvents
+                    Model.ReactiveModel.ReactiveFields
+                    Model.ReactiveModel.ReactiveModelInternals
+                    Paths
+                    Paths.CustomPaths
+                    SoOSiM.Components.HeatMap.Application
+                    SoOSiM.Components.HeatMap.Types
+                    SoOSiM.Components.HeatMap.Util
+                    SoOSiM.Components.Initializer
+                    SoOSiM.Components.MemoryManager
+                    SoOSiM.Components.MemoryManager.Types
+                    SoOSiM.Components.MemoryManager.Util
+                    SoOSiM.Components.Scheduler
+                    SoOSiM.Components.Scheduler.Types
+                    SoOSiM.Samples.Initializer
+                    View
+                    View.InitAnimationArea
+                    View.InitIconsInfoArea
+                    View.Objects
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
