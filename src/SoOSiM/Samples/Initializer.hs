@@ -47,6 +47,12 @@ import SoOSiM.Components.HeatMap.Types
 import SoOSiM.Components.MemoryManager ()
 import SoOSiM.Components.MemoryManager.Types
 
+import SoOSiM.Components.Scheduler ()
+import SoOSiM.Components.Scheduler.Types
+
+import SoOSiM.Components.ResourceDiscovery ()
+import SoOSiM.Components.ResourceDiscovery.Types as RD
+
 simstate :: IO SimState
 simstate = do
     supply <- mkSplitUniqSupply 'z'
@@ -87,8 +93,18 @@ initializer s Initialize = do
   nId <- getNodeId
   registerComponent (initState :: MemState)
   registerComponent (initState :: HMState)
+  registerComponent (initState :: SchedulerState)
+  registerComponent (initState :: RDState)
   _ <- createComponent (Just nId) Nothing "MemoryManager"
+  _ <- createComponent (Just nId) Nothing "Scheduler"
   _ <- createComponent (Just nId) Nothing "HeatMap"
+  rdId <- createComponent (Just nId) Nothing "ResourceDiscovery"
+
+  --newNodes <- sequence (replicate 4 createNode)
+  --rdIDs <- mapM (\n -> createComponent (Just n) (Just rdId) "ResourceDiscovery") newNodes
+
+  --invokeNoWait Nothing rdId (toDyn (RD.NewState (RDState rdIDs)))
+
   yield s
 
 initializer s _ = yield s
