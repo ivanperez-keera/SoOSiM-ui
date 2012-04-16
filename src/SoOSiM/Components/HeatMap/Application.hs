@@ -40,13 +40,6 @@ heatMapApplication hmState (ComponentMsg senderId content) | (Just Compute) <- f
   workerIDs   <- fmap (fromJust . fromDynamic) $ invoke Nothing schedulerId (toDyn $ Instantiate True (length wlocs) "HeatMapWorker")
   mapM_ (\(wId,wloc,rloc) -> invokeNoWait Nothing wId (toDyn $ HeatMap.NewState (HMWorker wloc rloc (transfer hmState)))) (zip3 workerIDs (reverse wlocs) (reverse rlocs))
 
-  --workerIDs <- mapM (\(wloc,rloc) -> do
-  --                      workerIDdyn <- invoke Nothing schedulerId (toDyn $ Execute "HeatMapWorker" [Register 0 (2 * w * h) (Just memManagerId)])
-  --                      let workerID = fromJust $ fromDynamic workerIDdyn
-  --                      invokeNoWait Nothing workerID (toDyn $ HeatMap.NewState (HMWorker wloc rloc (transfer hmState)))
-  --                      return workerID
-  --                  ) (zip wlocs rlocs)
-
   -- Make the worker threads do actual work
   let workers' = IM.fromList (zip (map getKey workerIDs) (repeat Compute))
   mapM_ (\x -> invokeNoWait Nothing x (toDyn Compute)) workerIDs

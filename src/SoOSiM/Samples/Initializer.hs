@@ -31,7 +31,7 @@ simstate = do
     bufferTV <- newTVarIO [Initialize]
     meta     <- newTVarIO $ SimMetaData 0 0 0 Map.empty Map.empty
     let component0CC             = CC component0id statusTV stateTV component0id bufferTV [] meta
-    let node0                    = Node node0id NodeInfo Map.empty (IM.fromList [(getKey component0id,component0CC)]) IM.empty
+    let node0                    = Node node0id NodeInfo Map.empty (IM.fromList [(getKey component0id,component0CC)]) IM.empty [component0id]
     let simState                 = SimState node0id component0id (IM.fromList [(getKey node0id,node0)]) supply'' Map.empty
     return simState
 
