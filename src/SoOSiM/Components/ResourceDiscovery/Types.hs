@@ -2,14 +2,16 @@
 module SoOSiM.Components.ResourceDiscovery.Types where
 
 import SoOSiM
+import SoOSiM.Components.Types.Code
+import SoOSiM.Components.Types.Node
 
 data RDMsg
-  = FindNodes Bool Int
-  | FoundNodes [NodeId]
+  = RequestResource Bool Int ResourceReq
+  | FoundNodes [NodeDef]
   | NewState  RDState
   deriving Typeable
 
 data RDState
   = RDState
-  { coreUsed :: [(NodeId,Bool)]
+  { coreUsed :: [(NodeDef,Bool)]
   }

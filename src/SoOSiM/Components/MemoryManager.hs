@@ -19,12 +19,12 @@ memoryManager s (ComponentMsg senderId msgContent)
     let src = checkAddress (fallback s) (addressLookup s) addr
     case (sourceId src) of
       Nothing -> do
-        traceMsg ("Reading addr: " ++ show (senderId,addr))
+        traceMsg ("Reading addr: " ++ show addr ++ " for component: " ++ show senderId)
         addrVal <- readMemory Nothing addr
         invokeNoWait Nothing senderId addrVal
         yield s
       Just remote -> do
-        traceMsg ("Forwarding read: " ++ show (senderId,addr))
+        traceMsg ("Forwarding read of addr: " ++ show addr ++ " to: " ++ show remote)
         response <- invoke Nothing remote msgContent
         invokeNoWait Nothing senderId response
         yield s
@@ -34,11 +34,11 @@ memoryManager s (ComponentMsg senderId msgContent)
     let src = checkAddress (fallback s) (addressLookup s) addr
     case (sourceId src) of
       Nothing -> do
-        traceMsg ("Writing addr: " ++ show (senderId,addr))
+        traceMsg ("Writing addr: " ++ show addr ++ " for component: " ++ show senderId)
         addrVal <- writeMemory Nothing addr val
         yield s
       Just remote -> do
-        traceMsg ("Forwarding write: " ++ show (senderId,addr))
+        traceMsg ("Forwarding write of addr: " ++ show addr ++ " to: " ++ show remote)
         invokeNoWait Nothing remote msgContent
         yield s
 

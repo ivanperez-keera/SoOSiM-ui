@@ -4,12 +4,13 @@ import Data.Maybe
 import SoOSiM
 
 import SoOSiM.Components.ResourceDiscovery.Types
+import SoOSiM.Components.Types.Node
 
 resourceDiscovery rdState (ComponentMsg senderId content)
   | (Just (NewState s')) <- fromDynamic content
   = yield s'
 
-  | (Just (FindNodes fresh n)) <- fromDynamic content
+  | (Just (RequestResource fresh n _)) <- fromDynamic content
   = do
     let (ns,coreUsed') = updateState (coreUsed rdState) fresh n
     invokeNoWait Nothing senderId (toDyn (FoundNodes ns))
@@ -17,7 +18,7 @@ resourceDiscovery rdState (ComponentMsg senderId content)
 
 resourceDiscovery rdState _ = yield rdState
 
-updateState :: [(NodeId,Bool)] -> Bool -> Int -> ([NodeId],[(NodeId,Bool)])
+updateState :: [(NodeDef,Bool)] -> Bool -> Int -> ([NodeDef],[(NodeDef,Bool)])
 updateState s  _ 0 = ([],s)
 updateState [] _ _ = ([],[])
 updateState ((n,True):ns) True i =

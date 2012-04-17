@@ -12,7 +12,7 @@ scheduler schedState (ComponentMsg sender content) = do
   case (fromDynamic content) of
     Just (Instantiate remote@True n cname) -> do
       rdCompId <- fmap fromJust $ componentLookup Nothing "ResourceDiscovery"
-      memCompId <- fmap fromJust $ componentLookup Nothing "MemoryManager"
+      memCompId <- fmap (fromMaybe (error "MemoryManager has no fallback"))  $ componentLookup Nothing "MemoryManager"
       (FoundNodes nIds) <- fmap (fromJust . fromDynamic) $ invoke Nothing rdCompId (toDyn (FindNodes True n))
 
       memCompIds <- mapM (\nId -> createComponent (Just nId) (Just sender) "MemoryManager") nIds
