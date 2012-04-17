@@ -42,6 +42,21 @@ memoryManager s (ComponentMsg senderId msgContent)
         invokeNoWait Nothing remote msgContent
         yield s
 
+  | Just (SyncWrite addr val) <- fromDynamic msgContent
+  = do
+    let src = checkAddress (fallback s) (addressLookup s) addr
+    case (sourceId src) of
+      Nothing -> do
+        traceMsg ("Writing addr: " ++ show addr ++ " for component: " ++ show senderId)
+        addrVal <- writeMemory Nothing addr val
+        invokeNoWait Nothing senderId (toDyn ())
+        yield s
+      Just remote -> do
+        traceMsg ("Forwarding write of addr: " ++ show addr ++ " to: " ++ show remote)
+        _ <- invoke Nothing remote msgContent
+        invokeNoWait Nothing senderId (toDyn ())
+        yield s
+
 memoryManager s _ = return s
 
 instance ComponentIface MemState where

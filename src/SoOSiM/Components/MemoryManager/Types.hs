@@ -21,5 +21,6 @@ data MemState =
 data MemCommand = Register Int Int (Maybe ComponentId)
                 | Read     Int
                 | Write    Int Dynamic
+                | SyncWrite Int Dynamic
                 | NewState MemState
   deriving Typeable

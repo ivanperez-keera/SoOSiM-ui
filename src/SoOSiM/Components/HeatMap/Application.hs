@@ -117,7 +117,7 @@ heatMapWorker hmwState (ComponentMsg _ content)
     let newVal  = (newValV + newValH) * dt
 
     -- Write array value
-    invokeNoWait Nothing memManagerId (toDyn (Write (wrLoc hmwState) (toDyn newVal)))
+    _ <- invoke Nothing memManagerId (toDyn (SyncWrite (wrLoc hmwState) (toDyn newVal)))
 
     -- Notify creator that we're finished
     creator <- componentCreator
