@@ -53,14 +53,16 @@ initialiseAnimationArea cfg mcs bldr = do
   drawPic cfg mcs vp
 
 -- | Initialises the gloss animation
+-- FIXME: Fixed size
 drawPic :: ContainerClass a => Config -> SimGlVar -> a -> IO ()
 drawPic cfg mcs e =
   playIO (InWidget e (800, 600))
        white 100 state
        (makePicture cfg mcs) queueEvent (stepWorld mcs)
- where state = State [] (fst initialViewState) (snd initialViewState) Nothing
+ where state = uncurry (State []) initialViewState Nothing
 
 -- | Draws a thumbnail of the main animation
+-- FIXME: Fixed size
 drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGlVar -> a -> b -> IO()
 drawThumb cfg mcs e be =
   animateIO (InWidget e (200, 150)) white (makeThumbnail cfg (widgetGetSize be) mcs)
@@ -92,18 +94,22 @@ makeThumbnail cfg getSz st _ = do
                     ]
 
 -- | Default thumbnail zoom level
+-- FIXME: fixed value
 thumbScale :: Float
 thumbScale = 0.05
 
 -- | Thumbnail base coords
+-- FIXME: fixed value
 thumbCoords :: Point
 thumbCoords = (thumbX, thumbY)
 
 -- | Thumbnail base X coord
+-- FIXME: fixed value
 thumbX :: Float
 thumbX = (-90)
 
 -- | Thumbnail base Y coord
+-- FIXME: fixed value
 thumbY :: Float
 thumbY = 0
 
@@ -134,6 +140,7 @@ zoomWith f (p1, p2) (State evs sc (o1,o2) no) = State evs (sc * f) o' no
  
 -- | Queues an input event into the state's event queue
 -- to be processed later
+-- FIXME: fixed values       
 queueEvent :: Event -> State -> State
 queueEvent event state
   -- Adds a click event to the event queue
@@ -256,10 +263,11 @@ isMenuOfB p1 (PGroupBox n p2 s bs _ _)
 
 -- | Returns True if the given position is in the menu
 -- icon area of a box with the given dimensions
+-- FIXME: fixed value
 isMenuOf :: Position -> (Position, Size) -> Bool
-isMenuOf (p11, p12) (p2, (_,th)) =
-  (  p11 >= p21 && p11 <= p21 + w
-  && p12 >= p22 && p12 <= p22 + h)
+isMenuOf (p11, p12) (p2, (_,th)) 
+  =  p11 >= p21 && p11 <= p21 + w 
+  && p12 >= p22 && p12 <= p22 + h
  where (p21, p22) = addPos p2 (0, th - 20)
        (w,h)      = (20, 20)
 
