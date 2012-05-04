@@ -14,10 +14,8 @@ loadInterface :: IO Builder
 loadInterface = loadDefaultInterface getDataFileName
 
 -- gtkBuilderAccessor element name type name
-gtkBuilderAccessor "mainWindow"              "Window"
-gtkBuilderAccessor "scrolledmainWindow"      "ScrolledWindow"
-gtkBuilderAccessor "viewport1"            "Viewport"
-gtkBuilderAccessor "viewport2"            "Viewport"
+gtkBuilderAccessor "mainWindow"           "Window"
+gtkBuilderAccessor "animationViewport"    "Viewport"
 gtkBuilderAccessor "image1"               "Image"
 gtkBuilderAccessor "image2"               "Image"
 gtkBuilderAccessor "pauseToolBtn"         "ToolButton"

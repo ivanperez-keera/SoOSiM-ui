@@ -43,7 +43,7 @@ initialViewState = (0.5, (-400, -100))
 -- | Initialises the opengl area with a picture
 initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
 initialiseAnimationArea cfg mcs bldr = do
-  vp <- viewport1 bldr
+  vp <- animationViewport bldr
   ev <- overviewEventBox bldr
 
   -- Paint thumbnail inside eventbox with the viewport size for reference
