@@ -54,7 +54,7 @@ installHandlers cenv = void $ do
   slowDown `onToolButtonClicked` conditionSlowDown cenv
 
   -- Handle the speed slider in the status bar
-  hscale <- hscale1 ui
+  hscale <- speedScale ui
   hscale `on` valueChanged $ conditionSpeedChanged VM cenv
   onEvent pm SpeedChanged $ conditionSpeedChanged MV cenv
   onEvent pm Initialised $ conditionSpeedChanged MV cenv
@@ -110,7 +110,7 @@ conditionSlowDown cenv = do
 conditionSpeedChanged :: ConditionDirection -> CEnv -> IO()
 conditionSpeedChanged cd cenv = do
   -- View value
-  hscale <- hscale1 ui
+  hscale <- speedScale ui
 
   -- Model value
   curSp <- getter speedField pm

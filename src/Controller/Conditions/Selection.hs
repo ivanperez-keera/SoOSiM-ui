@@ -23,7 +23,7 @@ installHandlers cenv = void $
 conditionShowPage :: CEnv -> IO()
 conditionShowPage cenv = do
  st <- readCBMVar $ mcs $ view cenv
- nb <- notebook1 $ uiBuilder $ view cenv
+ nb <- infoNotebook $ uiBuilder $ view cenv
  let sel = selection $ fst4 st
  case sel of
   [] -> notebookSetCurrentPage nb 0

@@ -31,7 +31,7 @@ initialiseTooltips bldr = do
  fsM <- fullScreenMenuItem bldr
  tooltipsSetTip tlt fsM "Toggle fullscreen" "T8"
 
- sc <- hscale1 bldr
+ sc <- speedScale bldr
  tooltipsSetTip tlt sc "Simulation speed (steps/second)" "T9"
 
  tooltipsEnable tlt
