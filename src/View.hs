@@ -51,7 +51,7 @@ createView = do
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
   msc  <- newCBMVar (emptySystemStatus, ss, initialViewState, [])
 
-  w <- window1 bldr
+  w <- mainWindow bldr
   widgetShowAll w
 
   initialiseAnimationArea cfg msc bldr

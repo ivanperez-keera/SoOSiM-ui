@@ -22,7 +22,7 @@ import CombinedEnvironment
 -- menu item or the toolbar icon.
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  w <- window1 $ uiBuilder $ view cenv
+  w <- mainWindow $ uiBuilder $ view cenv
 
   -- Save the new status in the model when it changes
   w `on` windowStateEvent $ do e <- eventWindowState
@@ -47,7 +47,7 @@ condition winfs cenv = do
 conditionToggle :: CEnv -> IO()
 conditionToggle cenv = do
   mfs    <- getter fullscreenField pm
-  window <- window1 $ uiBuilder $ view cenv
+  window <- mainWindow $ uiBuilder $ view cenv
   let toggle = if mfs then windowUnfullscreen else windowFullscreen
   toggle window
  where pm = model cenv
