@@ -8,7 +8,6 @@ import SoOSiM.Types (SimState)
 
 -- Internal imports
 import Data.History
-import Graphics.Diagrams.MultiCoreStatus
 import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 import Model.SystemStatus
 

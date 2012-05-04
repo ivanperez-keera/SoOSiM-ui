@@ -4,15 +4,11 @@ module Controller.Conditions.InfoTooltip
   where
 
 -- External imports
-import           Control.Concurrent.STM
-import           Control.Monad
-import           Data.CBMVar
-import qualified Data.IntMap            as I
-import           Data.List
-import           Data.Maybe
-import           Data.Tuple4
-import           Graphics.UI.Gtk
-import qualified SoOSiM.Types           as S
+import Control.Monad
+import Data.CBMVar
+import Data.Maybe
+import Data.Tuple4
+import Graphics.UI.Gtk
 
 -- Internal imports
 import CombinedEnvironment

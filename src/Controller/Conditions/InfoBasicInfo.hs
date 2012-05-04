@@ -5,14 +5,10 @@ module Controller.Conditions.InfoBasicInfo
  where
 
 -- External imports
-import           Control.Concurrent.STM
-import           Control.Monad
-import           Control.Monad.IfElse
-import           Data.CBMVar
-import qualified Data.IntMap            as I
-import           Data.List
-import           Graphics.UI.Gtk
-import qualified SoOSiM.Types           as S
+import Control.Monad
+import Control.Monad.IfElse
+import Data.CBMVar
+import Graphics.UI.Gtk
 
 -- Local imports
 import CombinedEnvironment
@@ -56,8 +52,7 @@ getElemInfo _     _  = Nothing
 
 -- | Gets the node info 
 getNodeInfo :: Name -> MultiCoreStatus -> Maybe (String, String)
-getNodeInfo n _ss =
-   Just (binfo, tinfo)
+getNodeInfo n _ss = Just (binfo, tinfo)
   where binfo = "Node: " ++ n
         tinfo = "Traces are only available for components"
 
@@ -69,10 +64,9 @@ getCompInfo nn cn ss = do
 
 -- | Renders two strings with the basic component info and the trace
 showCompInfo :: Name -> Name -> RunningElement -> (String, String)
-showCompInfo nn cn cc =
-  let bi  = showCompBasicInfo nn cn cc
-      msg = showCompTrace nn cn cc
-  in (bi, msg)
+showCompInfo nn cn cc = (bi, msg)
+ where bi  = showCompBasicInfo nn cn cc
+       msg = showCompTrace nn cn cc
 
 -- | Creates a string with the basic component info for a given S.ComponentContext
 showCompBasicInfo :: Name -> Name -> RunningElement -> String
