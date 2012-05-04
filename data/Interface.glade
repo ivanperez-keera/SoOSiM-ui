@@ -115,7 +115,7 @@
                 <property name="can_focus">False</property>
                 <property name="has_tooltip">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">toolbutton8</property>
+                <property name="label" translatable="yes">Fullscreen</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-fullscreen</property>
               </object>
