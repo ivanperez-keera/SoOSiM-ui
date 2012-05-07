@@ -35,7 +35,7 @@ pboxColumnLayoutP left maxWidth align top box = (top', box')
                 HCenter -> (maxWidth - boxW) / 2
                 HRight  -> maxWidth - boxW
 
--- | Arranges boxes in row
+-- | Arranges boxes in a row
 pboxRowLayout :: VAlign -- ^ Vertical alignment
               -> [PBox] -- ^ List of boxes
               -> [PBox] -- ^ Arranged boxes
