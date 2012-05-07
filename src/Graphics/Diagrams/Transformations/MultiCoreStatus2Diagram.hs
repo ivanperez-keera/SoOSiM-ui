@@ -22,7 +22,7 @@ transformStatus cfg (SystemStatus mhist s) = Diagram ps' ms'
        ms' = map transformMessage ms
        (MultiCoreStatus ps ms) = historyPresent mhist
 
--- | Transforms a processing unit into a box
+-- | Transforms a processing unit into a group box
 transformProcessingUnit :: Config -> [Name] -> ProcessingUnit -> Maybe Box
 transformProcessingUnit _   _   (ProcessingUnit _ _  UnitIgnored) = Nothing
 transformProcessingUnit cfg sel (ProcessingUnit n cs e) =
