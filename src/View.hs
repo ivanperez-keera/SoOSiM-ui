@@ -58,7 +58,7 @@ createView = do
 
   initIconsInfoArea bldr
 
-  _ <- initialiseTooltips bldr
+  initialiseTooltips bldr
 
   return
     View
