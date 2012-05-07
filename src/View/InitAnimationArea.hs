@@ -1,6 +1,6 @@
 {-# LANGUAGE PackageImports #-}
-{-# LANGUAGE PatternGuards #-}
--- | Presents the SimState to the user and updates it with the input events
+{-# LANGUAGE PatternGuards  #-}
+-- | Presents the SimState to the user and updates it with input events
 module View.InitAnimationArea where
 
 -- External imports
@@ -9,19 +9,23 @@ import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
-import             Graphics.UI.Gtk hiding (Color, Point, Size, LeftButton, RightButton)
+import             Graphics.UI.Gtk hiding ( Color, Point, Size
+                                          , LeftButton, RightButton
+                                          )
 
 -- Local imports
 import Config.Config
 import Data.Tuple4
 import Data.History
+import Model.SystemStatus
 import SoOSiM.Types
 import View.Objects
-import Model.SystemStatus
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
-import Graphics.Diagrams.Types (Name, Position, addPos, Size, multPos, subPos, BoxDescription)
+import Graphics.Diagrams.Types ( Name, Position, BoxDescription
+                               , addPos, Size, subPos, inArea, unScale
+                               )
 import Graphics.Diagrams.Positioned.PositionedDiagram
 import Graphics.Gloss.AdvancedShapes.Boxes
 
@@ -35,61 +39,20 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 -- with the rest of the program
 type SimGlVar  = CBMVar SimGlSt
 type SimGlSt   = (SystemStatus, SimState, ViewState, [Name])
-
 type ViewState = (Float, Point)
 
+-- | Initial zoom and position
+initialViewState :: ViewState
 initialViewState = (0.5, (-400, -100))
 
--- | Initialises the opengl area with a picture
-initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
-initialiseAnimationArea cfg mcs bldr = do
-  vp <- animationViewport bldr
-  ev <- overviewEventBox bldr
+stdZoomStep :: Float
+stdZoomStep = 0.8
 
-  -- Paint thumbnail inside eventbox with the viewport size for reference
-  drawThumb cfg mcs ev vp
+initialAnimationSize :: (Int, Int)
+initialAnimationSize = (800, 600)
 
-  -- Paint animation inside viewport
-  drawPic cfg mcs vp
-
--- | Initialises the gloss animation
-drawPic :: ContainerClass a => Config -> SimGlVar -> a -> IO ()
-drawPic cfg mcs e =
-  playIO (InWidget e (800, 600))
-       white 100 state
-       (makePicture cfg mcs) queueEvent (stepWorld mcs)
- where state = State [] (fst initialViewState) (snd initialViewState) Nothing
-
--- | Draws a thumbnail of the main animation
-drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGlVar -> a -> b -> IO()
-drawThumb cfg mcs e be =
-  animateIO (InWidget e (200, 150)) white (makeThumbnail cfg (widgetGetSize be) mcs)
-
--- | In the gloss internal state we just keep the pending events
---   and the current scaling
-data State = State [Event] Float Point (Maybe Point)
-
--- | Convert our state to a picture.
-makePicture :: Config -> SimGlVar -> State -> IO Picture
-makePicture cfg st oldSt = do
-  st'  <- readCBMVar st
-  let hist = multiCoreStatus $ fst4 st'
-      fut  = future hist
-  mcs' <- case fut of
-           [] -> updateFromSimState (historyPresent hist) (snd4 st')
-           _  -> return (present hist)
-  let newSt = (fst4 st') { multiCoreStatus = hist { present = mcs' } }
-  return $ paintMultiCoreStatus cfg sc orig newSt
- where (State _ sc orig _) = oldSt
-
--- | Convert our state to a smaller thumbnail 
-makeThumbnail :: Config -> IO (Int, Int) -> SimGlVar -> a -> IO Picture
-makeThumbnail cfg getSz st _ = do
-  st' <- readCBMVar st
-  sz  <- getSz
-  return $ Pictures [ paintMultiCoreStatus cfg thumbScale thumbCoords $ fst4 st'
-                    , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
-                    ]
+initialThumbnailSize :: (Int, Int)
+initialThumbnailSize = (200, 150)
 
 -- | Default thumbnail zoom level
 thumbScale :: Float
@@ -107,6 +70,62 @@ thumbX = (-90)
 thumbY :: Float
 thumbY = 0
 
+-- | Initialises the opengl area with a picture
+initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
+initialiseAnimationArea cfg mcs bldr = do
+  vp <- animationViewport bldr
+  ev <- overviewEventBox bldr
+
+  -- Paint thumbnail inside eventbox with the viewport size for reference
+  drawThumb cfg mcs ev vp
+
+  -- Paint animation inside viewport
+  drawPic cfg mcs vp
+
+-- | Initialises the gloss animation
+drawPic :: ContainerClass a => Config -> SimGlVar -> a -> IO ()
+drawPic cfg mcs e =
+  playIO (InWidget e initialAnimationSize) white fps state
+         (makePicture cfg mcs) queueEvent (stepWorld mcs)
+ where state = State [] (fst initialViewState) (snd initialViewState) Nothing
+       fps   = 100
+
+-- | Draws a thumbnail of the main animation
+drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGlVar -> a -> b -> IO()
+drawThumb cfg mcs e be =
+  animateIO (InWidget e initialThumbnailSize)
+    white (makeThumbnail cfg (widgetGetSize be) mcs)
+
+-- | In the gloss internal state we just keep the pending events
+--   and the current scaling
+data State = State [Event] Float Point (Maybe Point)
+
+-- | Convert the state into a picture.
+makePicture :: Config -> SimGlVar -> State -> IO Picture
+makePicture cfg st oldSt = do
+  st' <- readCBMVar st
+
+  -- Calculate next multi-core status (if not already known)
+  let hist = multiCoreStatus $ fst4 st'
+  mcs' <- case future hist of
+           [] -> updateFromSimState (historyPresent hist) (snd4 st')
+           _  -> return (present hist)
+
+  -- Update the multi core status
+  let newSt = (fst4 st') { multiCoreStatus = hist { present = mcs' } }
+
+  return $ paintMultiCoreStatus cfg sc orig newSt
+ where (State _ sc orig _) = oldSt
+
+-- | Convert our state to a smaller thumbnail 
+makeThumbnail :: Config -> IO (Int, Int) -> SimGlVar -> a -> IO Picture
+makeThumbnail cfg getSz st _ = do
+  st' <- readCBMVar st
+  sz  <- getSz
+  return $ Pictures [ paintMultiCoreStatus cfg thumbScale thumbCoords $ fst4 st'
+                    , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
+                    ]
+
 -- Paints the zoom box for a given scale, origin and container size
 paintZoomBox :: (Float, Point) -> (Int, Int) -> Picture
 paintZoomBox o (w',h') =
@@ -123,9 +142,10 @@ zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
 -- | Transform the abstract status into a picture
 paintMultiCoreStatus :: Config -> Float -> Point -> SystemStatus -> Picture
 paintMultiCoreStatus cfg progScale orig =
-  uncurry translate orig . scale progScale progScale . paintDiagram . transformDiagram . transformStatus cfg
+  uncurry translate orig . scale progScale progScale .
+    paintDiagram . transformDiagram . transformStatus cfg
 
--- | Zooms in a state with a specific zoom
+-- | Zooms in/out of a state with a specific zoom
 zoomWith :: Float -> Point -> State -> State
 zoomWith f (p1, p2) (State evs sc (o1,o2) no) = State evs (sc * f) o' no
  where p1' = p1 * (1 - f)
@@ -152,11 +172,11 @@ queueEvent event state
 
   -- Zoom in
   | EventKey (MouseButton WheelUp) Down _ p <- event
-  = zoomWith 0.8 p state
+  = zoomWith stdZoomStep p state
 
   -- Zoom out
   | EventKey (MouseButton WheelDown) Down _ p <- event
-  = zoomWith (1/0.8) p state
+  = zoomWith (1 / stdZoomStep) p state
 
   -- Start moving
   | EventKey (MouseButton RightButton) Down _ p <- event
@@ -186,12 +206,12 @@ queueEvent event state
 stepWorld :: SimGlVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs sc o no) = do
   mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
-  modifyCBMVar mcsRef (\(a,b,c,s) -> return (a,b,(sc,o),s)) 
+  modifyCBMVar mcsRef (\(a,b,_,s) -> return (a,b,(sc,o),s)) 
   return (State [] sc o no)
 
 -- | Handle mouse click and motion events.
 handleEvent :: Float -> Event -> SimGlSt -> SimGlSt
-handleEvent sc event st
+handleEvent _sc event st
   -- Queue event
   | EventKey (MouseButton LeftButton) Up _ pt <- event
   = handleClicks pt st
@@ -209,14 +229,15 @@ handleEvent sc event st
 handleClicks :: Point -> SimGlSt -> SimGlSt
 handleClicks p (st,s,v,op) = (st',s,v,op)
  where -- Expand/collapse when necessary
-       st'   = maybe st (\n -> updateCurrentStatus st (toggleVisibility n)) ns
+       -- st'   = maybe st (\n -> updateCurrentStatus st (toggleVisibility n)) ns
+       st'   = maybe st (updateCurrentStatus st . toggleVisibility) ns
        -- Update selection
        ns    = checkToggleVisibility p st
 
 -- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
 handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
- where ss = case checkSetSelection p st of
+ where ss = case checkSetSelection p st of -- Selecting simple boxes only
              Just [x,y] -> Just [x,y]
              _          -> Nothing
        ns = checkToggleVisibility p st
@@ -226,23 +247,21 @@ handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
 -- | Process moving the mouse over component boxes
 handleMouseOver :: Point -> SimGlSt -> SimGlSt
 handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
- where ss = case checkSetSelection p st of
+ where ss = case checkSetSelection p st of -- Hovering over simple boxes only
              Just [x,y] -> Just [x,y]
              _          -> Nothing
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
 checkToggleVisibility :: Point -> SystemStatus -> Maybe [Name]
-checkToggleVisibility p st = listToMaybe l
- where l = mapMaybe (isMenuOfB p) boxes
-       (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
+checkToggleVisibility p st = listToMaybe $ mapMaybe (isMenuOfB p) boxes
+ where (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box that the user
 -- selected (if any)
 checkSetSelection :: Point -> SystemStatus -> Maybe [Name]
-checkSetSelection p st = listToMaybe l
- where l = mapMaybe (isAreaOfB p) boxes
-       (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
+checkSetSelection p st = listToMaybe $ mapMaybe (isAreaOfB p) boxes
+ where (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box who's menu
 -- icon is in the given position (if any)
@@ -257,32 +276,22 @@ isMenuOfB p1 (PGroupBox n p2 s bs _ _)
 -- | Returns True if the given position is in the menu
 -- icon area of a box with the given dimensions
 isMenuOf :: Position -> (Position, Size) -> Bool
-isMenuOf (p11, p12) (p2, (_,th)) =
-  (  p11 >= p21 && p11 <= p21 + w
-  && p12 >= p22 && p12 <= p22 + h)
- where (p21, p22) = addPos p2 (0, th - 20)
-       (w,h)      = (20, 20)
+isMenuOf p1 (p2, (_,th)) = inArea p1 (p2', stdMenuBoxSize)
+ where p2' = addPos p2 (0, th - (snd stdMenuBoxSize))
 
--- | Returns the qualified name of a box that is in
--- the given position
+-- | Returns the qualified name of the box in the given position
 isAreaOfB :: Position -> PBox -> Maybe [Name]
-isAreaOfB p1 (PBox n k p2 s _) = if isAreaOf p1 (p2, s) then Just [n] else Nothing
-isAreaOfB p1 (PGroupBox n p2 s bs _ _)
- | not (null l)        = fmap (n:) $ listToMaybe l
- | isAreaOf p1 (p2, s) = Just [n]
- | otherwise           = Nothing
- where l   = mapMaybe (isAreaOfB p1') bs
-       p1' = subPos p1 p2
+isAreaOfB p1 b
+ | not (null l)         = fmap (n:) $ listToMaybe l
+ | isAreaOf p1 (p2, sz) = Just [n]
+ | otherwise            = Nothing
+ where l   = mapMaybe (isAreaOfB p1') $ pboxSubBoxes b
+       p1' = subPos p1 p2  -- p1 relative to p2
+       n   = pboxName     b
+       p2  = pboxPosition b
+       sz  = pboxSize     b
 
 -- | Returns True if the given position is in the
 -- area of a box with the given dimensions
 isAreaOf :: Position -> (Position, Size) -> Bool
-isAreaOf p1@(p11, p12) d@((p21, p22), (w,h)) =
-  (p11 >= p21 && p11 <= (p21 + w)
-   && p12 >= p22 && p12 <= (p22 + h))
-  && not (isMenuOf p1 d)
-
--- | Unscales a point (adjusts value from user input dimensions to gloss
--- dimensions)
-unScale :: Float -> Point -> Point
-unScale progScale p = multPos p (1 / progScale, 1 / progScale)
+isAreaOf p d = inArea p d && not (isMenuOf p d)

@@ -25,9 +25,10 @@ installHandlers cenv = void $ do
   w <- mainWindow $ uiBuilder $ view cenv
 
   -- Save the new status in the model when it changes
-  w `on` windowStateEvent $ do e <- eventWindowState
-                               liftIO $ condition (WindowStateFullscreen `elem` e) cenv
-                               return True
+  w `on` windowStateEvent $ do
+    fs <- fmap (WindowStateFullscreen `elem`) eventWindowState
+    liftIO $ conditionUpdateModel fs cenv -- (WindowStateFullscreen `elem` e) cenv
+    return True
 
   -- Toggle fullscreen mode
   fmi <- fullScreenMenuItem $ uiBuilder $ view cenv
@@ -36,8 +37,8 @@ installHandlers cenv = void $ do
   fmb `onToolButtonClicked` conditionToggle cenv
 
 -- | Save the new window status in the model
-condition :: Bool -> CEnv -> IO()
-condition winfs cenv = do
+conditionUpdateModel :: Bool -> CEnv -> IO()
+conditionUpdateModel winfs cenv = do
   mfs <- getter fullscreenField pm
   when (mfs /= winfs) $
     setter fullscreenField pm winfs

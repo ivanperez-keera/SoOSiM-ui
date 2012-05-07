@@ -1,8 +1,11 @@
+-- | Sets the GUI tooltips (shown on 'mouse over')
 module View.Tooltips where
 
 import Graphics.UI.Gtk
 import View.Objects
 
+-- | Creates and enables a new tooltips element and adds the tooltips
+-- for all the GUI elements that need one.
 initialiseTooltips :: Builder -> IO Tooltips
 initialiseTooltips bldr = do
  tlt <- tooltipsNew

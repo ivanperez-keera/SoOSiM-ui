@@ -4,8 +4,8 @@
 -- but between points.
 module Graphics.Diagrams.Positioned.PositionedDiagram
   ( PositionedDiagram(..) , PBox(..) , PArrow(..)
-  , boxSep, boxPadding, fontWidth, fontHeight, pboxPos , pboxLimits, stdMenuBoxSize
-  , pboxSize , pboxListSize
+  , boxSep, boxPadding, fontWidth, fontHeight, pboxLimits, stdMenuBoxSize
+  , pboxListSize , pboxKind, pboxSubBoxes, pboxExpanded
   )
  where
 
@@ -17,9 +17,37 @@ data PositionedDiagram = PositionedDiagram [PBox] [PArrow]
 
 -- | A box can be just a simple box, or a box with other boxes inside. The
 -- positions of the boxes inside a box are relative to the (parent) box.
-data PBox = PBox Name Name Position Size Color
-          | PGroupBox Name Position Size [PBox] Color Bool
+data PBox = PBox { pboxName     :: Name
+                 , pboxKind_    :: Name
+                 , pboxPosition :: Position
+                 , pboxSize     :: Size
+                 , pboxColor    :: Color
+                 }
+          | PGroupBox { pboxName      :: Name
+                      , pboxPosition  :: Position
+                      , pboxSize      :: Size
+                      , pboxSubBoxes_ :: [PBox]
+                      , pboxColor     :: Color
+                      , pboxExpanded_ :: Bool
+                      }
  deriving Show
+
+-- | Returns the box kind, if any
+pboxKind :: PBox -> Maybe Name
+pboxKind b@(PBox _ _ _ _ _) = Just $ pboxKind_ b
+pboxKind _                  = Nothing
+
+-- | Returns the list of subboxes of this box (empty list if it's not a group
+-- box)
+pboxSubBoxes :: PBox -> [PBox]
+pboxSubBoxes (PBox _ _ _ _ _) = []
+pboxSubBoxes b                = pboxSubBoxes_ b
+
+-- | Returns whether the box is expanded or collapsed (always true for
+-- simple boxes
+pboxExpanded :: PBox -> Bool
+pboxExpanded (PBox _ _ _ _ _) = True
+pboxExpanded b                = pboxExpanded_ b
 
 -- | An arrow is just a line between two positions
 data PArrow = PArrow Position Position
@@ -45,19 +73,9 @@ stdMenuBoxSize = (20, 20)
 -- | Returns the bottom-left and upper-right corner of a box
 pboxLimits :: PBox -> (Position, Position)
 pboxLimits b = ((boxMinX, boxMinY), (boxMaxX, boxMaxY))
-  where (boxMinX, boxMinY) = pboxPos b
+  where (boxMinX, boxMinY) = pboxPosition b
         (sizeX, sizeY)     = pboxSize b
         (boxMaxX, boxMaxY) = (boxMinX + sizeX, boxMinY + sizeY)
-
--- | Returns the position of a box
-pboxPos :: PBox -> Position
-pboxPos (PBox _ _ p _ _)          = p
-pboxPos (PGroupBox _ p _ _ _ _) = p
-
--- | Returns the size of a box
-pboxSize :: PBox -> Size
-pboxSize (PBox _ _ _ s _)          = s
-pboxSize (PGroupBox _ _ s _ _ _) = s
 
 -- | Calculates the size of the minimal area that encloses a list of boxes
 pboxListSize :: [PBox] -> Size

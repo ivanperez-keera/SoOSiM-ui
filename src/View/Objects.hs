@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
--- | GUI loading and access to GUI elements from a glade builder
+-- | GUI loading and accessing GUI elements from a glade builder
 module View.Objects where
 
 -- External imports

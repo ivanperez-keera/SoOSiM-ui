@@ -26,9 +26,7 @@ condition cenv = do
   nb        <- infoSelNotebook ui
   (path, _) <- iconViewGetCursor iv
   let page = case path of { [x] -> x + 1; _ -> 0 }
-  
+
   notebookSetCurrentPage nb page
-  -- case path of
-  --  [x] -> notebookSetCurrentPage nb (x + 1)
-  --  _   -> notebookSetCurrentPage nb 0
+
  where ui = uiBuilder $ view cenv
