@@ -62,12 +62,6 @@ data RunningElement = Component   { elementName       :: Name
                                   , elementGhost      :: Maybe QElementName
                                   , elementStatistics :: Statistics
                                   }
-                    | Application { elementName       :: Name
-                                  , elementKind       :: ElementKind
-                                  , elementState      :: ElementState
-                                  , elementGhost      :: Maybe QElementName
-                                  , elementStatistics :: Statistics
-                                  }
  deriving (Eq, Show)
 
 -- | A running element can be active (running), waiting (sync message)

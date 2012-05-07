@@ -34,8 +34,8 @@ transformProcessingUnit cfg sel (ProcessingUnit n cs e) =
 
 -- | Transforms a running element (component, application) into a box
 transformRunningElement :: Config -> [Name] -> RunningElement -> Box
-transformRunningElement cfg ns (Component n k s _ _)   = Box n k (runningElementColor cfg (ns == [n]) s)
-transformRunningElement cfg ns (Application n k s _ _) = Box n k (runningElementColor cfg (ns == [n]) s)
+transformRunningElement cfg ns (Component n k s _ _)   =
+  Box n k (runningElementColor cfg (ns == [n]) s)
 
 -- | Transforms a message into an arrow
 transformMessage :: Message -> Arrow
