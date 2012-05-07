@@ -1,4 +1,4 @@
--- | A helper module to lay elements out in columns or rows 
+-- | A helper module to lay out elements in columns or rows 
 module Graphics.Diagrams.Positioned.Layout
     ( pboxColumnLayout
     , pboxRowLayout
