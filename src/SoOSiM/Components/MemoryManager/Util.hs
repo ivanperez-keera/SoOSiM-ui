@@ -6,11 +6,12 @@ import SoOSiM
 import SoOSiM.Components.MemoryManager.Types
 
 checkAddress ::
-  [MemorySource]
+  ComponentId
+  -> [MemorySource]
   -> Int
   -> MemorySource
-checkAddress sources addr = case (filter containsAddr sources) of
-    []    -> error ("address unknown: " ++ show addr)
+checkAddress fbMem sources addr = case (filter containsAddr sources) of
+    []    -> (MemorySource undefined undefined (Just fbMem))
     (x:_) -> x
   where
     containsAddr (MemorySource base sc _) = base <= addr && addr < sc

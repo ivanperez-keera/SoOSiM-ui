@@ -54,12 +54,15 @@ compStateName (S.CC _ _ s _ _ _ _) =
 
 -- | Obtains the component state from its context
 compStateState :: S.ComponentContext -> IO ElementState
-compStateState (S.CC _ s _ _ _ _ _) = do
+compStateState (S.CC _ s _ _ mb _ _) = do
   s' <- readTVarIO s
+  mb' <- readTVarIO mb
   case s' of
     S.Running           -> return Active
     S.WaitingForMsg _ _ -> return Waiting
-    S.Idle              -> return Idle
+    S.Idle              -> if (null mb')
+                              then (return Idle)
+                              else (return Active)
 
 compStatistics :: S.ComponentContext -> IO Statistics
 compStatistics (S.CC _cid csu cse _cr _buf trc smd) = do
