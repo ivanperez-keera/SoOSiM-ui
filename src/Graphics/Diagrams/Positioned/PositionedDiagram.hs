@@ -34,20 +34,20 @@ data PBox = PBox { pboxName     :: Name
 
 -- | Returns the box kind, if any
 pboxKind :: PBox -> Maybe Name
-pboxKind b@(PBox _ _ _ _ _) = Just $ pboxKind_ b
-pboxKind _                  = Nothing
+pboxKind b@(PBox {}) = Just $ pboxKind_ b
+pboxKind _           = Nothing
 
 -- | Returns the list of subboxes of this box (empty list if it's not a group
 -- box)
 pboxSubBoxes :: PBox -> [PBox]
-pboxSubBoxes (PBox _ _ _ _ _) = []
-pboxSubBoxes b                = pboxSubBoxes_ b
+pboxSubBoxes (PBox {}) = []
+pboxSubBoxes b         = pboxSubBoxes_ b
 
 -- | Returns whether the box is expanded or collapsed (always true for
 -- simple boxes
 pboxExpanded :: PBox -> Bool
-pboxExpanded (PBox _ _ _ _ _) = True
-pboxExpanded b                = pboxExpanded_ b
+pboxExpanded (PBox {}) = True
+pboxExpanded b         = pboxExpanded_ b
 
 -- | An arrow is just a line between two positions
 data PArrow = PArrow Position Position

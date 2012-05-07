@@ -71,8 +71,8 @@ multPos (p11,p12) (p21, p22) = (p11*p21, p12*p22)
 
 inArea :: Position -> (Position, Size) -> Bool
 inArea (p11, p12) ((p21, p22), (w,h)) =
-  (p11 >= p21 && p11 <= (p21 + w)
-   && p12 >= p22 && p12 <= (p22 + h))
+  p11 >= p21 && p11 <= (p21 + w)
+  && p12 >= p22 && p12 <= (p22 + h)
 
 -- | Unscales a point (adjusts value from user input dimensions to gloss
 -- dimensions)

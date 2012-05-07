@@ -1,7 +1,9 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards  #-}
 -- | Presents the SimState to the user and updates it with input events
-module View.InitAnimationArea where
+module View.InitAnimationArea 
+        (SimGlVar, SimGlSt, initialViewState, initialiseAnimationArea)
+       where
 
 -- External imports
 import             Data.CBMVar
@@ -15,6 +17,7 @@ import             Graphics.UI.Gtk hiding ( Color, Point, Size
 
 -- Local imports
 import Config.Config
+import Config.Preferences
 import Data.Tuple4
 import Data.History
 import Model.SystemStatus
@@ -39,36 +42,6 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 -- with the rest of the program
 type SimGlVar  = CBMVar SimGlSt
 type SimGlSt   = (SystemStatus, SimState, ViewState, [Name])
-type ViewState = (Float, Point)
-
--- | Initial zoom and position
-initialViewState :: ViewState
-initialViewState = (0.5, (-400, -100))
-
-stdZoomStep :: Float
-stdZoomStep = 0.8
-
-initialAnimationSize :: (Int, Int)
-initialAnimationSize = (800, 600)
-
-initialThumbnailSize :: (Int, Int)
-initialThumbnailSize = (200, 150)
-
--- | Default thumbnail zoom level
-thumbScale :: Float
-thumbScale = 0.05
-
--- | Thumbnail base coords
-thumbCoords :: Point
-thumbCoords = (thumbX, thumbY)
-
--- | Thumbnail base X coord
-thumbX :: Float
-thumbX = (-90)
-
--- | Thumbnail base Y coord
-thumbY :: Float
-thumbY = 0
 
 -- | Initialises the opengl area with a picture
 initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
@@ -100,6 +73,8 @@ drawThumb cfg mcs e be =
 --   and the current scaling
 data State = State [Event] Float Point (Maybe Point)
 
+-- * Auxiliary Picture Generators
+
 -- | Convert the state into a picture.
 makePicture :: Config -> SimGlVar -> State -> IO Picture
 makePicture cfg st oldSt = do
@@ -126,32 +101,17 @@ makeThumbnail cfg getSz st _ = do
                     , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
                     ]
 
--- Paints the zoom box for a given scale, origin and container size
-paintZoomBox :: (Float, Point) -> (Int, Int) -> Picture
-paintZoomBox o (w',h') =
-   box ((p1 * thumbScale, p2 * thumbScale), (w * thumbScale, h * thumbScale))
- where ((p1,p2),(w,h)) = zoomBoxDescription o sz
-       sz              = (fromIntegral w', fromIntegral h')
+-- * Main picture step processing
 
--- | Builds the box description for the zoom box from the scale, origin and container size
-zoomBoxDescription :: (Float, Point) -> (Float, Float) -> BoxDescription
-zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
- where p1' = - (w / 2 + p1)
-       p2' = - (h / 2 + p2)
- 
--- | Transform the abstract status into a picture
-paintMultiCoreStatus :: Config -> Float -> Point -> SystemStatus -> Picture
-paintMultiCoreStatus cfg progScale orig =
-  uncurry translate orig . scale progScale progScale .
-    paintDiagram . transformDiagram . transformStatus cfg
+-- Process the event queue and return an empty state
+stepWorld :: SimGlVar -> Float -> State -> IO State
+stepWorld mcsRef _ (State evs sc o no) = do
+  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
+  modifyCBMVar mcsRef (\(a,b,_,s) -> return (a,b,(sc,o),s)) 
+  return (State [] sc o no)
 
--- | Zooms in/out of a state with a specific zoom
-zoomWith :: Float -> Point -> State -> State
-zoomWith f (p1, p2) (State evs sc (o1,o2) no) = State evs (sc * f) o' no
- where p1' = p1 * (1 - f)
-       p2' = p2 * (1 - f)
-       o'  = (o1 * f + p1', o2 * f + p2')
- 
+-- * Main picture event handlers
+  
 -- | Queues an input event into the state's event queue
 -- to be processed later
 queueEvent :: Event -> State -> State
@@ -202,13 +162,6 @@ queueEvent event state
   | otherwise
   = state
 
--- Process the event queue and return an empty state
-stepWorld :: SimGlVar -> Float -> State -> IO State
-stepWorld mcsRef _ (State evs sc o no) = do
-  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
-  modifyCBMVar mcsRef (\(a,b,_,s) -> return (a,b,(sc,o),s)) 
-  return (State [] sc o no)
-
 -- | Handle mouse click and motion events.
 handleEvent :: Float -> Event -> SimGlSt -> SimGlSt
 handleEvent _sc event st
@@ -229,7 +182,6 @@ handleEvent _sc event st
 handleClicks :: Point -> SimGlSt -> SimGlSt
 handleClicks p (st,s,v,op) = (st',s,v,op)
  where -- Expand/collapse when necessary
-       -- st'   = maybe st (\n -> updateCurrentStatus st (toggleVisibility n)) ns
        st'   = maybe st (updateCurrentStatus st . toggleVisibility) ns
        -- Update selection
        ns    = checkToggleVisibility p st
@@ -237,9 +189,7 @@ handleClicks p (st,s,v,op) = (st',s,v,op)
 -- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
 handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
- where ss = case checkSetSelection p st of -- Selecting simple boxes only
-             Just [x,y] -> Just [x,y]
-             _          -> Nothing
+ where ss = simpleBoxName =<< checkSetSelection p st -- Select simple boxes only
        ns = checkToggleVisibility p st
        st' | isNothing ns = st { selection = fromMaybe [] ss }
            | otherwise    = st
@@ -247,9 +197,14 @@ handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
 -- | Process moving the mouse over component boxes
 handleMouseOver :: Point -> SimGlSt -> SimGlSt
 handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
- where ss = case checkSetSelection p st of -- Hovering over simple boxes only
-             Just [x,y] -> Just [x,y]
-             _          -> Nothing
+ where ss = simpleBoxName =<< checkSetSelection p st -- Hovering over simple boxes only
+
+-- | Zooms in/out of a state with a specific zoom
+zoomWith :: Float -> Point -> State -> State
+zoomWith f (p1, p2) (State evs sc (o1,o2) no) = State evs (sc * f) o' no
+ where p1' = p1 * (1 - f)
+       p2' = p2 * (1 - f)
+       o'  = (o1 * f + p1', o2 * f + p2')
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
@@ -263,6 +218,29 @@ checkSetSelection :: Point -> SystemStatus -> Maybe [Name]
 checkSetSelection p st = listToMaybe $ mapMaybe (isAreaOfB p) boxes
  where (PositionedDiagram boxes _) = transformDiagram $ transformStatus defaultConfig st
   
+-- * Auxiliary gloss functions
+
+-- | Transform the abstract status into a picture
+paintMultiCoreStatus :: Config -> Float -> Point -> SystemStatus -> Picture
+paintMultiCoreStatus cfg progScale orig =
+  uncurry translate orig . scale progScale progScale .
+    paintDiagram . transformDiagram . transformStatus cfg
+
+-- Paints the zoom box for a given scale, origin and container size
+paintZoomBox :: (Float, Point) -> (Int, Int) -> Picture
+paintZoomBox o (w',h') =
+   box ((p1 * thumbScale, p2 * thumbScale), (w * thumbScale, h * thumbScale))
+ where ((p1,p2),(w,h)) = zoomBoxDescription o sz
+       sz              = (fromIntegral w', fromIntegral h')
+
+-- | Builds the box description for the zoom box from the scale, origin and container size
+zoomBoxDescription :: (Float, Point) -> (Float, Float) -> BoxDescription
+zoomBoxDescription (s, (p1, p2)) (w, h) = ((p1'/s, p2'/s), (w / s, h / s))
+ where p1' = - (w / 2 + p1)
+       p2' = - (h / 2 + p2)
+
+-- * Auxiliary box geometry functions
+
 -- | Returns the qualified name of the box who's menu
 -- icon is in the given position (if any)
 isMenuOfB :: Position -> PBox -> Maybe [Name]
@@ -271,7 +249,7 @@ isMenuOfB p1 (PGroupBox n p2 s bs _ _)
  | isMenuOf p1 (p2,s) = Just [n]
  | otherwise          = fmap (n:) $ listToMaybe l
  where l   = mapMaybe (isMenuOfB p1') bs
-       p1' = subPos p1 p2
+       p1' = subPos p1 p2  -- p1 relative to p2
 
 -- | Returns True if the given position is in the menu
 -- icon area of a box with the given dimensions
@@ -286,7 +264,7 @@ isAreaOfB p1 b
  | isAreaOf p1 (p2, sz) = Just [n]
  | otherwise            = Nothing
  where l   = mapMaybe (isAreaOfB p1') $ pboxSubBoxes b
-       p1' = subPos p1 p2  -- p1 relative to p2
+       p1' = subPos p1 p2   -- p1 relative to p2
        n   = pboxName     b
        p2  = pboxPosition b
        sz  = pboxSize     b
@@ -295,3 +273,11 @@ isAreaOfB p1 b
 -- area of a box with the given dimensions
 isAreaOf :: Position -> (Position, Size) -> Bool
 isAreaOf p d = inArea p d && not (isMenuOf p d)
+
+-- * Auxiliary Box functions
+
+-- | Returns just the name unmodified if it's a simple box name
+-- (PUName, ComponentName), otherwise returns Nothing
+simpleBoxName :: [Name] -> Maybe [Name]
+simpleBoxName n@[_,_] = Just n
+simpleBoxName _       = Nothing
