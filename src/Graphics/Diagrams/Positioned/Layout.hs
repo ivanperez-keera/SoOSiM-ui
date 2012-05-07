@@ -12,41 +12,45 @@ import Data.List (mapAccumL)
 import Graphics.Diagrams.Types
 import Graphics.Diagrams.Positioned.PositionedDiagram
 
--- | Arranges boxes in a column
-pboxColumnLayout :: Float -> Float -> HAlign -> [PBox] -> [PBox]
+-- | Arranges boxes in column
+pboxColumnLayout :: Float  -- ^ Initial top or base position
+                 -> Float  -- ^ Minimum column width
+                 -> HAlign -- ^ Horizontal alignment
+                 -> [PBox] -- ^ Boxes to arrange in column
+                 -> [PBox] -- ^ Arranged boxes
 pboxColumnLayout base w align bs =
    snd $ mapAccumL (pboxColumnLayoutP boxSep width align) base bs
  where width = max w (fst (pboxListSize bs))
 
 -- | Arranges one box in a column, returning the new top and the modified box
 pboxColumnLayoutP :: Float -> Float -> HAlign -> Float -> PBox -> (Float, PBox)
-pboxColumnLayoutP left maxWidth align top b = (top', b')
- where top' = top + boxSep + snd (pboxSize b)
-       b'   = case b of
-                PBox n k _ sz@(w,_) c         -> PBox n k (left + newX w, top) sz c
-                PGroupBox n _ sz@(w,_) gs c e -> PGroupBox n (left + newX w, top) sz gs c e
+pboxColumnLayoutP left maxWidth align top box = (top', box')
+ where top' = top + boxSep + boxH
+       box' = box { pboxPosition = (left + newX, top) }
+       (boxW,boxH) = pboxSize box
 
        -- Align
-       newX w = case align of
-                 HLeft   -> 0
-                 HCenter -> (maxWidth - w) / 2
-                 HRight  -> maxWidth - w
+       newX = case align of
+                HLeft   -> 0
+                HCenter -> (maxWidth - boxW) / 2
+                HRight  -> maxWidth - boxW
 
--- | Arranges boxes in a row
-pboxRowLayout :: VAlign -> [PBox] -> [PBox]
+-- | Arranges boxes in row
+pboxRowLayout :: VAlign -- ^ Vertical alignment
+              -> [PBox] -- ^ List of boxes
+              -> [PBox] -- ^ Arranged boxes
 pboxRowLayout align bs = snd $ mapAccumL (pboxRowLayoutP height align) 0 bs
  where height = snd $ pboxListSize bs
 
 -- | Arranges one box in a row, returning the new left and the modified box
 pboxRowLayoutP :: Float -> VAlign -> Float -> PBox -> (Float, PBox)
-pboxRowLayoutP maxHeight  align  left b = (left', b')
-  where left' = left + boxSep + 40 + fst (pboxSize b)
-        b'    = case b of
-                 PBox n k _ sz@(_,h) c         -> PBox n k (left, newY h) sz c
-                 PGroupBox n _ sz@(_,h) gs c e -> PGroupBox n (left, newY h) sz gs c e
+pboxRowLayoutP maxHeight align left box = (left', box')
+  where left' = left + boxSep + 40 + boxW
+        box'  = box { pboxPosition = (left, newY) }
+        (boxW,boxH) = pboxSize box
         
         -- Align
-        newY h = case align of
-                  VTop    -> maxHeight - h
-                  VCenter -> (maxHeight - h) / 2
-                  VBottom -> maxHeight - h
+        newY = case align of
+                 VTop    -> maxHeight - boxH
+                 VCenter -> (maxHeight - boxH) / 2
+                 VBottom -> 0 -- maxHeight - boxH
