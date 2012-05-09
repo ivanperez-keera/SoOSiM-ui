@@ -97,7 +97,16 @@ makeThumbnail :: Config -> IO (Int, Int) -> SimGlVar -> a -> IO Picture
 makeThumbnail cfg getSz st _ = do
   st' <- readCBMVar st
   sz  <- getSz
-  return $ Pictures [ paintMultiCoreStatus cfg thumbScale thumbCoords $ fst4 st'
+  -- Calculate next multi-core status (if not already known)
+  let hist = multiCoreStatus $ fst4 st'
+  mcs' <- case future hist of
+           [] -> updateFromSimState (historyPresent hist) (snd4 st')
+           _  -> return (present hist)
+
+  -- Update the multi core status
+  let newSt = (fst4 st') { multiCoreStatus = hist { present = mcs' } }
+
+  return $ Pictures [ paintMultiCoreStatus cfg thumbScale thumbCoords newSt
                     , translate thumbX thumbY $ paintZoomBox (trd4 st') sz
                     ]
 
