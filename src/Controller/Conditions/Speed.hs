@@ -57,23 +57,23 @@ installHandlers cenv = void $ do
   hscale <- speedScale ui
   hscale `on` valueChanged $ conditionSpeedChanged VM cenv
   onEvent pm SpeedChanged $ conditionSpeedChanged MV cenv
-  onEvent pm Initialised $ conditionSpeedChanged MV cenv
+  onEvent pm Initialised  $ conditionSpeedChanged MV cenv
 
 -- | Sets the system as running
 conditionRun :: CEnv -> IO()
-conditionRun cenv =
-  setter statusField pm Running
+conditionRun cenv = setter statusField pm Running
  where pm = model cenv
 
 -- | If the system is running or paused, it toggles the state
 conditionPause :: CEnv -> IO()
 conditionPause cenv = do
   st <- getter statusField pm
-  case st of
-   Running -> setter statusField pm Paused
-   Paused  -> setter statusField pm Running
-   Stopped -> return ()
+  let st' = pauseSt st
+  when (st /= st') $ setter statusField pm st'
  where pm = model cenv
+       pauseSt Running = Paused
+       pauseSt Paused  = Running
+       pauseSt x       = x
 
 -- | Halts and restarts the simulation
 conditionStop :: CEnv -> IO()

@@ -105,6 +105,7 @@ Executable SoOSiM-ui
                     Graphics.Gloss.AdvancedShapes.Boxes
                     Graphics.Gloss.AdvancedShapes.Shadows
                     Graphics.UI.Gtk.Multiline.TextBufferHelpers
+                    Graphics.Zoom
                     Model.Model
                     Model.SystemStatus
                     Model.ProtectedModel
@@ -127,7 +128,10 @@ Executable SoOSiM-ui
                     SoOSiM.Components.Scheduler.Types
                     SoOSiM.Samples.Initializer
                     View
+                    View.Animation
                     View.InitAnimationArea
+                    View.InitMainPictureArea
+                    View.InitThumbnail
                     View.InitIconsInfoArea
                     View.Objects
                     View.Tooltips

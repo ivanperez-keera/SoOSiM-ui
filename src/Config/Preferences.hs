@@ -1,9 +1,9 @@
 {-# LANGUAGE PackageImports #-}
 module Config.Preferences where
 
+import Config.Config
 import "gloss-gtk" Graphics.Gloss
 import Graphics.Diagrams.MultiCoreStatus
-import Config.Config
 
 -- | Default angle of arrow heads (in pi-radians)
 arrowDegrees :: Float

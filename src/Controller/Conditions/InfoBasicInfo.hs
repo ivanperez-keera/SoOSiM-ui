@@ -15,9 +15,9 @@ import CombinedEnvironment
 import Data.Tuple4
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
-import Model.SystemStatus
 import Graphics.Diagrams.Types
 import Graphics.UI.Gtk.Multiline.TextBufferHelpers
+import Model.SystemStatus
 
 -- | Selects the appropriate page in the info notebook as the user
 -- chooses between basic info and component trace

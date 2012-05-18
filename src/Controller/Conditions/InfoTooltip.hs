@@ -20,12 +20,12 @@ import Graphics.Diagrams.MultiCoreStatus
 -- | Handles changes in the box selection in the gloss diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
-   installCallbackCBMVar mcsRef $ conditionShowPage cenv
+   installCallbackCBMVar mcsRef $ conditionShowInfo cenv
   where mcsRef = mcs (view cenv)
   
 -- | Shows component info only when a component is selected
-conditionShowPage :: CEnv -> IO()
-conditionShowPage cenv = do
+conditionShowInfo :: CEnv -> IO()
+conditionShowInfo cenv = do
   -- Get elem info if possible
   st <- readCBMVar $ mcs $ view cenv
   let tt = getElemInfo (fth4 st) $ present $ multiCoreStatus $ fst4 st
@@ -46,11 +46,11 @@ getElemInfo _     _  = Nothing
 getCompInfo :: Name -> Name -> MultiCoreStatus -> Maybe String
 getCompInfo nn cn ss = do
   re <- findRunningElement (nn, cn) ss
-  return $ showCompInfo nn cn re
+  return $ showCompStatus nn cn re
 
--- | Renders two strings with the basic component info and the trace
-showCompInfo :: Name -> Name -> RunningElement -> String
-showCompInfo _nn cn re = concat
+-- | Renders a small string with the summarised component status
+showCompStatus :: Name -> Name -> RunningElement -> String
+showCompStatus _nn cn re = concat
    [ show cn
    , " : " ++ cKind
    , " | " ++ st
