@@ -18,6 +18,16 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkWindow" id="flowChartWindow">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="label12">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">To be completed</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="image20">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -82,6 +92,15 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="ubuntu_local">True</property>
+                    <child>
+                      <object class="GtkMenuItem" id="showFlowChartMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">Show flowchart</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                    </child>
                     <child>
                       <object class="GtkImageMenuItem" id="fullScreenMenuItem">
                         <property name="label">gtk-fullscreen</property>
