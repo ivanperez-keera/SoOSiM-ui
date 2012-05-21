@@ -1,5 +1,5 @@
 {-# LANGUAGE PackageImports  #-}
-{-# LANGUAGE PatternGuards  #-}
+{-# LANGUAGE PatternGuards   #-}
 -- | Presents the SimState to the user and updates it with input events
 module View.Animation where
 
@@ -26,7 +26,7 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 
 -- Auxiliary types. We use an MVar with callbacks to communicate
 -- with the rest of the program
-type SimGLVar  = CBMVar SimGLState
+type SimGLVar   = CBMVar SimGLState
 data SimGLState = SimGLState
   { simGLSystemStatus :: SystemStatus
   , simGLSimState     :: SimState
