@@ -45,7 +45,7 @@ makePicture cfg st oldSt = makeImage cfg st sc orig
 -- Process the event queue and return an empty state
 stepWorld :: SimGlVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs sc o no) = do
-  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent sc ev)) evs
+  mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
   modifyCBMVar mcsRef (\(a,b,_,s) -> return (a,b,(sc,o),s)) 
   return (State [] sc o no)
 
@@ -107,20 +107,20 @@ queueEvent event state
   = state
 
 -- | Handle mouse click and motion events.
-handleEvent :: Float -> Event -> SimGlSt -> SimGlSt
-handleEvent _sc event st
+handleEvent :: Event -> SimGlSt -> SimGlSt
+handleEvent event state
   -- Queue event
-  | EventKey (MouseButton LeftButton) Up _ pt <- event
-  = handleClicks pt st
+  | EventKey (MouseButton LeftButton) Up _ point <- event
+  = handleClicks point state
 
-  | EventKey (MouseButton LeftButtonDouble) Up _ pt <- event
-  = handleDoubleClicks pt st
+  | EventKey (MouseButton LeftButtonDouble) Up _ point <- event
+  = handleDoubleClicks point state
 
-  | EventMotion pt <- event
-  = handleMouseOver pt st
+  | EventMotion point <- event
+  = handleMouseOver point state
 
   | otherwise
-  = st
+  = state
 
 -- | Process clicks in the boxes or menu icons
 handleClicks :: Point -> SimGlSt -> SimGlSt
