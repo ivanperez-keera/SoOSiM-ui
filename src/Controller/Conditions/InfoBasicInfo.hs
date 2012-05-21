@@ -12,7 +12,6 @@ import Graphics.UI.Gtk
 
 -- Local imports
 import CombinedEnvironment
-import Data.Tuple4
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
 import Graphics.Diagrams.Types
@@ -33,9 +32,8 @@ conditionShowCompInfo cenv = do
  bf1 <- textViewGetBuffer <=< infoTextView  $ uiBuilder $ view cenv
  bf2 <- textViewGetBuffer <=< traceTextView $ uiBuilder $ view cenv
 
- let sel   = selection $ fst4 st
-     mcs   = present $ multiCoreStatus $ fst4 st
-     -- simSt = snd4 st
+ let sel   = selection $ simGLSystemStatus st
+     mcs   = present $ multiCoreStatus $ simGLSystemStatus st
 
  awhen (getElemInfo sel mcs) $ \(ni,nt) -> do
    textBufferUpdateText bf1 ni

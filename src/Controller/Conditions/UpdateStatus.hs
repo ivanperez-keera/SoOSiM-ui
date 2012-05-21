@@ -35,8 +35,11 @@ condition cenv = do
 
   -- If the system is actually running, update the state
   when (st == Running && sp > 0) $
-    modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStep (a,b)
-                                           return (a',b',c,d)
+    modifyCBMVar mcsRef $ \state -> do
+      (a',b') <- nextStep (simGLSystemStatus state, simGLSimState state)
+      return $ state { simGLSystemStatus = a'
+                     , simGLSimState     = b'
+                     }
 
   -- If the system is not paused or stopped,
   -- reupdate after a delay

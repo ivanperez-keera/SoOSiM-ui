@@ -11,7 +11,6 @@ import             Graphics.UI.Gtk (ContainerClass, widgetGetSize)
 -- Local imports
 import Config.Config
 import Config.Preferences
-import Data.Tuple4
 import View.Animation
 
 -- Local imports: basic types
@@ -19,20 +18,21 @@ import Graphics.Diagrams.Types ( BoxDescription )
 import Graphics.Gloss.AdvancedShapes.Boxes
 
 -- | Draws a thumbnail of the main animation
-drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGlVar -> a -> b -> IO()
+drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGLVar -> a -> b -> IO()
 drawThumb cfg mcs e be =
   animateIO (InWidget e initialThumbnailSize)
     white (makeThumbnail cfg (widgetGetSize be) mcs)
 
 -- | Convert our state to a smaller thumbnail 
-makeThumbnail :: Config -> IO (Int, Int) -> SimGlVar -> a -> IO Picture
+makeThumbnail :: Config -> IO (Int, Int) -> SimGLVar -> a -> IO Picture
 makeThumbnail cfg getSz st _ = do
   pcs <- makeImage cfg st thumbScale thumbCoords
   st' <- readCBMVar st
   sz  <- getSz
-  return $ Pictures [ pcs
-                    , translate thumbX thumbY $ paintZoomBox (trd4 st') sz 
-                    ]
+  return $ Pictures 
+             [ pcs
+             , translate thumbX thumbY $ paintZoomBox (simGLViewState st') sz 
+             ]
 
 -- Paints the zoom box for a given scale, origin and container size
 paintZoomBox :: (Float, Point) -> (Int, Int) -> Picture

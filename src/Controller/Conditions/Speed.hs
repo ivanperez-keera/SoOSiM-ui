@@ -83,7 +83,7 @@ conditionStop cenv = do
   -- Starts a fresh new simulation
   ss <- simstate 
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
-      mcs'              = (emptySystemStatus, ss, initialViewState, [])
+      mcs'              = SimGLState emptySystemStatus ss initialViewState []
   modifyCBMVar mcsRef $ \_ -> return mcs'
 
   setter statusField pm Paused

@@ -7,7 +7,6 @@ module Controller.Conditions.InfoTooltip
 import Control.Monad
 import Data.CBMVar
 import Data.Maybe
-import Data.Tuple4
 import Graphics.UI.Gtk
 
 -- Internal imports
@@ -28,7 +27,8 @@ conditionShowInfo :: CEnv -> IO()
 conditionShowInfo cenv = do
   -- Get elem info if possible
   st <- readCBMVar $ mcs $ view cenv
-  let tt = getElemInfo (fth4 st) $ present $ multiCoreStatus $ fst4 st
+  let tt = getElemInfo (simGLSelection st) $ 
+             present $ multiCoreStatus $ simGLSystemStatus st
 
   -- Update label text
   lbl <- statusLbl $ uiBuilder $ view cenv

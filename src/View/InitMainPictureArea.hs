@@ -28,7 +28,7 @@ import Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
 import Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
 
 -- | Initialises the gloss animation
-drawPic :: ContainerClass a => Config -> SimGlVar -> a -> IO ()
+drawPic :: ContainerClass a => Config -> SimGLVar -> a -> IO ()
 drawPic cfg mcs e =
   playIO (InWidget e initialAnimationSize) white fps state
          (makePicture cfg mcs) queueEvent (stepWorld mcs)
@@ -36,17 +36,17 @@ drawPic cfg mcs e =
        fps   = 100
 
 -- | Convert the state into a picture.
-makePicture :: Config -> SimGlVar -> State -> IO Picture
+makePicture :: Config -> SimGLVar -> State -> IO Picture
 makePicture cfg st oldSt = makeImage cfg st sc orig
  where (State _ sc orig _) = oldSt
 
 -- * Main picture step processing
 
 -- Process the event queue and return an empty state
-stepWorld :: SimGlVar -> Float -> State -> IO State
+stepWorld :: SimGLVar -> Float -> State -> IO State
 stepWorld mcsRef _ (State evs sc o no) = do
   mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
-  modifyCBMVar mcsRef (\(a,b,_,s) -> return (a,b,(sc,o),s)) 
+  modifyCBMVar mcsRef (\state -> return (state { simGLViewState = (sc, o) }))
   return (State [] sc o no)
 
 -- * Main picture event handlers
@@ -107,7 +107,7 @@ queueEvent event state
   = state
 
 -- | Handle mouse click and motion events.
-handleEvent :: Event -> SimGlSt -> SimGlSt
+handleEvent :: Event -> SimGLState -> SimGLState
 handleEvent event state
   -- Queue event
   | EventKey (MouseButton LeftButton) Up _ point <- event
@@ -123,25 +123,29 @@ handleEvent event state
   = state
 
 -- | Process clicks in the boxes or menu icons
-handleClicks :: Point -> SimGlSt -> SimGlSt
-handleClicks p (st,s,v,op) = (st',s,v,op)
+handleClicks :: Point -> SimGLState -> SimGLState
+handleClicks p state = state { simGLSystemStatus = st' }
  where -- Expand/collapse when necessary
-       st'   = maybe st (updateCurrentStatus st . toggleVisibility) ns
-       -- Update selection
-       ns    = checkToggleVisibility p st
+       st' = maybe st (updateCurrentStatus st . toggleVisibility) ns
+       -- Check whether an item has been clicked
+       ns  = checkToggleVisibility p st
+       -- Old system status
+       st = simGLSystemStatus state
 
 -- | Process double clicks in component boxes
-handleDoubleClicks :: Point -> SimGlSt -> SimGlSt
-handleDoubleClicks p (st,s,v,o) = (st',s,v,o)
+handleDoubleClicks :: Point -> SimGLState -> SimGLState
+handleDoubleClicks p state = state { simGLSystemStatus = st' }
  where ss = simpleBoxName =<< checkSetSelection p st -- Select simple boxes only
        ns = checkToggleVisibility p st
+       st = simGLSystemStatus state
        st' | isNothing ns = st { selection = fromMaybe [] ss }
            | otherwise    = st
 
 -- | Process moving the mouse over component boxes
-handleMouseOver :: Point -> SimGlSt -> SimGlSt
-handleMouseOver p (st,s,v,_) = (st,s,v,fromMaybe [] ss)
+handleMouseOver :: Point -> SimGLState -> SimGLState
+handleMouseOver p state = state { simGLSelection = fromMaybe [] ss }
  where ss = simpleBoxName =<< checkSetSelection p st -- Hovering over simple boxes only
+       st = simGLSystemStatus state
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)

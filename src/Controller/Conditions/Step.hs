@@ -33,8 +33,11 @@ conditionF cenv = void $ do
   st <- getter statusField pm
 
   when (st == Paused) $
-    modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStep (a,b)
-                                           return (a',b',c,d)
+    modifyCBMVar mcsRef $ \state -> do
+      (a',b') <- nextStep (simGLSystemStatus state, simGLSimState state)
+      return $ state { simGLSystemStatus = a'
+                     , simGLSimState     = b'
+                     }
 
   where mcsRef = mcs (view cenv)
         pm     = model cenv
@@ -44,8 +47,8 @@ conditionB cenv = void $ do
   st <- getter statusField pm
 
   when (st == Paused) $
-    modifyCBMVar mcsRef $ \(a,b,c,d) -> let a' = previousStatus a
-                                        in return (a',b,c,d)
+    modifyCBMVar mcsRef $ \state -> 
+      return $ state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
 
   where mcsRef = mcs (view cenv)
         pm     = model cenv

@@ -6,7 +6,6 @@ module Controller.Conditions.Selection
 -- External imports
 import Control.Monad
 import Data.CBMVar
-import Data.Tuple4
 import Graphics.UI.Gtk
 
 -- Internal imports
@@ -22,7 +21,7 @@ installHandlers cenv = void $
 -- | Shows component info only when a component is selected
 conditionShowPage :: CEnv -> IO()
 conditionShowPage cenv = do
-  hasSelection <- fmap (not . null . selection . fst4) $ readCBMVar $ mcs vw
+  hasSelection <- fmap (not . null . selection . simGLSystemStatus) $ readCBMVar $ mcs vw
   notebook     <- infoNotebook $ uiBuilder vw
 
   -- Show notebook page

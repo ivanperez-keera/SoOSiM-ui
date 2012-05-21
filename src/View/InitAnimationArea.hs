@@ -1,6 +1,6 @@
 -- | Presents the SimState to the user and updates it with input events
 module View.InitAnimationArea 
-        (SimGlVar, SimGlSt, initialViewState, initialiseAnimationArea)
+        (SimGLVar, SimGLState(..), initialViewState, initialiseAnimationArea)
        where
 
 -- External imports
@@ -15,7 +15,7 @@ import View.InitThumbnail
 import View.InitMainPictureArea
 
 -- | Initialises the opengl area with a picture
-initialiseAnimationArea :: Config -> SimGlVar -> Builder -> IO ()
+initialiseAnimationArea :: Config -> SimGLVar -> Builder -> IO ()
 initialiseAnimationArea cfg mcs bldr = do
   vp <- animationViewport bldr
   ev <- overviewEventBox bldr

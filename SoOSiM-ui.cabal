@@ -89,7 +89,6 @@ Executable SoOSiM-ui
                     Controller.Conditions.Step
                     Controller.Conditions.UpdateStatus
                     Controller.Helpers.NextSimState
-                    Data.Tuple4
                     Data.History
                     Graphics.Diagrams.MultiCoreStatus
                     Graphics.Diagrams.Positioned.Layout

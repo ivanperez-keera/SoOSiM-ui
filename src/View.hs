@@ -2,8 +2,8 @@
 module View
   ( module View
   , module Exported
-  , SimGlVar
-  , SimGlSt
+  , SimGLVar
+  , SimGLState(..)
   )
   where
 
@@ -36,7 +36,7 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: SimGlVar
+  , mcs          :: SimGLVar
   }
 
 -- | Initialised the glade GUI and all the view components that are not
@@ -51,7 +51,7 @@ createView = do
   ss   <- simstate 
   initialMcs <- updateFromSimState emptyMultiCoreStatus ss
   let initialSystemStatus = SystemStatus (historyNew initialMcs) []
-  msc  <- newCBMVar (initialSystemStatus, ss, initialViewState, [])
+  msc  <- newCBMVar $ SimGLState initialSystemStatus ss initialViewState []
 
   w <- mainWindow bldr
   widgetShowAll w

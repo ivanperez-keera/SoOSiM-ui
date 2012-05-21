@@ -11,7 +11,6 @@ import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 -- Local imports
 import Config.Config
 import Config.Preferences
-import Data.Tuple4
 import Data.History
 import Model.SystemStatus
 import SoOSiM.Types
@@ -27,26 +26,31 @@ import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 
 -- Auxiliary types. We use an MVar with callbacks to communicate
 -- with the rest of the program
-type SimGlVar  = CBMVar SimGlSt
-type SimGlSt   = (SystemStatus, SimState, ViewState, [Name])
+type SimGLVar  = CBMVar SimGLState
+data SimGLState = SimGLState
+  { simGLSystemStatus :: SystemStatus
+  , simGLSimState     :: SimState
+  , simGLViewState    :: ViewState
+  , simGLSelection    :: [Name]
+  }
 
 -- | In the gloss internal state we just keep the pending events
 --   and the current scaling
 data State = State [Event] Float Point (Maybe Point)
 
 -- | Convert the state into a picture.
-makeImage :: Config -> SimGlVar -> Float -> Point -> IO Picture
+makeImage :: Config -> SimGLVar -> Float -> Point -> IO Picture
 makeImage cfg st sc orig = do
   st' <- readCBMVar st
 
   -- Calculate next multi-core status (if not already known)
-  let hist = multiCoreStatus $ fst4 st'
+  let hist = multiCoreStatus $ simGLSystemStatus st'
   mcs' <- case future hist of
-           [] -> updateFromSimState (historyPresent hist) (snd4 st')
+           [] -> updateFromSimState (historyPresent hist) (simGLSimState st')
            _  -> return (present hist)
 
   -- Update the multi core status
-  let newSt = (fst4 st') { multiCoreStatus = hist { present = mcs' } }
+  let newSt = (simGLSystemStatus st') { multiCoreStatus = hist { present = mcs' } }
 
   return $ paintMultiCoreStatus cfg sc orig newSt
 
