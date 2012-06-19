@@ -64,6 +64,7 @@ Executable SoOSiM-ui
                , glade
                , gloss-gtk
                , keera-callbacks
+               , gtk-helpers >= 0.0.3
                , SoOSiM
 
                , base >= 4.0 && < 5.0
@@ -104,7 +105,6 @@ Executable SoOSiM-ui
                     Graphics.Gloss.AdvancedShapes.Arrows
                     Graphics.Gloss.AdvancedShapes.Boxes
                     Graphics.Gloss.AdvancedShapes.Shadows
-                    Graphics.UI.Gtk.Multiline.TextBufferHelpers
                     Model.Model
                     Model.SystemStatus
                     Model.ProtectedModel

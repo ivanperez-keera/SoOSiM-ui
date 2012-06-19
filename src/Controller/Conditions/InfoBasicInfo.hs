@@ -12,6 +12,7 @@ import           Data.CBMVar
 import qualified Data.IntMap            as I
 import           Data.List
 import           Graphics.UI.Gtk
+import           Graphics.UI.Gtk.Helpers.Multiline.TextBufferHelpers
 import qualified SoOSiM.Types           as S
 
 -- Local imports
@@ -21,7 +22,6 @@ import Data.History
 import Graphics.Diagrams.MultiCoreStatus
 import Model.SystemStatus
 import Graphics.Diagrams.Types
-import Graphics.UI.Gtk.Multiline.TextBufferHelpers
 
 -- | Selects the appropriate page in the info notebook as the user
 -- chooses between basic info and component trace
