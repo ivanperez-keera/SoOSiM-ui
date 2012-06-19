@@ -41,6 +41,9 @@ installHandlers cenv = void $ do
   run <- runToolBtn ui
   run `onToolButtonClicked` conditionRun cenv
 
+  slowRun <- runSlowToolBtn ui
+  slowRun `onToolButtonClicked` conditionSlowRun cenv
+
   pause <- pauseToolBtn ui
   pause `onToolButtonClicked` conditionPause cenv
 
@@ -65,12 +68,18 @@ conditionRun cenv =
   setter statusField pm Running
  where pm = model cenv
 
+conditionSlowRun :: CEnv -> IO ()
+conditionSlowRun cenv =
+  setter statusField pm SlowRunning
+ where pm = model cenv
+
 -- | If the system is running or paused, it toggles the state
 conditionPause :: CEnv -> IO()
 conditionPause cenv = do
   st <- getter statusField pm
   case st of
    Running -> setter statusField pm Paused
+   SlowRunning -> setter statusField pm Paused
    Paused  -> setter statusField pm Running
    Stopped -> return ()
  where pm = model cenv
@@ -81,7 +90,7 @@ conditionStop cenv = do
   setter statusField pm Stopped
 
   -- Starts a fresh new simulation
-  ss <- simstate 
+  ss <- simstate
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
       mcs'              = (emptySystemStatus, ss, initialViewState, [])
   modifyCBMVar mcsRef $ \_ -> return mcs'
@@ -99,7 +108,7 @@ conditionSpeedUp cenv = do
 
 -- | Decreases the simulation speed by a factor of 2
 conditionSlowDown :: CEnv -> IO()
-conditionSlowDown cenv = do 
+conditionSlowDown cenv = do
   curSp <- getter speedField pm
   when (curSp >= 0.2) $ setter speedField pm (curSp / 2)
  where pm = model cenv
@@ -114,7 +123,7 @@ conditionSpeedChanged cd cenv = do
 
   -- Model value
   curSp <- getter speedField pm
-  curV  <- fmap double2Float $ get hscale rangeValue 
+  curV  <- fmap double2Float $ get hscale rangeValue
 
   -- Update in the appropriate direction when values differ
   when (curV /= curSp) $

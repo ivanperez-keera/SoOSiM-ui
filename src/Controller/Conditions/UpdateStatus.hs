@@ -38,9 +38,13 @@ condition cenv = do
     modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStep (a,b)
                                            return (a',b',c,d)
 
+  when (st == SlowRunning && sp > 0) $
+    modifyCBMVar mcsRef $ \(a,b,c,d) -> do (a',b') <- nextStepSmall (a,b)
+                                           return (a',b',c,d)
+
   -- If the system is not paused or stopped,
   -- reupdate after a delay
-  when (st == Running) $ void $
+  when (st == Running || st == SlowRunning) $ void $
     let wt = if sp == 0 then 2 else sp
     in timeoutAdd (condition cenv) (round (1000 / wt))
 
