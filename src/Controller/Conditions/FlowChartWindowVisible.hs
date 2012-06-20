@@ -9,12 +9,12 @@ import CombinedEnvironment
 
 flowChartWindowVisibleCondition :: CEnv -> IO()
 flowChartWindowVisibleCondition cenv = void $ do
-  menu <- showFlowChartMenuItem $ uiBuilder $ view cenv
+  menu <- showFlowChartMenuItem $ view cenv
   menu `on` menuItemActivate $ flowChartWindowConditionEnforcer cenv
 
 flowChartWindowConditionEnforcer :: CEnv -> IO()
 flowChartWindowConditionEnforcer cenv = void $ do
-  window  <- flowChartWindow $ uiBuilder $ view cenv
+  window  <- flowChartWindow $ view cenv
   visible <- get window widgetVisible
   if visible
    then widgetHide window

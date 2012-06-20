@@ -24,7 +24,7 @@ import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
 import View.InitIconsInfoArea
 import View.Tooltips
-import View.Objects
+import View.Objects as Builder
 
 instance GtkGUI View where
   initialise = createView
@@ -53,7 +53,7 @@ createView = do
   let initialSystemStatus = SystemStatus (historyNew initialMcs) []
   msc  <- newCBMVar $ SimGLState initialSystemStatus ss initialViewState []
 
-  w <- mainWindow bldr
+  w <- Builder.mainWindow bldr
   widgetShowAll w
 
   initialiseAnimationArea cfg msc bldr
@@ -67,3 +67,79 @@ createView = do
       { uiBuilder    = bldr
       , mcs          = msc
       }
+
+mainWindow :: View -> IO Window
+mainWindow = Builder.mainWindow . uiBuilder
+
+animationViewport :: View -> IO Viewport
+animationViewport = Builder.animationViewport . uiBuilder
+
+pauseToolBtn :: View -> IO ToolButton
+pauseToolBtn = Builder.pauseToolBtn . uiBuilder
+
+runToolBtn :: View -> IO ToolButton
+runToolBtn = Builder.runToolBtn . uiBuilder
+
+runSlowToolBtn :: View -> IO ToolButton
+runSlowToolBtn = Builder.runSlowToolBtn . uiBuilder
+
+stopToolBtn :: View -> IO ToolButton
+stopToolBtn = Builder.stopToolBtn . uiBuilder
+
+slowDownToolBtn :: View -> IO ToolButton
+slowDownToolBtn = Builder.slowDownToolBtn . uiBuilder
+
+speedUpToolBtn :: View -> IO ToolButton
+speedUpToolBtn = Builder.speedUpToolBtn . uiBuilder
+
+stepForwardToolBtn :: View -> IO ToolButton
+stepForwardToolBtn = Builder.stepForwardToolBtn . uiBuilder
+
+stepForwardSmallToolBtn :: View -> IO ToolButton
+stepForwardSmallToolBtn = Builder.stepForwardSmallToolBtn . uiBuilder
+
+stepBackToolBtn :: View -> IO ToolButton
+stepBackToolBtn = Builder.stepBackToolBtn . uiBuilder
+
+fullScreenToolBtn :: View -> IO ToolButton
+fullScreenToolBtn = Builder.fullScreenToolBtn . uiBuilder
+
+fullScreenMenuItem :: View -> IO ImageMenuItem
+fullScreenMenuItem = Builder.fullScreenMenuItem . uiBuilder
+
+quitMenuItem :: View -> IO ImageMenuItem
+quitMenuItem = Builder.quitMenuItem . uiBuilder
+
+showFlowChartMenuItem :: View -> IO MenuItem
+showFlowChartMenuItem = Builder.showFlowChartMenuItem . uiBuilder
+
+menuBar :: View -> IO MenuBar
+menuBar = Builder.menuBar . uiBuilder
+
+speedScale :: View -> IO HScale
+speedScale = Builder.speedScale . uiBuilder
+
+infoNotebook :: View -> IO Notebook
+infoNotebook = Builder.infoNotebook . uiBuilder
+
+infoSelNotebook :: View -> IO Notebook
+infoSelNotebook = Builder.infoSelNotebook . uiBuilder
+
+overviewEventBox :: View -> IO EventBox
+overviewEventBox = Builder.overviewEventBox . uiBuilder
+
+infoIconView :: View -> IO IconView
+infoIconView = Builder.infoIconView . uiBuilder
+
+infoTextView :: View -> IO TextView
+infoTextView = Builder.infoTextView . uiBuilder
+
+traceTextView :: View -> IO TextView
+traceTextView = Builder.traceTextView . uiBuilder
+
+statusLbl :: View -> IO Label
+statusLbl = Builder.statusLbl . uiBuilder
+
+-- Flowchart Window
+flowChartWindow :: View -> IO Window
+flowChartWindow = Builder.flowChartWindow . uiBuilder

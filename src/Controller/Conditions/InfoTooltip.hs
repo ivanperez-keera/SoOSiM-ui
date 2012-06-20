@@ -35,7 +35,7 @@ conditionShowInfo cenv = do
              present $ multiCoreStatus $ simGLSystemStatus st
 
   -- Update label text
-  lbl <- statusLbl $ uiBuilder $ view cenv
+  lbl <- statusLbl $ view cenv
   labelSetText lbl $ fromMaybe "" tt
 
 -- | Renders the info relative to a given element (both basic info and a trace)

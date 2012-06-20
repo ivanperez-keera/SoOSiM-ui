@@ -22,7 +22,7 @@ installHandlers cenv = void $
 conditionShowPage :: CEnv -> IO()
 conditionShowPage cenv = do
   hasSelection <- fmap (not . null . selection . simGLSystemStatus) $ readCBMVar $ mcs vw
-  notebook     <- infoNotebook $ uiBuilder vw
+  notebook     <- infoNotebook vw
 
   -- Show notebook page
   let newPage = if hasSelection then 1 else 0

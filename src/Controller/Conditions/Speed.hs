@@ -35,29 +35,29 @@ import View.InitAnimationArea
 -- to the user selection
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  let ui = uiBuilder $ view cenv
+  let vw = view cenv
       pm = model cenv
 
-  run <- runToolBtn ui
+  run <- runToolBtn vw
   run `onToolButtonClicked` conditionRun cenv
 
-  slowRun <- runSlowToolBtn ui
+  slowRun <- runSlowToolBtn vw
   slowRun `onToolButtonClicked` conditionSlowRun cenv
 
-  pause <- pauseToolBtn ui
+  pause <- pauseToolBtn vw
   pause `onToolButtonClicked` conditionPause cenv
 
-  stop <- stopToolBtn ui
+  stop <- stopToolBtn vw
   stop `onToolButtonClicked` conditionStop cenv
 
-  speedUp <- speedUpToolBtn ui
+  speedUp <- speedUpToolBtn vw
   speedUp `onToolButtonClicked` conditionSpeedUp cenv
 
-  slowDown <- slowDownToolBtn ui
+  slowDown <- slowDownToolBtn vw
   slowDown `onToolButtonClicked` conditionSlowDown cenv
 
   -- Handle the speed slider in the status bar
-  hscale <- speedScale ui
+  hscale <- speedScale vw
   hscale `on` valueChanged $ conditionSpeedChanged VM cenv
   onEvent pm SpeedChanged $ conditionSpeedChanged MV cenv
   onEvent pm Initialised  $ conditionSpeedChanged MV cenv
@@ -126,7 +126,7 @@ conditionSlowDown cenv = do
 conditionSpeedChanged :: ConditionDirection -> CEnv -> IO()
 conditionSpeedChanged cd cenv = do
   -- View value
-  hscale <- speedScale ui
+  hscale <- speedScale vw
 
   -- Model value
   curSp <- getter speedField pm
@@ -139,4 +139,4 @@ conditionSpeedChanged cd cenv = do
      VM -> setter speedField pm curV
 
  where pm = model cenv
-       ui = uiBuilder $ view cenv
+       vw = view cenv

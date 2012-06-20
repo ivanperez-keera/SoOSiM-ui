@@ -9,7 +9,7 @@ import Control.Monad
 import Control.Monad.IfElse
 import Data.CBMVar
 import Graphics.UI.Gtk
-import Graphics.UI.Gtk.Helpers.Multiline.TextBufferHelpers
+import Graphics.UI.Gtk.Helpers.Multiline.TextBuffer
 
 -- Local imports
 import CombinedEnvironment
@@ -29,8 +29,8 @@ installHandlers cenv = void $
 conditionShowCompInfo :: CEnv -> IO()
 conditionShowCompInfo cenv = do
  st  <- readCBMVar $ mcs $ view cenv
- bf1 <- textViewGetBuffer <=< infoTextView  $ uiBuilder $ view cenv
- bf2 <- textViewGetBuffer <=< traceTextView $ uiBuilder $ view cenv
+ bf1 <- textViewGetBuffer <=< infoTextView  $ view cenv
+ bf2 <- textViewGetBuffer <=< traceTextView $ view cenv
 
  let sel   = selection $ simGLSystemStatus st
      mcs   = present $ multiCoreStatus $ simGLSystemStatus st

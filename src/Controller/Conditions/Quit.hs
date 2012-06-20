@@ -13,10 +13,10 @@ import CombinedEnvironment
 -- or clicks on Quit in the File menu
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  window <- mainWindow $ uiBuilder $ view cenv
+  window <- mainWindow $ view cenv
   onDestroy window quit
 
-  mn <- quitMenuItem $ uiBuilder $ view cenv
+  mn <- quitMenuItem $ view cenv
   mn `on` menuItemActivate $ quit
 
 -- | Quits the application

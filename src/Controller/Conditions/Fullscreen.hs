@@ -22,7 +22,7 @@ import CombinedEnvironment
 -- menu item or the toolbar icon.
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  w <- mainWindow $ uiBuilder $ view cenv
+  w <- mainWindow $ view cenv
 
   -- Save the new status in the model when it changes
   w `on` windowStateEvent $ do
@@ -31,9 +31,9 @@ installHandlers cenv = void $ do
     return True
 
   -- Toggle fullscreen mode
-  fmi <- fullScreenMenuItem $ uiBuilder $ view cenv
+  fmi <- fullScreenMenuItem $ view cenv
   fmi `on` menuItemActivate $ conditionToggle cenv
-  fmb <- fullScreenToolBtn $ uiBuilder $ view cenv
+  fmb <- fullScreenToolBtn $ view cenv
   fmb `onToolButtonClicked` conditionToggle cenv
 
 -- | Save the new window status in the model
@@ -48,7 +48,7 @@ conditionUpdateModel winfs cenv = do
 conditionToggle :: CEnv -> IO()
 conditionToggle cenv = do
   mfs    <- getter fullscreenField pm
-  window <- mainWindow $ uiBuilder $ view cenv
+  window <- mainWindow $ view cenv
   let toggle = if mfs then windowUnfullscreen else windowFullscreen
   toggle window
  where pm = model cenv

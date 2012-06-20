@@ -17,7 +17,7 @@ import CombinedEnvironment
 -- chooses between basic info and component trace
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
-  iv <- infoIconView $ uiBuilder $ view cenv
+  iv <- infoIconView $ view cenv
   iv `on` selectionChanged $ condition cenv
   model cenv `onEvent` Initialised $ condition cenv
 
@@ -33,4 +33,4 @@ condition cenv = do
   let pageF = maybe 0 (+1) . listToMaybe
   modelViewNotebookSync iv nb pageF
 
- where ui = uiBuilder $ view cenv
+ where ui = view cenv

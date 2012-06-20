@@ -28,7 +28,7 @@ installHandlers cenv = void $ do
 
   stepB <- stepBackToolBtn ui
   stepB `onToolButtonClicked` conditionB cenv
- where ui = uiBuilder $ view cenv
+ where ui = view cenv
 
 -- | Updates the state with the next step only if the system is paused
 conditionF :: CEnv -> IO()
