@@ -7,9 +7,7 @@ import Paths
 readConfigFile :: IO Config
 readConfigFile = do
   cfg <- fmap readConfig . readFile =<< getDataFileName "config"
-  case cfg of
-   Nothing -> return defaultConfig
-   Just x  -> return x
+  return $ fromMaybe defaultConfig cfg
 
 type Config = ColorSpec
 
