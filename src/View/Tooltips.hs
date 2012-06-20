@@ -26,7 +26,7 @@ initialiseTooltips' :: Builder -> Tooltips -> IO ()
 initialiseTooltips' bldr tlts = do
   mapM_ (installTooltip bldr tlts) tooltipsWithIds
  where tooltipsWithIds = zip tooltipsTable identifiers
-       identifiers     = map (("T" ++) . show) [1..]
+       identifiers     = map (("T" ++) . show) ([1..] :: [Int])
  
 -- Installs one tooltip on a tooltips widget using a builder, an accessor from that builder,
 -- a tooltip string and an identifier
@@ -40,15 +40,18 @@ installTooltip bldr tlts ((accessor, string), identifier) = do
 -- | The list of tooltips we know about and use
 tooltipsTable :: [(Builder -> IO Widget, String)]
 tooltipsTable =
- [ (asWidget runToolBtn,         "Run"                             )
- , (asWidget slowDownToolBtn,    "Decrease simulation speed"       )
- , (asWidget speedUpToolBtn,     "Increase simulation speed"       )
- , (asWidget stopToolBtn,        "Stop"                            )
- , (asWidget pauseToolBtn,       "Pause"                           )  
- , (asWidget stepForwardToolBtn, "One step forward"                ) 
- , (asWidget fullScreenToolBtn,  "Toggle fullscreen"               )
- , (asWidget fullScreenMenuItem, "Toggle fullscreen"               )
- , (asWidget speedScale,         "Simulation speed (steps/second)" )
+ [ (asWidget runToolBtn,              "Run"                             )
+ , (asWidget runSlowToolBtn,          "Run using small steps"           )
+ , (asWidget slowDownToolBtn,         "Decrease simulation speed"       )
+ , (asWidget speedUpToolBtn,          "Increase simulation speed"       )
+ , (asWidget stopToolBtn,             "Stop"                            )
+ , (asWidget pauseToolBtn,            "Pause"                           )  
+ , (asWidget stepBackToolBtn,         "One step back"                   ) 
+ , (asWidget stepForwardToolBtn,      "One step forward"                ) 
+ , (asWidget stepForwardSmallToolBtn, "One small step forward"          ) 
+ , (asWidget fullScreenToolBtn,       "Toggle fullscreen"               )
+ , (asWidget fullScreenMenuItem,      "Toggle fullscreen"               )
+ , (asWidget speedScale,              "Simulation speed (steps/second)" )
  ]
  where -- Transforms an accessor of a type in WidgetClass into a widget
        -- accessor
