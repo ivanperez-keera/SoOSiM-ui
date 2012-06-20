@@ -64,8 +64,8 @@ Executable SoOSiM-ui
                , glade
                , gloss-gtk
                , keera-callbacks
-               , gtk-helpers >= 0.0.3
-               , SoOSiM
+               , gtk-helpers     >= 0.0.3
+               , SoOSiM          == 0.1
 
                , base >= 4.0 && < 5.0
                , ghc  
