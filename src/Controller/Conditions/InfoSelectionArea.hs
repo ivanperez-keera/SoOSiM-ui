@@ -6,7 +6,9 @@ module Controller.Conditions.InfoSelectionArea
 
 -- External imports
 import Control.Monad
+import Data.Maybe
 import Graphics.UI.Gtk
+import Graphics.UI.Gtk.Helpers.ModelViewNotebookSync
 
 -- Local imports
 import CombinedEnvironment
@@ -22,13 +24,13 @@ installHandlers cenv = void $ do
 -- | Shows appropriate page based on current selection
 condition :: CEnv -> IO()
 condition cenv = do
-  iv        <- infoIconView ui
-  nb        <- infoSelNotebook ui
-  (path, _) <- iconViewGetCursor iv
-  let page = case path of { [x] -> x + 1; _ -> 0 }
-  
-  notebookSetCurrentPage nb page
-  -- case path of
-  --  [x] -> notebookSetCurrentPage nb (x + 1)
-  --  _   -> notebookSetCurrentPage nb 0
+
+  -- Get widgets
+  iv <- infoIconView ui
+  nb <- infoSelNotebook ui
+
+  -- Calculate page number and show it
+  let pageF = maybe 0 (+1) . listToMaybe
+  modelViewNotebookSync iv nb pageF
+
  where ui = uiBuilder $ view cenv
