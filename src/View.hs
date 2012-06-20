@@ -2,8 +2,8 @@
 module View
   ( module View
   , module Exported
-  , SimGlVar
-  , SimGlSt
+  , SimGLVar
+  , SimGLState(..)
   )
   where
 
@@ -18,6 +18,7 @@ import Hails.MVC.View.GtkView as Exported
 import Config.Config
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
+import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 import Model.SystemStatus
 import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
@@ -35,7 +36,7 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: SimGlVar
+  , mcs          :: SimGLVar
   }
 
 -- | Initialised the glade GUI and all the view components that are not
@@ -48,17 +49,18 @@ createView = do
 
   bldr <- loadInterface
   ss   <- simstate 
-  let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
-  msc  <- newCBMVar (emptySystemStatus, ss, initialViewState, [])
+  initialMcs <- updateFromSimState emptyMultiCoreStatus ss
+  let initialSystemStatus = SystemStatus (historyNew initialMcs) []
+  msc  <- newCBMVar $ SimGLState initialSystemStatus ss initialViewState []
 
-  w <- window1 bldr
+  w <- mainWindow bldr
   widgetShowAll w
 
   initialiseAnimationArea cfg msc bldr
 
   initIconsInfoArea bldr
 
-  _ <- initialiseTooltips bldr
+  initialiseTooltips bldr
 
   return
     View

@@ -1,9 +1,9 @@
 {-# LANGUAGE PackageImports #-}
 module Config.Preferences where
 
+import Config.Config
 import "gloss-gtk" Graphics.Gloss
 import Graphics.Diagrams.MultiCoreStatus
-import Config.Config
 
 -- | Default angle of arrow heads (in pi-radians)
 arrowDegrees :: Float
@@ -34,3 +34,34 @@ runningElementColor (_,_,_,(_,x)) False Idle    = makeColorT x
 
 makeColorT :: Color4 -> Color
 makeColorT (r,g,b,a) = makeColor r g b a
+
+type ViewState = (Float, Point)
+
+-- | Initial zoom and position
+initialViewState :: ViewState
+initialViewState = (0.5, (-400, -100))
+
+stdZoomStep :: Float
+stdZoomStep = 0.8
+
+initialAnimationSize :: (Int, Int)
+initialAnimationSize = (800, 600)
+
+initialThumbnailSize :: (Int, Int)
+initialThumbnailSize = (200, 150)
+
+-- | Default thumbnail zoom level
+thumbScale :: Float
+thumbScale = 0.05
+
+-- | Thumbnail base coords
+thumbCoords :: Point
+thumbCoords = (thumbX, thumbY)
+
+-- | Thumbnail base X coord
+thumbX :: Float
+thumbX = (-90)
+
+-- | Thumbnail base Y coord
+thumbY :: Float
+thumbY = 0

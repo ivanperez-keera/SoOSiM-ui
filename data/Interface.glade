@@ -18,6 +18,16 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkWindow" id="flowChartWindow">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="label12">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">To be completed</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="image20">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -28,7 +38,7 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-close</property>
   </object>
-  <object class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="mainWindow">
     <property name="width_request">1024</property>
     <property name="height_request">768</property>
     <property name="can_focus">False</property>
@@ -83,6 +93,15 @@
                     <property name="can_focus">False</property>
                     <property name="ubuntu_local">True</property>
                     <child>
+                      <object class="GtkMenuItem" id="showFlowChartMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="label" translatable="yes">Show flowchart</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="fullScreenMenuItem">
                         <property name="label">gtk-fullscreen</property>
                         <property name="visible">True</property>
@@ -115,7 +134,7 @@
                 <property name="can_focus">False</property>
                 <property name="has_tooltip">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">toolbutton8</property>
+                <property name="label" translatable="yes">Fullscreen</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-fullscreen</property>
               </object>
@@ -262,7 +281,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkViewport" id="viewport1">
+              <object class="GtkViewport" id="animationViewport">
                 <property name="width_request">800</property>
                 <property name="height_request">600</property>
                 <property name="visible">True</property>
@@ -307,7 +326,7 @@
                                 <property name="left_padding">12</property>
                                 <property name="right_padding">10</property>
                                 <child>
-                                  <object class="GtkNotebook" id="notebook1">
+                                  <object class="GtkNotebook" id="infoNotebook">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="tab_pos">left</property>
@@ -668,7 +687,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHScale" id="hscale1">
+                  <object class="GtkHScale" id="speedScale">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

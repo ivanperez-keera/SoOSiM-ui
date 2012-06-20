@@ -57,15 +57,14 @@ installHandlers cenv = void $ do
   slowDown `onToolButtonClicked` conditionSlowDown cenv
 
   -- Handle the speed slider in the status bar
-  hscale <- hscale1 ui
+  hscale <- speedScale ui
   hscale `on` valueChanged $ conditionSpeedChanged VM cenv
   onEvent pm SpeedChanged $ conditionSpeedChanged MV cenv
-  onEvent pm Initialised $ conditionSpeedChanged MV cenv
+  onEvent pm Initialised  $ conditionSpeedChanged MV cenv
 
 -- | Sets the system as running
 conditionRun :: CEnv -> IO()
-conditionRun cenv =
-  setter statusField pm Running
+conditionRun cenv = setter statusField pm Running
  where pm = model cenv
 
 conditionSlowRun :: CEnv -> IO ()
@@ -77,12 +76,20 @@ conditionSlowRun cenv =
 conditionPause :: CEnv -> IO()
 conditionPause cenv = do
   st <- getter statusField pm
-  case st of
-   Running -> setter statusField pm Paused
-   SlowRunning -> setter statusField pm Paused
-   Paused  -> setter statusField pm Running
-   Stopped -> return ()
+-- <<<<<<< HEAD
+--   case st of
+--    Running -> setter statusField pm Paused
+--    SlowRunning -> setter statusField pm Paused
+--    Paused  -> setter statusField pm Running
+--    Stopped -> return ()
+-- =======
+  let st' = pauseSt st
+  when (st /= st') $ setter statusField pm st'
+-- >>>>>>> b9d5608c07bc9f8f4ea2328106ce4548ac199fa9
  where pm = model cenv
+       pauseSt Running = Paused
+       pauseSt Paused  = Running
+       pauseSt x       = x
 
 -- | Halts and restarts the simulation
 conditionStop :: CEnv -> IO()
@@ -92,7 +99,7 @@ conditionStop cenv = do
   -- Starts a fresh new simulation
   ss <- simstate
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
-      mcs'              = (emptySystemStatus, ss, initialViewState, [])
+      mcs'              = SimGLState emptySystemStatus ss initialViewState []
   modifyCBMVar mcsRef $ \_ -> return mcs'
 
   setter statusField pm Paused
@@ -119,7 +126,7 @@ conditionSlowDown cenv = do
 conditionSpeedChanged :: ConditionDirection -> CEnv -> IO()
 conditionSpeedChanged cd cenv = do
   -- View value
-  hscale <- hscale1 ui
+  hscale <- speedScale ui
 
   -- Model value
   curSp <- getter speedField pm

@@ -48,10 +48,16 @@ _STRING_COLUMN = makeColumnIdString 1
 -- | The icon list with proper sizes
 getIconList :: IO [(Pixbuf, String)]
 getIconList = mapM f icons
- where f (x,y) = getDataFileName x >>= \w -> pixbufNewFromFileAtSize w 48 48 >>= \pb -> return (pb, y)
+ where f (x,y) = do w  <- getDataFileName x
+                    pb <- pixbufNewFromFileAtSize w stdIconSize stdIconSize
+                    return (pb, y)
 
 -- | The list of icons and their labels
 icons :: [(String, String)]
 icons = [ ("images/icons/info.png",  "Basic info")
         , ("images/icons/trace.png", "Trace")
         ]
+
+-- | The icon size for these icons
+stdIconSize :: Int
+stdIconSize = 48

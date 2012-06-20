@@ -9,6 +9,9 @@ module Graphics.Diagrams.Types
    , addPos
    , subPos
    , multPos
+   , inArea
+   , unScale
+
    -- * Sizes
    , Size
    -- * Areas (boxes)
@@ -65,3 +68,13 @@ subPos (p11,p12) (p21, p22) = (p11-p21, p12-p22)
 -- | Multiplies two positions
 multPos :: Position -> Position -> Position
 multPos (p11,p12) (p21, p22) = (p11*p21, p12*p22)
+
+inArea :: Position -> (Position, Size) -> Bool
+inArea (p11, p12) ((p21, p22), (w,h)) =
+  p11 >= p21 && p11 <= (p21 + w)
+  && p12 >= p22 && p12 <= (p22 + h)
+
+-- | Unscales a point (adjusts value from user input dimensions to gloss
+-- dimensions)
+unScale :: Float -> Position -> Position
+unScale progScale p = multPos p (1 / progScale, 1 / progScale)

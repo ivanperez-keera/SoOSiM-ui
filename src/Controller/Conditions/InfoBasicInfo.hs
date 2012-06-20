@@ -13,11 +13,10 @@ import Graphics.UI.Gtk.Helpers.Multiline.TextBufferHelpers
 
 -- Local imports
 import CombinedEnvironment
-import Data.Tuple4
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
-import Model.SystemStatus
 import Graphics.Diagrams.Types
+import Model.SystemStatus
 
 -- | Selects the appropriate page in the info notebook as the user
 -- chooses between basic info and component trace
@@ -33,9 +32,8 @@ conditionShowCompInfo cenv = do
  bf1 <- textViewGetBuffer <=< infoTextView  $ uiBuilder $ view cenv
  bf2 <- textViewGetBuffer <=< traceTextView $ uiBuilder $ view cenv
 
- let sel   = selection $ fst4 st
-     mcs   = present $ multiCoreStatus $ fst4 st
-     -- simSt = snd4 st
+ let sel   = selection $ simGLSystemStatus st
+     mcs   = present $ multiCoreStatus $ simGLSystemStatus st
 
  awhen (getElemInfo sel mcs) $ \(ni,nt) -> do
    textBufferUpdateText bf1 ni
@@ -52,8 +50,7 @@ getElemInfo _     _  = Nothing
 
 -- | Gets the node info 
 getNodeInfo :: Name -> MultiCoreStatus -> Maybe (String, String)
-getNodeInfo n _ss =
-   Just (binfo, tinfo)
+getNodeInfo n _ss = Just (binfo, tinfo)
   where binfo = "Node: " ++ n
         tinfo = "Traces are only available for components"
 
@@ -65,10 +62,9 @@ getCompInfo nn cn ss = do
 
 -- | Renders two strings with the basic component info and the trace
 showCompInfo :: Name -> Name -> RunningElement -> (String, String)
-showCompInfo nn cn cc =
-  let bi  = showCompBasicInfo nn cn cc
-      msg = showCompTrace nn cn cc
-  in (bi, msg)
+showCompInfo nn cn cc = (bi, msg)
+ where bi  = showCompBasicInfo nn cn cc
+       msg = showCompTrace nn cn cc
 
 -- | Creates a string with the basic component info for a given S.ComponentContext
 showCompBasicInfo :: Name -> Name -> RunningElement -> String

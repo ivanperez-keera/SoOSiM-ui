@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
--- | GUI loading and access to GUI elements from a glade builder
+-- | GUI loading and accessing GUI elements from a glade builder
 module View.Objects where
 
 -- External imports
@@ -14,12 +14,8 @@ loadInterface :: IO Builder
 loadInterface = loadDefaultInterface getDataFileName
 
 -- gtkBuilderAccessor element name type name
-gtkBuilderAccessor "window1"              "Window"
-gtkBuilderAccessor "scrolledwindow1"      "ScrolledWindow"
-gtkBuilderAccessor "viewport1"            "Viewport"
-gtkBuilderAccessor "viewport2"            "Viewport"
-gtkBuilderAccessor "image1"               "Image"
-gtkBuilderAccessor "image2"               "Image"
+gtkBuilderAccessor "mainWindow"           "Window"
+gtkBuilderAccessor "animationViewport"    "Viewport"
 gtkBuilderAccessor "pauseToolBtn"         "ToolButton"
 gtkBuilderAccessor "runToolBtn"           "ToolButton"
 gtkBuilderAccessor "runSlowToolBtn"       "ToolButton"
@@ -32,14 +28,16 @@ gtkBuilderAccessor "stepBackToolBtn"      "ToolButton"
 gtkBuilderAccessor "fullScreenToolBtn"    "ToolButton"
 gtkBuilderAccessor "fullScreenMenuItem"   "ImageMenuItem"
 gtkBuilderAccessor "quitMenuItem"         "ImageMenuItem"
+gtkBuilderAccessor "showFlowChartMenuItem" "MenuItem"
 gtkBuilderAccessor "menuBar"              "MenuBar"
-gtkBuilderAccessor "hscale1"              "HScale"
-gtkBuilderAccessor "vpaned1"              "VPaned"
-gtkBuilderAccessor "notebook1"            "Notebook"
-gtkBuilderAccessor "notebook2"            "Notebook"
+gtkBuilderAccessor "speedScale"           "HScale"
+gtkBuilderAccessor "infoNotebook"         "Notebook"
 gtkBuilderAccessor "infoSelNotebook"      "Notebook"
 gtkBuilderAccessor "overviewEventBox"     "EventBox"
 gtkBuilderAccessor "infoIconView"         "IconView"
 gtkBuilderAccessor "infoTextView"         "TextView"
 gtkBuilderAccessor "traceTextView"        "TextView"
 gtkBuilderAccessor "statusLbl"            "Label"
+
+-- Flowchart Window
+gtkBuilderAccessor "flowChartWindow"   "Window"

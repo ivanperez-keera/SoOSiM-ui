@@ -47,7 +47,8 @@ tooltipsTable =
  , (asWidget pauseToolBtn,       "Pause"                           )  
  , (asWidget stepForwardToolBtn, "One step forward"                ) 
  , (asWidget fullScreenToolBtn,  "Toggle fullscreen"               )
- , (asWidget hscale1,            "Simulation speed (steps/second)" )
+ , (asWidget fullScreenMenuItem, "Toggle fullscreen"               )
+ , (asWidget speedScale,         "Simulation speed (steps/second)" )
  ]
  where -- Transforms an accessor of a type in WidgetClass into a widget
        -- accessor
