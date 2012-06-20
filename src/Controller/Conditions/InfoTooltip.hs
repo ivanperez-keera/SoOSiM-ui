@@ -4,15 +4,11 @@ module Controller.Conditions.InfoTooltip
   where
 
 -- External imports
-import           Control.Concurrent.STM
-import           Control.Monad
-import           Data.CBMVar
-import qualified Data.IntMap            as I
-import           Data.List
-import           Data.Maybe
-import           Data.Tuple4
-import           Graphics.UI.Gtk
-import qualified SoOSiM.Types           as S
+import Control.Monad
+import Data.CBMVar
+import Data.Maybe
+import Data.Tuple4
+import Graphics.UI.Gtk
 
 -- Internal imports
 import CombinedEnvironment
@@ -54,10 +50,10 @@ getCompInfo nn cn ss = do
 
 -- | Renders two strings with the basic component info and the trace
 showCompInfo :: Name -> Name -> RunningElement -> String
-showCompInfo nn cn re = 
+showCompInfo _nn cn re = 
   map (\x -> if x == '\n' then ' ' else x) $ unlines
    [ show cn
-   , ": "   ++ cKind
+   , ": " ++ cKind
    , "| " ++ st
    , "| Cycle count: " ++ show (compCyclesRunning stats) ++ "(R)"
      ++ "/" ++ show (compCyclesWaiting stats) ++ "(W)"

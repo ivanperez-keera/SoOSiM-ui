@@ -5,15 +5,11 @@ module Controller.Conditions.InfoBasicInfo
  where
 
 -- External imports
-import           Control.Concurrent.STM
-import           Control.Monad
-import           Control.Monad.IfElse
-import           Data.CBMVar
-import qualified Data.IntMap            as I
-import           Data.List
-import           Graphics.UI.Gtk
-import           Graphics.UI.Gtk.Helpers.Multiline.TextBufferHelpers
-import qualified SoOSiM.Types           as S
+import Control.Monad
+import Control.Monad.IfElse
+import Data.CBMVar
+import Graphics.UI.Gtk
+import Graphics.UI.Gtk.Helpers.Multiline.TextBufferHelpers
 
 -- Local imports
 import CombinedEnvironment
