@@ -1,4 +1,4 @@
--- | Reacts to changes in the selection in the gloss diagram
+-- | Reacts to changes in the selection in the diagram
 module Controller.Conditions.InfoTooltip
    (installHandlers)
   where
@@ -20,7 +20,7 @@ import Data.History
 import Model.SystemStatus
 import Graphics.Diagrams.MultiCoreStatus
 
--- | Handles changes in the box selection in the gloss diagram
+-- | Handles changes in the box selection in the diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
    installCallbackCBMVar mcsRef $ conditionShowInfo cenv

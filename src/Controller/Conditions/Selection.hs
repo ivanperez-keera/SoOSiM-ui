@@ -1,4 +1,4 @@
--- | Reacts to changes in the selection in the gloss diagram
+-- | Reacts to changes in the selection in the diagram
 module Controller.Conditions.Selection
    (installHandlers)
   where
@@ -12,7 +12,7 @@ import Graphics.UI.Gtk
 import CombinedEnvironment
 import Model.SystemStatus
 
--- | Handles changes in the box selection in the gloss diagram
+-- | Handles changes in the box selection in the diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
   installCallbackCBMVar mcsRef $ conditionShowPage cenv
