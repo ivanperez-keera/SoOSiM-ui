@@ -29,12 +29,11 @@ modelUpdateNextStep cenv = do
 
 modelUpdateNextStepWith :: CEnv -> ((SystemStatus, SimState) -> IO (SystemStatus, SimState)) -> IO ()
 modelUpdateNextStepWith cenv nextStepCalc =
-  modifierIO simStateField pm $ maybeM $ \state -> do
+  modifierIO simStateField (model cenv) $ maybeM $ \state -> do
      (a', b') <- nextStepCalc (simGLSystemStatus state, simGLSimState state)
      return $ state { simGLSystemStatus = a'
                     , simGLSimState     = b'
                     }
- where pm = model cenv
 
 -- FIXME: To be moved to monad extra (or Control.Monad.IfElse)
 maybeM :: Monad m => (a -> m b) -> Maybe a -> m (Maybe b)

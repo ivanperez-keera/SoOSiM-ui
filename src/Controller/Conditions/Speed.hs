@@ -16,10 +16,9 @@ module Controller.Conditions.Speed
 
 -- External imports
 import Control.Monad
-import GHC.Float
 import Graphics.UI.Gtk
+import Hails.Graphics.UI.Gtk.Reactive
 import Hails.MVC.Model.ProtectedModel.Reactive
-import Hails.MVC.Controller.ConditionDirection
 
 -- Internal imports
 import CombinedEnvironment
@@ -34,7 +33,6 @@ import SoOSiM.Samples.Initializer
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $ do
   let vw = view cenv
-      pm = model cenv
 
   run <- runToolBtn vw
   run `onToolButtonClicked` conditionRun cenv
@@ -55,11 +53,9 @@ installHandlers cenv = void $ do
   slowDown `onToolButtonClicked` conditionSlowDown cenv
 
   -- Handle the speed slider in the status bar
-  hscale <- speedScale vw
-  hscale `on` valueChanged $ conditionSpeedChanged VM cenv
-  onEvent pm SpeedChanged $ conditionSpeedChanged MV cenv
-  onEvent pm Initialised  $ conditionSpeedChanged MV cenv
-
+  hscale <- fmap reactiveScale $ speedScale vw
+  installCondition cenv (hscale =:= speedField)
+  
 -- | Sets the system as running
 conditionRun :: CEnv -> IO()
 conditionRun cenv = setter statusField (model cenv) Running
@@ -97,24 +93,3 @@ conditionSpeedUp cenv = modifier speedField (model cenv) (*2)
 conditionSlowDown :: CEnv -> IO()
 conditionSlowDown cenv = modifier speedField (model cenv) slowDown
  where slowDown curSpeed = if curSpeed >= 0.2 then curSpeed / 2 else curSpeed
-
--- | Maintains the coherence between the simulation's speed and the slider's
---
--- FIXME: To be implemented using (=:=)
-conditionSpeedChanged :: ConditionDirection -> CEnv -> IO()
-conditionSpeedChanged cd cenv = do
-  -- View value
-  hscale <- speedScale vw
-
-  -- Model value
-  curSp <- getter speedField pm
-  curV  <- fmap double2Float $ get hscale rangeValue
-
-  -- Update in the appropriate direction when values differ
-  when (curV /= curSp) $
-    case cd of
-     MV -> set hscale [ rangeValue := float2Double curSp ]
-     VM -> setter speedField pm curV
-
- where pm = model cenv
-       vw = view cenv
