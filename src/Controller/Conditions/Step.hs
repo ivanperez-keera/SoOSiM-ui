@@ -5,7 +5,6 @@ module Controller.Conditions.Step
 
 -- External imports
 import Control.Monad
-import Control.Monad.IfElse
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
 
@@ -33,50 +32,24 @@ installHandlers cenv = void $ do
 -- | Updates the state with the next step only if the system is paused
 conditionF :: CEnv -> IO()
 conditionF cenv = void $ do
-  st <- getter statusField pm
-
-  when (st == Paused) $ do
-    stateM <- getter simStateField pm
-    awhen stateM $ \state -> do
-      (a',b') <- nextStep (simGLSystemStatus state, simGLSimState state)
-      setter simStateField pm $ Just $
-        state { simGLSystemStatus = a'
-              , simGLSimState     = b'
-              }
-
-  where -- mcsRef = mcs (view cenv)
-        pm     = model cenv
+  st <- getter statusField $ model cenv
+  when (st == Paused) $ modelUpdateNextStepWith cenv nextStep
 
 -- | Updates the state with the next step only if the system is paused
 conditionFS :: CEnv -> IO()
 conditionFS cenv = void $ do
-  st <- getter statusField pm
+  st <- getter statusField $ model cenv
+  when (st == Paused) $ modelUpdateNextStepWith cenv nextStepSmall
 
-  when (st == Paused) $ do
-    stateM <- getter simStateField pm
-    awhen stateM $ \state -> do
-      (a',b') <- nextStepSmall (simGLSystemStatus state, simGLSimState state)
-      setter simStateField pm $ Just $
-        state { simGLSystemStatus = a'
-              , simGLSimState     = b'
-              }
-
-  where -- mcsRef = mcs (view cenv)
-        pm     = model cenv
-
+-- | Go back one step
 conditionB :: CEnv -> IO()
 conditionB cenv = void $ do
   st <- getter statusField pm
+  when (st == Paused) $ modifier simStateField pm (fmap previousState)
+ where pm = model cenv
 
-  when (st == Paused) $ do
-    stateM <- getter simStateField pm
-    awhen stateM $ \state ->
-    -- modifyCBMVar mcsRef $ \state -> 
-      setter simStateField pm $ Just $
-        state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
-
-  where -- mcsRef = mcs (view cenv)
-        pm     = model cenv
+previousState :: SimGLState -> SimGLState
+previousState state = state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
 
 previousStatus :: SystemStatus -> SystemStatus
 previousStatus (SystemStatus hist sel) = (SystemStatus hist' sel)

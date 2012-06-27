@@ -62,25 +62,18 @@ installHandlers cenv = void $ do
 
 -- | Sets the system as running
 conditionRun :: CEnv -> IO()
-conditionRun cenv = setter statusField pm Running
- where pm = model cenv
+conditionRun cenv = setter statusField (model cenv) Running
 
 conditionSlowRun :: CEnv -> IO ()
-conditionSlowRun cenv =
-  setter statusField pm SlowRunning
- where pm = model cenv
+conditionSlowRun cenv = setter statusField (model cenv) SlowRunning
 
 -- | If the system is running or paused, it toggles the state
 conditionPause :: CEnv -> IO()
-conditionPause cenv = do
-  st <- getter statusField pm
-  let st' = pauseSt st
-  when (st /= st') $ setter statusField pm st'
- where pm = model cenv
-       pauseSt Running     = Paused
-       pauseSt SlowRunning = Paused
-       pauseSt Paused      = Running
-       pauseSt x           = x
+conditionPause cenv = modifier statusField (model cenv) togglePauseSt
+ where togglePauseSt Running     = Paused
+       togglePauseSt SlowRunning = Paused
+       togglePauseSt Paused      = Running
+       togglePauseSt x           = x
 
 -- | Halts and restarts the simulation
 conditionStop :: CEnv -> IO()
@@ -92,25 +85,18 @@ conditionStop cenv = do
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
       mcs'              = SimGLState emptySystemStatus ss []
   setter simStateField pm (Just mcs')
-  -- modifyCBMVar mcsRef $ \_ -> return mcs'
 
-  setter statusField pm Paused
- where pm     = model cenv
-       -- mcsRef = mcs $ view cenv
+  setter statusField  pm Paused
+ where pm = model cenv
 
 -- | Increases the simulation speed by a factor of 2
 conditionSpeedUp :: CEnv -> IO()
-conditionSpeedUp cenv = do
-  curSp <- getter speedField pm
-  setter speedField pm (curSp * 2)
- where pm = model cenv
+conditionSpeedUp cenv = modifier speedField (model cenv) (*2)
 
--- | Decreases the simulation speed by a factor of 2
+-- | Decreases the simulation speed by a factor of 2, down to a minimum of 0.1
 conditionSlowDown :: CEnv -> IO()
-conditionSlowDown cenv = do
-  curSp <- getter speedField pm
-  when (curSp >= 0.2) $ setter speedField pm (curSp / 2)
- where pm = model cenv
+conditionSlowDown cenv = modifier speedField (model cenv) slowDown
+ where slowDown curSpeed = if curSpeed >= 0.2 then curSpeed / 2 else curSpeed
 
 -- | Maintains the coherence between the simulation's speed and the slider's
 --
