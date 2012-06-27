@@ -30,13 +30,13 @@ type SimGLVar   = CBMVar SimGLState
 data SimGLState = SimGLState
   { simGLSystemStatus :: SystemStatus
   , simGLSimState     :: SimState
-  , simGLViewState    :: ViewState
+  -- , simGLViewState    :: ViewState
   , simGLSelection    :: [Name]
   }
 
 -- | In the gloss internal state we just keep the pending events
 --   and the current scaling
-data State = State [Event] Float Point (Maybe Point)
+data State = State [Event]
 
 -- | Convert the state into a picture.
 makeImage :: Config -> SimGLVar -> Float -> Point -> IO Picture

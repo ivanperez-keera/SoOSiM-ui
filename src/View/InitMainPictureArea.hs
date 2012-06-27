@@ -9,11 +9,12 @@ import             Data.CBMVar
 import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
-import             Graphics.UI.Gtk (ContainerClass)
+import             Graphics.UI.Gtk (ContainerClass, Widget, toWidget)
 
 -- Local imports
 import Config.Config
 import Config.Preferences
+import Graphics.UI.Gtk.Display.GlossIO
 import Graphics.Zoom
 import Model.SystemStatus
 import View.Animation
@@ -27,84 +28,32 @@ import Graphics.Diagrams.Positioned.PositionedDiagram
 import Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
 import Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
 
--- | Initialises the gloss animation
-drawPic :: ContainerClass a => Config -> SimGLVar -> a -> IO ()
-drawPic cfg mcs e =
-  playIO (InWidget e initialAnimationSize) white fps state
-         (makePicture cfg mcs) queueEvent (stepWorld mcs)
- where state = State [] (fst initialViewState) (snd initialViewState) Nothing
+drawPic :: Config -> SimGLVar -> IO GlossIO
+drawPic cfg mcs = do
+  gloss <- glossIONewWithGame 0.5 (-400, -100) initialAnimationSize fps state
+             (makePicture cfg mcs) queueEvent (stepWorld mcs)
+  return gloss
+ where state = (State [])
        fps   = 100
 
 -- | Convert the state into a picture.
 makePicture :: Config -> SimGLVar -> State -> IO Picture
-makePicture cfg st oldSt = makeImage cfg st sc orig
- where (State _ sc orig _) = oldSt
+makePicture cfg st oldSt = makeImage cfg st 1.0 (0,0)
 
 -- * Main picture step processing
 
 -- Process the event queue and return an empty state
 stepWorld :: SimGLVar -> Float -> State -> IO State
-stepWorld mcsRef _ (State evs sc o no) = do
+stepWorld mcsRef _ (State evs) = do
   mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
-  modifyCBMVar mcsRef (\state -> return (state { simGLViewState = (sc, o) }))
-  return (State [] sc o no)
+  return (State [])
 
 -- * Main picture event handlers
   
 -- | Queues an input event into the state's event queue
 -- to be processed later
 queueEvent :: Event -> State -> State
-queueEvent event state
-  -- Adds a click event to the event queue
-  | EventKey (MouseButton LeftButton) Up m p <- event
-  , State evs sc o no <- state
-  = let p'     = unScale sc $ subPos p o 
-        event' = EventKey (MouseButton LeftButton) Up m p'
-    in State (evs ++ [event']) sc o no
-
-  -- Only Down presses will be received for double clicks
-  | EventKey (MouseButton LeftButtonDouble) Down m p <- event
-  , State evs sc o no <- state
-  = let p'     = unScale sc $ subPos p o 
-        event' = EventKey (MouseButton LeftButtonDouble) Up m p'
-    in State (evs ++ [event']) sc o no
-
-  -- Zoom in
-  | EventKey (MouseButton WheelUp) Down _ p <- event
-  , State evs sc o no <- state
-  , (sc',o') <- zoomWith stdZoomStep p (sc, o)
-  = State evs sc' o' no
-
-  -- Zoom out
-  | EventKey (MouseButton WheelDown) Down _ p <- event
-  , State evs sc o no <- state
-  , (sc',o') <- zoomWith (1/stdZoomStep) p (sc, o)
-  = State evs sc' o' no
-
-  -- Start moving
-  | EventKey (MouseButton RightButton) Down _ p <- event
-  , State evs sc o _ <- state
-  = State evs sc o (Just p)
-
-  -- Finish moving
-  | EventKey (MouseButton RightButton) Up _ _ <- event
-  , State evs sc p _ <- state
-  = State evs sc p Nothing
-
-  -- Keep moving
-  | EventMotion p <- event
-  , State evs sc o (Just p') <- state
-  = State evs sc (addPos o (subPos p p')) (Just p)
-
-  -- Moving over the diagram
-  | EventMotion p <- event
-  , State evs sc o Nothing <- state
-  = let p'     = unScale sc $ subPos p o 
-        event' = EventMotion p'
-    in State (evs ++ [event']) sc o Nothing
-       
-  | otherwise
-  = state
+queueEvent event (State evs) = State (evs ++ [event])
 
 -- | Handle mouse click and motion events.
 handleEvent :: Event -> SimGLState -> SimGLState

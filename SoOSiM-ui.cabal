@@ -60,6 +60,7 @@ Executable SoOSiM-ui
   
   -- Packages needed in order to build this package.
   Build-depends: hails
+               , glib
                , gtk
                , glade
                , gloss-gtk

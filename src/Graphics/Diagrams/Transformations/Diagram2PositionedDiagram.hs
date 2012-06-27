@@ -24,10 +24,9 @@ transformDiagram (Diagram boxes arrows) = PositionedDiagram pboxes parrows
 
 -- | Transforms a box into a box with a position and a size
 transformBox :: Box -> PBox
-transformBox (Box s k c)        = PBox s k (0,0) (w, fontHeight) c
+transformBox (Box s k c) = PBox s k (0,0) (w, fontHeight) c
  where l = length (s ++ " : " ++ k)
        w = 2 * boxPadding + (fontWidth * fromIntegral l)
-
 transformBox (GroupBox s g c e) = PGroupBox s (0,0) (wM,hP) g'' c e
  where g'      = map transformBox g
        g''     = pboxColumnLayout boxSep w HCenter g'

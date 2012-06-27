@@ -51,7 +51,7 @@ createView = do
   ss   <- simstate 
   initialMcs <- updateFromSimState emptyMultiCoreStatus ss
   let initialSystemStatus = SystemStatus (historyNew initialMcs) []
-  msc  <- newCBMVar $ SimGLState initialSystemStatus ss initialViewState []
+  msc  <- newCBMVar $ SimGLState initialSystemStatus ss []
 
   w <- Builder.mainWindow bldr
   widgetShowAll w
@@ -64,8 +64,8 @@ createView = do
 
   return
     View
-      { uiBuilder    = bldr
-      , mcs          = msc
+      { uiBuilder = bldr
+      , mcs       = msc
       }
 
 mainWindow :: View -> IO Window

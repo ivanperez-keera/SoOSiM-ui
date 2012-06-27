@@ -6,32 +6,37 @@ module View.InitThumbnail where
 import             Data.CBMVar
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
-import             Graphics.UI.Gtk (ContainerClass, widgetGetSize)
+import             Graphics.UI.Gtk (WidgetClass, widgetGetSize)
 
 -- Local imports
 import Config.Config
 import Config.Preferences
+import Graphics.UI.Gtk.Display.GlossIO
 import View.Animation
 
 -- Local imports: basic types
 import Graphics.Diagrams.Types ( BoxDescription )
 import Graphics.Gloss.AdvancedShapes.Boxes
 
--- | Draws a thumbnail of the main animation
-drawThumb :: (ContainerClass a, ContainerClass b) => Config -> SimGLVar -> a -> b -> IO()
-drawThumb cfg mcs e be =
-  animateIO (InWidget e initialThumbnailSize)
-    white (makeThumbnail cfg (widgetGetSize be) mcs)
+-- | Draws a thumbnail of the main animation. The thumbnail has the same
+-- picture but includes a red box showing the area that is shown on the main
+-- panel. It's also not sensitive to user input.
+drawThumb :: GlossIO -> Config -> SimGLVar -> IO GlossIO
+drawThumb glossMain cfg mcs =  do
+  gloss <- glossIONewWithAnimation initialThumbnailSize (makeThumbnail cfg glossMain mcs)
+  glossIOSetSensitive gloss False
+  return gloss
 
 -- | Convert our state to a smaller thumbnail 
-makeThumbnail :: Config -> IO (Int, Int) -> SimGLVar -> a -> IO Picture
-makeThumbnail cfg getSz st _ = do
-  pcs <- makeImage cfg st thumbScale thumbCoords
-  st' <- readCBMVar st
-  sz  <- getSz
+makeThumbnail :: Config -> GlossIO -> SimGLVar -> a -> IO Picture
+makeThumbnail cfg glossMain st _ = do
+  pcs  <- makeImage cfg st thumbScale thumbCoords
+  sz   <- widgetGetSize glossMain
+  zoom <- glossIOGetZoom glossMain
+  diff <- glossIOGetOrig glossMain
   return $ Pictures 
              [ pcs
-             , translate thumbX thumbY $ paintZoomBox (simGLViewState st') sz 
+             , translate thumbX thumbY $ paintZoomBox (zoom, diff) sz 
              ]
 
 -- Paints the zoom box for a given scale, origin and container size

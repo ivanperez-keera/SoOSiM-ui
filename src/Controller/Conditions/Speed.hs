@@ -29,7 +29,6 @@ import Graphics.Diagrams.MultiCoreStatus
 import Model.Model
 import Model.SystemStatus
 import SoOSiM.Samples.Initializer
-import View.InitAnimationArea
 
 -- | Adjusts the system speed and running/paused status
 -- to the user selection
@@ -76,20 +75,13 @@ conditionSlowRun cenv =
 conditionPause :: CEnv -> IO()
 conditionPause cenv = do
   st <- getter statusField pm
--- <<<<<<< HEAD
---   case st of
---    Running -> setter statusField pm Paused
---    SlowRunning -> setter statusField pm Paused
---    Paused  -> setter statusField pm Running
---    Stopped -> return ()
--- =======
   let st' = pauseSt st
   when (st /= st') $ setter statusField pm st'
--- >>>>>>> b9d5608c07bc9f8f4ea2328106ce4548ac199fa9
  where pm = model cenv
-       pauseSt Running = Paused
-       pauseSt Paused  = Running
-       pauseSt x       = x
+       pauseSt Running     = Paused
+       pauseSt SlowRunning = Paused
+       pauseSt Paused      = Running
+       pauseSt x           = x
 
 -- | Halts and restarts the simulation
 conditionStop :: CEnv -> IO()
@@ -99,7 +91,7 @@ conditionStop cenv = do
   -- Starts a fresh new simulation
   ss <- simstate
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
-      mcs'              = SimGLState emptySystemStatus ss initialViewState []
+      mcs'              = SimGLState emptySystemStatus ss []
   modifyCBMVar mcsRef $ \_ -> return mcs'
 
   setter statusField pm Paused

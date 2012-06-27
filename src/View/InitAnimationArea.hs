@@ -4,7 +4,7 @@ module View.InitAnimationArea
        where
 
 -- External imports
-import Graphics.UI.Gtk (Builder)
+import Graphics.UI.Gtk -- (Builder, fixedPut, e)
 
 -- Local imports
 import Config.Config
@@ -18,10 +18,13 @@ import View.InitMainPictureArea
 initialiseAnimationArea :: Config -> SimGLVar -> Builder -> IO ()
 initialiseAnimationArea cfg mcs bldr = do
   vp <- animationViewport bldr
-  ev <- overviewEventBox bldr
-
-  -- Paint thumbnail inside eventbox with the viewport size for reference
-  drawThumb cfg mcs ev vp
+  fx <- fixed1 bldr
 
   -- Paint animation inside viewport
-  drawPic cfg mcs vp
+  mainWdgt <- drawPic cfg mcs
+  containerAdd vp mainWdgt
+
+  wdgt <- drawThumb mainWdgt cfg mcs
+  fixedPut fx wdgt (0,0)
+
+  return ()
