@@ -15,6 +15,7 @@ import qualified Controller.Conditions.Speed                  as Speed
 import qualified Controller.Conditions.Step                   as Step
 import qualified Controller.Conditions.UpdateStatus           as Update
 import qualified Controller.Conditions.ShowState              as ShowState
+import qualified Controller.Conditions.InitialiseExample      as LoadExample
 
 -- | Installs the condition handlers that enforce the system's conditions both
 -- from the view to the model and from the model to the view.
@@ -22,14 +23,15 @@ installHandlers :: CEnv -> IO ()
 installHandlers =
   Fullscreen.installHandlers ## 
   FlowChartWindowVisible.flowChartWindowVisibleCondition ## 
-  Quit.installHandlers       ## 
-  ShowState.installHandlers  ## 
-  Selection.installHandlers  ## 
-  Speed.installHandlers      ## 
-  Step.installHandlers       ## 
-  Update.installHandlers     ## 
-  InfoSel.installHandlers    ## 
-  InfoBasic.installHandlers  ## 
+  Quit.installHandlers         ## 
+  ShowState.installHandlers    ## 
+  LoadExample.installHandlers  ## 
+  Selection.installHandlers    ## 
+  Speed.installHandlers        ## 
+  Step.installHandlers         ## 
+  Update.installHandlers       ## 
+  InfoSel.installHandlers      ## 
+  InfoBasic.installHandlers    ## 
   InfoTooltip.installHandlers
 
 (##) :: Monad m => (a -> m b) -> (a -> m c) -> a -> m c

@@ -8,7 +8,7 @@ import             Data.CBMVar
 import             Data.Maybe
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
-import             Graphics.UI.Gtk (ObjectClass, WidgetClass, Widget, toWidget)
+import             Graphics.UI.Gtk (ObjectClass, WidgetClass)
 import             System.Glib.Types
 import             SoOSiM.Types
 
@@ -17,20 +17,18 @@ import Config.Config
 import Config.Preferences
 import Data.History
 import Graphics.UI.Gtk.Display.GlossIO
-import Graphics.Zoom
 import Model.SystemStatus
-import SoOSiM.Types
-import View.Animation
 
 -- Local imports: basic types
 import Graphics.Diagrams.MultiCoreStatus
-import Graphics.Diagrams.Types ( Name, addPos, subPos, unScale )
+import Graphics.Diagrams.Types ( Name )
 import Graphics.Diagrams.Positioned.PositionedDiagram
 
 -- Local imports: transformation functions: Status ~> Picture
 import Graphics.Diagrams.Transformations.Diagram2PositionedDiagram
 import Graphics.Diagrams.Transformations.MultiCoreStatus2Diagram
 import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
+import Graphics.Diagrams.Transformations.PositionedDiagram2Picture
 
 data SoOSiMState = SoOSiMState
   { soosimIO     :: GlossIO
@@ -83,7 +81,7 @@ makeImage' cfg soosim = do
     -- Update the multi core status
     let newSt = systemSt { multiCoreStatus = hist { present = mcs' } }
 
-    return $ paintMultiCoreStatus cfg 1.0 (0,0) newSt
+    return $ paintMultiCoreStatus cfg newSt
 
 -- * Main picture step processing
 
@@ -216,19 +214,35 @@ soosimGetMCS         = readCBMVar . soosimMCS . soosimParams
 instance GlossIOClass SoOSiMState where
  -- glossIOSetSensitive :: a -> Bool -> IO ()
  glossIOSetSensitive = glossIOSetSensitive . asGlossIO
+
  -- glossIOSetZoom :: a -> Float -> IO ()
  glossIOSetZoom = glossIOSetZoom . asGlossIO
+
  -- glossIOGetZoom :: a -> IO Float
  glossIOGetZoom = glossIOGetZoom . asGlossIO
+
  -- glossIOSetOrig :: a -> G.Point -> IO ()
  glossIOSetOrig = glossIOSetOrig . asGlossIO
+
  -- glossIOAddToOrig :: a -> G.Point -> IO ()
  glossIOAddToOrig = glossIOAddToOrig . asGlossIO
+
  -- glossIOGetOrig :: a -> IO G.Point
  glossIOGetOrig = glossIOGetOrig . asGlossIO
+
  -- glossIOGetPicture :: a -> IO (Maybe Picture)
  glossIOGetPicture = glossIOGetPicture . asGlossIO
+
  -- glossIOOnZoomChange :: a -> IO () -> IO ()
  glossIOOnZoomChange = glossIOOnZoomChange . asGlossIO
+
  -- glossIOOnOrigChange :: a -> IO () -> IO ()
  glossIOOnOrigChange = glossIOOnOrigChange . asGlossIO
+
+-- | Transform the abstract status into a picture
+paintMultiCoreStatus :: Config -> SystemStatus -> Picture
+paintMultiCoreStatus cfg = paintDiagram . transformDiagram . transformStatus cfg
+
+-- | In the gloss internal state we just keep the pending events
+--   and the current scaling
+data State = State [Event]

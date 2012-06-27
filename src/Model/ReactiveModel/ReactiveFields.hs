@@ -27,3 +27,5 @@ reactiveField "Speed"      [t|Float|]
 
 -- | Fullscreen/windowed mode
 reactiveField "Fullscreen" [t|Bool|]
+
+reactiveField "SimState" [t|Maybe SimGLState |]

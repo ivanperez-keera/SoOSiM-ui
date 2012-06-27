@@ -22,3 +22,5 @@ protectedField "Speed"      [t|Float|]  "Model" "ModelEvent"
 
 -- | Fullscreen/windowed mode
 protectedField "Fullscreen" [t|Bool|]   "Model" "ModelEvent"
+
+protectedField "SimState" [t|Maybe SimGLState |] "Model" "ModelEvent"

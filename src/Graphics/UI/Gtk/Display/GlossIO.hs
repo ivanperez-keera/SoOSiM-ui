@@ -5,6 +5,7 @@ module Graphics.UI.Gtk.Display.GlossIO
     ( glossIONewWithAnimation
     , glossIONewWithGame
     , glossIONew
+    , glossIOStartAnimation
     , glossIOStartGame
     , glossIOSetSensitive
     , GlossIO
@@ -48,16 +49,6 @@ glossIONew = do
   orig  <- newCBMVar (0,0)
   pic   <- newCBMVar Nothing
   return $ GlossIO ev (GlossIOParams zoomL orig pic)
-  
-glossIOStartAnimation :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
-glossIOStartAnimation (GlossIO ev params) size f = do
-  animateIO (InWidget ev size) white f'
- where f' x = do x' <- f x
-                 zoom <- readCBMVar $ glossIOZoom params
-                 diff <- readCBMVar $ glossIOTranslation params
-                 let picture = reposition zoom diff x'
-                 writeCBMVar (glossIOPicture params) $ Just x'
-                 return picture
 
 reposition :: Float -> G.Point -> Picture -> Picture
 reposition progScale orig = uncurry translate orig . scale progScale progScale
@@ -65,8 +56,22 @@ reposition progScale orig = uncurry translate orig . scale progScale progScale
 glossIONewWithAnimation :: (Int, Int) -> (Float -> IO Picture) -> IO GlossIO
 glossIONewWithAnimation size f = do
   gloss <- glossIONew 
-  gloss `on` realize $ glossIOStartAnimation gloss size f
+  glossIOStartAnimation gloss size f
   return gloss
+
+glossIOStartAnimation :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
+glossIOStartAnimation gloss size f = void $
+  gloss `on` realize $ glossIOStartAnimation' gloss size f
+  
+glossIOStartAnimation' :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
+glossIOStartAnimation' (GlossIO ev params) size f = do
+  animateIO (InWidget ev size) white f'
+ where f' x = do x' <- f x
+                 zoom <- readCBMVar $ glossIOZoom params
+                 diff <- readCBMVar $ glossIOTranslation params
+                 let picture = reposition zoom diff x'
+                 writeCBMVar (glossIOPicture params) $ Just x'
+                 return picture
 
 data GameState a = GameState Float G.Point (Maybe G.Point) a
 

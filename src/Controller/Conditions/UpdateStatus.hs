@@ -8,8 +8,8 @@ module Controller.Conditions.UpdateStatus
   where
 
 -- External imports
-import Data.CBMVar
 import Control.Monad
+import Control.Monad.IfElse
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
 
@@ -34,23 +34,26 @@ condition cenv = do
   sp <- getter speedField pm
 
   -- If the system is actually running, update the state
-  when (st == Running && sp > 0) $
-    modifyCBMVar mcsRef $ \state -> do
-      (a',b') <- nextStep (simGLSystemStatus state, simGLSimState state)
-      return $ state { simGLSystemStatus = a'
-                     , simGLSimState     = b'
-                     }
+  when (isActiveState st && sp > 0) $ do
+    let f = if st == Running then nextStep else nextStepSmall
+    stateM <- getter simStateField pm
+    awhen stateM $ \state -> do
+      (a',b') <- f (simGLSystemStatus state, simGLSimState state)
+      setter simStateField pm $ Just $
+        state { simGLSystemStatus = a'
+              , simGLSimState     = b'
+              }
 
-  when (st == SlowRunning && sp > 0) $
-    modifyCBMVar mcsRef $ \state -> do
-      (a',b') <- nextStepSmall (simGLSystemStatus state, simGLSimState state)
-      return $ state { simGLSystemStatus = a'
-                     , simGLSimState     = b'
-                     }
+  -- when (st == SlowRunning && sp > 0) $
+  --   modifyCBMVar mcsRef $ \state -> do
+  --     (a',b') <- nextStepSmall (simGLSystemStatus state, simGLSimState state)
+  --     return $ state { simGLSystemStatus = a'
+  --                    , simGLSimState     = b'
+  --                    }
 
   -- If the system is not paused or stopped,
   -- reupdate after a delay
-  when (st == Running || st == SlowRunning) $ void $
+  when (isActiveState st) $ void $
     let wt = if sp == 0 then 2 else sp
     in timeoutAdd (condition cenv) (round (1000 / wt))
 
@@ -58,5 +61,8 @@ condition cenv = do
   -- be reinstalled at each step if necessary)
   return False
 
-  where mcsRef = mcs (view cenv)
-        pm     = model cenv
+  where -- mcsRef = mcs (view cenv)
+        pm = model cenv
+        isActiveState Running     = True
+        isActiveState SlowRunning = True
+        isActiveState _           = False

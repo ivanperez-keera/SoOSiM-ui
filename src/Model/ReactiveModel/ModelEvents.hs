@@ -12,6 +12,7 @@ data ModelEvent = UncapturedEvent
                 | SpeedChanged
                 | StatusChanged
                 | FullscreenChanged
+                | SimStateChanged
  deriving (Eq,Ord)
 
 instance GRM.Event ModelEvent where

@@ -2,13 +2,10 @@
 module View
   ( module View
   , module Exported
-  , SimGLVar
-  , SimGLState(..)
   )
   where
 
 -- External libraries
-import Data.CBMVar
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
 import Hails.MVC.View.GladeView
@@ -16,12 +13,8 @@ import Hails.MVC.View.GtkView as Exported
 
 -- Internal libraries
 import Config.Config
-import Data.History
-import Graphics.Diagrams.MultiCoreStatus
-import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
+import Graphics.UI.Gtk.Display.GlossIO
 import Graphics.UI.Gtk.Display.SoOSiMState
-import Model.SystemStatus
-import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
 import View.InitIconsInfoArea
 import View.Tooltips
@@ -37,8 +30,8 @@ instance GladeView View where
 -- (for instance, treeview models)
 data View = View
   { uiBuilder    :: Builder
-  , mcs          :: SimGLVar
   , soosimView   :: SoOSiMState
+  , thumbView    :: GlossIO
   }
 
 -- | Initialised the glade GUI and all the view components that are not
@@ -50,18 +43,10 @@ createView = do
   cfg <- readConfigFile
 
   bldr <- loadInterface
-  ss   <- simstate 
-  initialMcs <- updateFromSimState emptyMultiCoreStatus ss
-  let initialSystemStatus = SystemStatus (historyNew initialMcs) []
-  msc  <- newCBMVar $ SimGLState initialSystemStatus ss []
 
-  w <- Builder.mainWindow bldr
-  widgetShowAll w
+  widgetShowAll =<< Builder.mainWindow bldr
 
   (soosim, thumb) <- initialiseAnimationArea cfg bldr
-  soosimSetMCS soosim (Just initialMcs)
-  soosimSetSimState soosim (Just ss)
-  soosimSetSelection soosim (Just [])
 
   initIconsInfoArea bldr
 
@@ -70,8 +55,8 @@ createView = do
   return
     View
       { uiBuilder  = bldr
-      , mcs        = msc
       , soosimView = soosim
+      , thumbView  = thumb
       }
 
 mainWindow :: View -> IO Window

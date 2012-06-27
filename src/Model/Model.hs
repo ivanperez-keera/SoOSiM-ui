@@ -1,6 +1,11 @@
 -- | The internal system's model
 module Model.Model where
 
+import SoOSiM.Types
+
+import Graphics.Diagrams.Types (Name)
+import Model.SystemStatus
+
 -- | The system's model can be described by giving:
 --
 --  * The simulation parameters (speed, status)
@@ -9,8 +14,17 @@ data Model = Model
   { speed      :: Float
   , status     :: Status
   , fullscreen :: Bool
+  , simState   :: Maybe SimGLState
   }
 
+data SimGLState = SimGLState
+  { simGLSystemStatus :: SystemStatus
+  , simGLSimState     :: SimState
+  , simGLSelection    :: [Name]
+  }
+
+instance Eq SimGLState where
+  _ == _ = False
 
 -- | A simulation can be running, paused or halted
 data Status = Running
@@ -25,4 +39,5 @@ emptyBM :: Model
 emptyBM = Model { speed      = 1
                 , status     = Paused
                 , fullscreen = False
+                , simState   = Nothing
                 }

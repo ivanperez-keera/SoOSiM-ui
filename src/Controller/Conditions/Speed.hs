@@ -16,7 +16,6 @@ module Controller.Conditions.Speed
 
 -- External imports
 import Control.Monad
-import Data.CBMVar
 import GHC.Float
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
@@ -92,11 +91,12 @@ conditionStop cenv = do
   ss <- simstate
   let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
       mcs'              = SimGLState emptySystemStatus ss []
-  modifyCBMVar mcsRef $ \_ -> return mcs'
+  setter simStateField pm (Just mcs')
+  -- modifyCBMVar mcsRef $ \_ -> return mcs'
 
   setter statusField pm Paused
  where pm     = model cenv
-       mcsRef = mcs $ view cenv
+       -- mcsRef = mcs $ view cenv
 
 -- | Increases the simulation speed by a factor of 2
 conditionSpeedUp :: CEnv -> IO()

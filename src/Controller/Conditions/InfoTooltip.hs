@@ -5,38 +5,38 @@ module Controller.Conditions.InfoTooltip
 
 -- External imports
 import Control.Monad
-import Data.CBMVar
+import Control.Monad.IfElse
 import Data.Maybe
--- <<<<<<< HEAD
--- import Data.Tuple4
--- =======
--- >>>>>>> b9d5608c07bc9f8f4ea2328106ce4548ac199fa9
 import Graphics.UI.Gtk
+import Hails.MVC.Model.ProtectedModel.Reactive
 
 -- Internal imports
 import CombinedEnvironment
 import Graphics.Diagrams.Types
 import Data.History
+import Model.Model
 import Model.SystemStatus
 import Graphics.Diagrams.MultiCoreStatus
 
 -- | Handles changes in the box selection in the diagram
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
-   installCallbackCBMVar mcsRef $ conditionShowInfo cenv
-  where mcsRef = mcs (view cenv)
+  onEvent (model cenv) SimStateChanged $ conditionShowInfo cenv
+  --  installCallbackCBMVar mcsRef $ conditionShowInfo cenv
+  -- where mcsRef = mcs (view cenv)
   
 -- | Shows component info only when a component is selected
 conditionShowInfo :: CEnv -> IO()
 conditionShowInfo cenv = do
+ stM  <- getter simStateField (model cenv) -- readCBMVar $ mcs $ view cenv
+ awhen stM $ \st -> do
   -- Get elem info if possible
-  st <- readCBMVar $ mcs $ view cenv
-  let tt = getElemInfo (simGLSelection st) $ 
-             present $ multiCoreStatus $ simGLSystemStatus st
+   let tt = getElemInfo (simGLSelection st) $ 
+              present $ multiCoreStatus $ simGLSystemStatus st
 
-  -- Update label text
-  lbl <- statusLbl $ view cenv
-  labelSetText lbl $ fromMaybe "" tt
+   -- Update label text
+   lbl <- statusLbl $ view cenv
+   labelSetText lbl $ fromMaybe "" tt
 
 -- | Renders the info relative to a given element (both basic info and a trace)
 getElemInfo :: [Name]          -- ^ The qualified name of the element whose info we need

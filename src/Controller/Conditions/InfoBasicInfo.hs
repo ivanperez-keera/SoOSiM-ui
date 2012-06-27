@@ -7,37 +7,38 @@ module Controller.Conditions.InfoBasicInfo
 -- External imports
 import Control.Monad
 import Control.Monad.IfElse
-import Data.CBMVar
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Helpers.Multiline.TextBuffer
+import Hails.MVC.Model.ProtectedModel.Reactive
 
 -- Local imports
 import CombinedEnvironment
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
 import Graphics.Diagrams.Types
+import Model.Model
 import Model.SystemStatus
 
 -- | Selects the appropriate page in the info notebook as the user
 -- chooses between basic info and component trace
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
-   installCallbackCBMVar mcsRef $ conditionShowCompInfo cenv
-  where mcsRef = mcs (view cenv)
+  onEvent (model cenv) SimStateChanged $ conditionShowCompInfo cenv
   
 -- | Shows component info of the selected component
 conditionShowCompInfo :: CEnv -> IO()
 conditionShowCompInfo cenv = do
- st  <- readCBMVar $ mcs $ view cenv
- bf1 <- textViewGetBuffer <=< infoTextView  $ view cenv
- bf2 <- textViewGetBuffer <=< traceTextView $ view cenv
+ stM  <- getter simStateField (model cenv) -- readCBMVar $ mcs $ view cenv
+ awhen stM $ \st -> do
+   bf1 <- textViewGetBuffer <=< infoTextView  $ view cenv
+   bf2 <- textViewGetBuffer <=< traceTextView $ view cenv
 
- let sel   = selection $ simGLSystemStatus st
-     mcs   = present $ multiCoreStatus $ simGLSystemStatus st
+   let sel   = selection $ simGLSystemStatus st
+       mcs   = present $ multiCoreStatus $ simGLSystemStatus st
 
- awhen (getElemInfo sel mcs) $ \(ni,nt) -> do
-   textBufferUpdateText bf1 ni
-   textBufferUpdateText bf2 nt
+   awhen (getElemInfo sel mcs) $ \(ni,nt) -> do
+     textBufferUpdateText bf1 ni
+     textBufferUpdateText bf2 nt
 
 -- | Renders the info relative to a given element (both basic info and a trace)
 getElemInfo :: [Name]                 -- ^ The qualified name of the element whose info we need

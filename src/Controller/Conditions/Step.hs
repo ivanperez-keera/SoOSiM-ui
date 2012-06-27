@@ -4,8 +4,8 @@ module Controller.Conditions.Step
   where
 
 -- External imports
-import Data.CBMVar
 import Control.Monad
+import Control.Monad.IfElse
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
 
@@ -35,14 +35,16 @@ conditionF :: CEnv -> IO()
 conditionF cenv = void $ do
   st <- getter statusField pm
 
-  when (st == Paused) $
-    modifyCBMVar mcsRef $ \state -> do
+  when (st == Paused) $ do
+    stateM <- getter simStateField pm
+    awhen stateM $ \state -> do
       (a',b') <- nextStep (simGLSystemStatus state, simGLSimState state)
-      return $ state { simGLSystemStatus = a'
-                     , simGLSimState     = b'
-                     }
+      setter simStateField pm $ Just $
+        state { simGLSystemStatus = a'
+              , simGLSimState     = b'
+              }
 
-  where mcsRef = mcs (view cenv)
+  where -- mcsRef = mcs (view cenv)
         pm     = model cenv
 
 -- | Updates the state with the next step only if the system is paused
@@ -50,25 +52,30 @@ conditionFS :: CEnv -> IO()
 conditionFS cenv = void $ do
   st <- getter statusField pm
 
-  when (st == Paused) $
-    modifyCBMVar mcsRef $ \state -> do
+  when (st == Paused) $ do
+    stateM <- getter simStateField pm
+    awhen stateM $ \state -> do
       (a',b') <- nextStepSmall (simGLSystemStatus state, simGLSimState state)
-      return $ state { simGLSystemStatus = a'
-                     , simGLSimState     = b'
-                     }
+      setter simStateField pm $ Just $
+        state { simGLSystemStatus = a'
+              , simGLSimState     = b'
+              }
 
-  where mcsRef = mcs (view cenv)
+  where -- mcsRef = mcs (view cenv)
         pm     = model cenv
 
 conditionB :: CEnv -> IO()
 conditionB cenv = void $ do
   st <- getter statusField pm
 
-  when (st == Paused) $
-    modifyCBMVar mcsRef $ \state -> 
-      return $ state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
+  when (st == Paused) $ do
+    stateM <- getter simStateField pm
+    awhen stateM $ \state ->
+    -- modifyCBMVar mcsRef $ \state -> 
+      setter simStateField pm $ Just $
+        state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
 
-  where mcsRef = mcs (view cenv)
+  where -- mcsRef = mcs (view cenv)
         pm     = model cenv
 
 previousStatus :: SystemStatus -> SystemStatus
