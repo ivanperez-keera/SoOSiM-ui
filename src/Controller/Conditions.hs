@@ -14,6 +14,7 @@ import qualified Controller.Conditions.Selection              as Selection
 import qualified Controller.Conditions.Speed                  as Speed
 import qualified Controller.Conditions.Step                   as Step
 import qualified Controller.Conditions.UpdateStatus           as Update
+import qualified Controller.Conditions.ShowState              as ShowState
 
 -- | Installs the condition handlers that enforce the system's conditions both
 -- from the view to the model and from the model to the view.
@@ -22,6 +23,7 @@ installHandlers =
   Fullscreen.installHandlers ## 
   FlowChartWindowVisible.flowChartWindowVisibleCondition ## 
   Quit.installHandlers       ## 
+  ShowState.installHandlers  ## 
   Selection.installHandlers  ## 
   Speed.installHandlers      ## 
   Step.installHandlers       ## 

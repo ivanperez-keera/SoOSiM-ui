@@ -13,18 +13,20 @@ import View.Objects
 import View.Animation
 import View.InitThumbnail
 import View.InitMainPictureArea
+import Graphics.UI.Gtk.Display.GlossIO
+import Graphics.UI.Gtk.Display.SoOSiMState
 
 -- | Initialises the opengl area with a picture
-initialiseAnimationArea :: Config -> SimGLVar -> Builder -> IO ()
-initialiseAnimationArea cfg mcs bldr = do
+initialiseAnimationArea :: Config -> Builder -> IO (SoOSiMState, GlossIO)
+initialiseAnimationArea cfg bldr = do
   vp <- animationViewport bldr
   fx <- fixed1 bldr
 
   -- Paint animation inside viewport
-  mainWdgt <- drawPic cfg mcs
+  mainWdgt <- drawPic cfg
   containerAdd vp mainWdgt
 
-  wdgt <- drawThumb mainWdgt cfg mcs
+  wdgt <- drawThumb mainWdgt
   fixedPut fx wdgt (0,0)
 
-  return ()
+  return (mainWdgt, wdgt)

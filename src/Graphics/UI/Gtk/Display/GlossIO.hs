@@ -4,12 +4,14 @@
 module Graphics.UI.Gtk.Display.GlossIO
     ( glossIONewWithAnimation
     , glossIONewWithGame
+    , glossIONew
+    , glossIOStartGame
     , glossIOSetSensitive
     , GlossIO
-    -- , glossIOSetZoom
+    , GlossIOClass(..)
     , glossIOGetZoom
-    -- , glossIOSetOrig
     , glossIOGetOrig
+    , glossIOGetPicture
     , glossIOAddToOrig
     , glossIOOnZoomChange
     , glossIOOnOrigChange
@@ -30,6 +32,7 @@ data GlossIO = GlossIO EventBox (GlossIOParams)
 data GlossIOParams = GlossIOParams 
   { glossIOZoom        :: CBMVar Float
   , glossIOTranslation :: CBMVar G.Point
+  , glossIOPicture     :: CBMVar (Maybe Picture)
   }
 
 instance WidgetClass GlossIO
@@ -40,19 +43,21 @@ instance GObjectClass GlossIO where
 
 glossIONew :: IO GlossIO
 glossIONew = do
-  ev <- eventBoxNew 
+  ev    <- eventBoxNew 
   zoomL <- newCBMVar 1
   orig  <- newCBMVar (0,0)
-  return $ GlossIO ev (GlossIOParams zoomL orig)
+  pic   <- newCBMVar Nothing
+  return $ GlossIO ev (GlossIOParams zoomL orig pic)
   
 glossIOStartAnimation :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
-glossIOStartAnimation (GlossIO ev paramsR) size f = do
+glossIOStartAnimation (GlossIO ev params) size f = do
   animateIO (InWidget ev size) white f'
  where f' x = do x' <- f x
-                 let GlossIOParams zoomV diffV = paramsR
-                 zoom <- readCBMVar zoomV
-                 diff <- readCBMVar diffV
-                 return (reposition zoom diff x')
+                 zoom <- readCBMVar $ glossIOZoom params
+                 diff <- readCBMVar $ glossIOTranslation params
+                 let picture = reposition zoom diff x'
+                 writeCBMVar (glossIOPicture params) $ Just x'
+                 return picture
 
 reposition :: Float -> G.Point -> Picture -> Picture
 reposition progScale orig = uncurry translate orig . scale progScale progScale
@@ -65,25 +70,52 @@ glossIONewWithAnimation size f = do
 
 data GameState a = GameState Float G.Point (Maybe G.Point) a
 
-glossIONewWithGame :: Float -> G.Point
-                   -> (Int, Int) -> Int -> a -> (a -> IO Picture)
-                   -> (Event -> a -> a)
-                   -> (Float -> a -> IO a) -> IO GlossIO
-glossIONewWithGame initZ initO size fps state mkPic queue stepW = do
-  gloss@(GlossIO e paramsR) <- glossIONew 
+glossIOStartGame :: GlossIO
+                 -> Float -> G.Point
+                 -> (Int, Int) -> Int -> a -> (a -> IO Picture)
+                 -> (Event -> a -> a)
+                 -> (Float -> a -> IO a) -> IO ()
+glossIOStartGame gloss initZ initO size fps state mkPic queue stepW = do
+  let (GlossIO e paramsR) = gloss
   glossIOSetZoom gloss initZ
   glossIOSetOrig gloss initO
   let mkPic' x = do let (GameState _ _ _ x') = x
                     zoom <- glossIOGetZoom gloss
                     diff <- glossIOGetOrig gloss
                     x'' <- mkPic x'
-                    return (reposition zoom diff x'')
+                    let picture = reposition zoom diff x''
+                    writeCBMVar (glossIOPicture paramsR) $ Just x''
+                    return picture
       state' = GameState initZ initO Nothing state
       queue' = transformEvent queue
       stepW' = stepWorld gloss stepW
       play = playIO (InWidget e size) white fps state' mkPic' queue' stepW'
   gloss `on` realize $ play
+  return ()
+
+glossIONewWithGame :: Float -> G.Point
+                   -> (Int, Int) -> Int -> a -> (a -> IO Picture)
+                   -> (Event -> a -> a)
+                   -> (Float -> a -> IO a) -> IO GlossIO
+glossIONewWithGame initZ initO size fps state mkPic queue stepW = do
+  gloss@(GlossIO e paramsR) <- glossIONew 
+  glossIOStartGame gloss initZ initO size fps state mkPic queue stepW
   return gloss
+  -- glossIOSetZoom gloss initZ
+  -- glossIOSetOrig gloss initO
+  -- let mkPic' x = do let (GameState _ _ _ x') = x
+  --                   zoom <- glossIOGetZoom gloss
+  --                   diff <- glossIOGetOrig gloss
+  --                   x'' <- mkPic x'
+  --                   let picture = reposition zoom diff x''
+  --                   writeCBMVar (glossIOPicture paramsR) $ Just picture
+  --                   return picture
+  --     state' = GameState initZ initO Nothing state
+  --     queue' = transformEvent queue
+  --     stepW' = stepWorld gloss stepW
+  --     play = playIO (InWidget e size) white fps state' mkPic' queue' stepW'
+  -- gloss `on` realize $ play
+  -- return gloss
 
 -- Process the event queue and return an empty state
 stepWorld :: GlossIO -> (Float -> a -> IO a) -> Float -> (GameState a) -> IO (GameState a)
@@ -143,39 +175,54 @@ transformEvent internalTrans event (GameState zoomL orig moving state)
   | otherwise
   = GameState zoomL orig moving (internalTrans event state)
 
-glossIOSetSensitive :: GlossIO -> Bool -> IO ()
-glossIOSetSensitive (GlossIO ev _) sensitive =
-  eventBoxSetAboveChild ev (not sensitive)
-
-glossIOSetZoom :: GlossIO -> Float -> IO ()
-glossIOSetZoom (GlossIO _ (GlossIOParams zoomV _)) zoom' = do
-  zoom <- readCBMVar zoomV
-  when (zoom /= zoom') $ writeCBMVar zoomV zoom'
-
-glossIOGetZoom :: GlossIO -> IO Float
-glossIOGetZoom (GlossIO _ params) = readCBMVar (glossIOZoom params)
-
-glossIOSetOrig :: GlossIO -> G.Point -> IO ()
-glossIOSetOrig (GlossIO _ (GlossIOParams _ diffV)) point = do
-  diff <- readCBMVar diffV
-  when (diff /= point) $ writeCBMVar diffV point
-
-glossIOAddToOrig :: GlossIO -> G.Point -> IO ()
-glossIOAddToOrig glossIO point = do
-  p <- glossIOGetOrig glossIO
-  let pAddition = (fst point + fst p, snd point + snd p)
-  glossIOSetOrig glossIO pAddition
-
-glossIOGetOrig :: GlossIO -> IO G.Point
-glossIOGetOrig (GlossIO _ params) = readCBMVar (glossIOTranslation params)
-
-glossIOOnZoomChange :: GlossIO -> IO () -> IO ()
-glossIOOnZoomChange (GlossIO _ (GlossIOParams zoomV _)) p = do
-  installCallbackCBMVar zoomV p
-
-glossIOOnOrigChange :: GlossIO -> IO () -> IO ()
-glossIOOnOrigChange (GlossIO _ (GlossIOParams _ diffV)) p = do
-  installCallbackCBMVar diffV p
-
 stdZoomStep :: Float
 stdZoomStep = 0.8
+
+class WidgetClass a => GlossIOClass a where
+ glossIOSetSensitive :: a -> Bool -> IO ()
+ glossIOSetZoom :: a -> Float -> IO ()
+ glossIOGetZoom :: a -> IO Float
+ glossIOSetOrig :: a -> G.Point -> IO ()
+ glossIOAddToOrig :: a -> G.Point -> IO ()
+ glossIOGetOrig :: a -> IO G.Point
+ glossIOGetPicture :: a -> IO (Maybe Picture)
+ glossIOOnZoomChange :: a -> IO () -> IO ()
+ glossIOOnOrigChange :: a -> IO () -> IO ()
+
+instance GlossIOClass GlossIO where
+  -- glossIOSetSensitive :: GlossIO -> Bool -> IO ()
+  glossIOSetSensitive (GlossIO ev _) sensitive =
+    eventBoxSetAboveChild ev (not sensitive)
+  
+  -- glossIOSetZoom :: GlossIO -> Float -> IO ()
+  glossIOSetZoom (GlossIO _ (GlossIOParams zoomV _ _)) zoom' = do
+    zoom <- readCBMVar zoomV
+    when (zoom /= zoom') $ writeCBMVar zoomV zoom'
+  
+  -- glossIOGetZoom :: GlossIO -> IO Float
+  glossIOGetZoom (GlossIO _ params) = readCBMVar (glossIOZoom params)
+  
+  -- glossIOSetOrig :: GlossIO -> G.Point -> IO ()
+  glossIOSetOrig (GlossIO _ (GlossIOParams _ diffV _)) point = do
+    diff <- readCBMVar diffV
+    when (diff /= point) $ writeCBMVar diffV point
+  
+  -- glossIOAddToOrig :: GlossIO -> G.Point -> IO ()
+  glossIOAddToOrig glossIO point = do
+    p <- glossIOGetOrig glossIO
+    let pAddition = (fst point + fst p, snd point + snd p)
+    glossIOSetOrig glossIO pAddition
+  
+  -- glossIOGetOrig :: GlossIO -> IO G.Point
+  glossIOGetOrig (GlossIO _ params) = readCBMVar (glossIOTranslation params)
+  
+  -- glossIOGetPicture :: GlossIO -> IO (Maybe Picture)
+  glossIOGetPicture (GlossIO _ params) = readCBMVar (glossIOPicture params)
+  
+  -- glossIOOnZoomChange :: GlossIO -> IO () -> IO ()
+  glossIOOnZoomChange (GlossIO _ (GlossIOParams zoomV _ _)) p = do
+    installCallbackCBMVar zoomV p
+  
+  -- glossIOOnOrigChange :: GlossIO -> IO () -> IO ()
+  glossIOOnOrigChange (GlossIO _ (GlossIOParams _ diffV _)) p = do
+    installCallbackCBMVar diffV p

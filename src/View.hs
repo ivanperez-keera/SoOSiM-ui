@@ -19,6 +19,7 @@ import Config.Config
 import Data.History
 import Graphics.Diagrams.MultiCoreStatus
 import Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
+import Graphics.UI.Gtk.Display.SoOSiMState
 import Model.SystemStatus
 import SoOSiM.Samples.Initializer
 import View.InitAnimationArea
@@ -37,6 +38,7 @@ instance GladeView View where
 data View = View
   { uiBuilder    :: Builder
   , mcs          :: SimGLVar
+  , soosimView   :: SoOSiMState
   }
 
 -- | Initialised the glade GUI and all the view components that are not
@@ -56,7 +58,10 @@ createView = do
   w <- Builder.mainWindow bldr
   widgetShowAll w
 
-  initialiseAnimationArea cfg msc bldr
+  (soosim, thumb) <- initialiseAnimationArea cfg bldr
+  soosimSetMCS soosim (Just initialMcs)
+  soosimSetSimState soosim (Just ss)
+  soosimSetSelection soosim (Just [])
 
   initIconsInfoArea bldr
 
@@ -64,8 +69,9 @@ createView = do
 
   return
     View
-      { uiBuilder = bldr
-      , mcs       = msc
+      { uiBuilder  = bldr
+      , mcs        = msc
+      , soosimView = soosim
       }
 
 mainWindow :: View -> IO Window
