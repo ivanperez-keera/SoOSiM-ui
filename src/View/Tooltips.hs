@@ -55,5 +55,5 @@ tooltipsTable =
  ]
  where -- Transforms an accessor of a type in WidgetClass into a widget
        -- accessor
-       asWidget :: WidgetClass a => (b -> IO a) -> (b -> IO Widget)
+       asWidget :: WidgetClass a => (b -> IO a) -> b -> IO Widget
        asWidget x = fmap toWidget . x
