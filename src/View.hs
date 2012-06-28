@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 -- | Contains basic operations related to the GUI
 module View
   ( module View
@@ -8,6 +9,7 @@ module View
 -- External libraries
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.GtkView
+import Hails.Graphics.UI.Gtk.THBuilderAccessor
 import Hails.MVC.View.GladeView
 import Hails.MVC.View.GtkView as Exported
 
@@ -19,6 +21,7 @@ import View.InitAnimationArea
 import View.InitIconsInfoArea
 import View.Tooltips
 import View.Objects as Builder
+
 
 instance GtkGUI View where
   initialise = createView
@@ -42,95 +45,47 @@ createView = do
   -- Certain aspects of the visual interface can be configured with a config file
   cfg <- readConfigFile
 
+  -- Load Glade builder
   bldr <- loadInterface
 
+  -- Intialise interface
   widgetShowAll =<< Builder.mainWindow bldr
-
   (soosim, thumb) <- initialiseAnimationArea cfg bldr
-
   initIconsInfoArea bldr
-
   initialiseTooltips bldr
 
-  return
-    View
-      { uiBuilder  = bldr
-      , soosimView = soosim
-      , thumbView  = thumb
-      }
+  return View
+           { uiBuilder  = bldr
+           , soosimView = soosim
+           , thumbView  = thumb
+           }
 
-mainWindow :: View -> IO Window
-mainWindow = Builder.mainWindow . uiBuilder
-
-animationViewport :: View -> IO Viewport
-animationViewport = Builder.animationViewport . uiBuilder
-
-pauseToolBtn :: View -> IO ToolButton
-pauseToolBtn = Builder.pauseToolBtn . uiBuilder
-
-runToolBtn :: View -> IO ToolButton
-runToolBtn = Builder.runToolBtn . uiBuilder
-
-runSlowToolBtn :: View -> IO ToolButton
-runSlowToolBtn = Builder.runSlowToolBtn . uiBuilder
-
-stopToolBtn :: View -> IO ToolButton
-stopToolBtn = Builder.stopToolBtn . uiBuilder
-
-slowDownToolBtn :: View -> IO ToolButton
-slowDownToolBtn = Builder.slowDownToolBtn . uiBuilder
-
-speedUpToolBtn :: View -> IO ToolButton
-speedUpToolBtn = Builder.speedUpToolBtn . uiBuilder
-
-stepForwardToolBtn :: View -> IO ToolButton
-stepForwardToolBtn = Builder.stepForwardToolBtn . uiBuilder
-
-stepForwardSmallToolBtn :: View -> IO ToolButton
-stepForwardSmallToolBtn = Builder.stepForwardSmallToolBtn . uiBuilder
-
-stepBackToolBtn :: View -> IO ToolButton
-stepBackToolBtn = Builder.stepBackToolBtn . uiBuilder
-
-fullScreenToolBtn :: View -> IO ToolButton
-fullScreenToolBtn = Builder.fullScreenToolBtn . uiBuilder
-
-fullScreenMenuItem :: View -> IO ImageMenuItem
-fullScreenMenuItem = Builder.fullScreenMenuItem . uiBuilder
-
-quitMenuItem :: View -> IO ImageMenuItem
-quitMenuItem = Builder.quitMenuItem . uiBuilder
-
-showFlowChartMenuItem :: View -> IO MenuItem
-showFlowChartMenuItem = Builder.showFlowChartMenuItem . uiBuilder
-
-menuBar :: View -> IO MenuBar
-menuBar = Builder.menuBar . uiBuilder
-
-speedScale :: View -> IO HScale
-speedScale = Builder.speedScale . uiBuilder
-
-infoNotebook :: View -> IO Notebook
-infoNotebook = Builder.infoNotebook . uiBuilder
-
-infoSelNotebook :: View -> IO Notebook
-infoSelNotebook = Builder.infoSelNotebook . uiBuilder
-
-overviewEventBox :: View -> IO EventBox
-overviewEventBox = Builder.overviewEventBox . uiBuilder
-
-infoIconView :: View -> IO IconView
-infoIconView = Builder.infoIconView . uiBuilder
-
-infoTextView :: View -> IO TextView
-infoTextView = Builder.infoTextView . uiBuilder
-
-traceTextView :: View -> IO TextView
-traceTextView = Builder.traceTextView . uiBuilder
-
-statusLbl :: View -> IO Label
-statusLbl = Builder.statusLbl . uiBuilder
+-- gtkViewAccessor element name type name
+gtkViewAccessor "Builder" "uiBuilder" "mainWindow"           "Window"
+gtkViewAccessor "Builder" "uiBuilder" "animationViewport"    "Viewport"
+gtkViewAccessor "Builder" "uiBuilder" "pauseToolBtn"         "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "runToolBtn"           "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "runSlowToolBtn"       "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "stopToolBtn"          "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "slowDownToolBtn"      "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "speedUpToolBtn"       "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "stepForwardToolBtn"   "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "stepForwardSmallToolBtn"   "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "stepBackToolBtn"      "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "fullScreenToolBtn"    "ToolButton"
+gtkViewAccessor "Builder" "uiBuilder" "fullScreenMenuItem"   "ImageMenuItem"
+gtkViewAccessor "Builder" "uiBuilder" "quitMenuItem"         "ImageMenuItem"
+gtkViewAccessor "Builder" "uiBuilder" "showFlowChartMenuItem" "MenuItem"
+gtkViewAccessor "Builder" "uiBuilder" "menuBar"              "MenuBar"
+gtkViewAccessor "Builder" "uiBuilder" "speedScale"           "HScale"
+gtkViewAccessor "Builder" "uiBuilder" "infoNotebook"         "Notebook"
+gtkViewAccessor "Builder" "uiBuilder" "infoSelNotebook"      "Notebook"
+gtkViewAccessor "Builder" "uiBuilder" "overviewEventBox"     "EventBox"
+gtkViewAccessor "Builder" "uiBuilder" "fixed1"               "Fixed"
+gtkViewAccessor "Builder" "uiBuilder" "infoIconView"         "IconView"
+gtkViewAccessor "Builder" "uiBuilder" "infoTextView"         "TextView"
+gtkViewAccessor "Builder" "uiBuilder" "traceTextView"        "TextView"
+gtkViewAccessor "Builder" "uiBuilder" "statusLbl"            "Label"
 
 -- Flowchart Window
-flowChartWindow :: View -> IO Window
-flowChartWindow = Builder.flowChartWindow . uiBuilder
+gtkViewAccessor "Builder" "uiBuilder" "flowChartWindow"   "Window"
