@@ -21,16 +21,16 @@ modelUpdateNextStep :: CEnv -> IO ()
 modelUpdateNextStep cenv = do
   st <- getter statusField (model cenv)
   when (isActiveState st) $
-    let f = if st == Running then nextStep else nextStepSmall
+    let f = if st == Running then execStep else execStepSmall
     in modelUpdateNextStepWith cenv f
  where isActiveState Running     = True
        isActiveState SlowRunning = True
        isActiveState _           = False
 
-modelUpdateNextStepWith :: CEnv -> ((SystemStatus, SimState) -> IO (SystemStatus, SimState)) -> IO ()
+modelUpdateNextStepWith :: CEnv -> (SimState -> IO SimState) -> IO ()
 modelUpdateNextStepWith cenv nextStepCalc =
   modifierIO simStateField (model cenv) $ maybeM $ \state -> do
-     (a', b') <- nextStepCalc (simGLSystemStatus state, simGLSimState state)
+     (a', b') <- nextStepWith nextStepCalc (simGLSystemStatus state, simGLSimState state)
      return $ state { simGLSystemStatus = a'
                     , simGLSimState     = b'
                     }
@@ -39,39 +39,20 @@ modelUpdateNextStepWith cenv nextStepCalc =
 maybeM :: Monad m => (a -> m b) -> Maybe a -> m (Maybe b)
 maybeM f v = maybe (return Nothing) (liftM Just . f) v
 
--- | Executes one simulation step and updates the multi-core status taking
--- recent changes into account.
-nextStep :: (SystemStatus, SimState) -> IO (SystemStatus, SimState)
-nextStep = nextStepWith nextStep'
-
-nextStep' :: (SystemStatus, SimState) -> IO (SystemStatus, SimState)
-nextStep' (sys,ss) = do
- let mcs = present history
- ns   <- execStep ss
- mcs' <- updateFromSimState mcs ns
- let sys' = sys { multiCoreStatus = historyBranch history mcs' }
- return (sys',ns)
- where history = multiCoreStatus sys
-
--- | Executes one simulation step and updates the multi-core status taking
--- recent changes into account.
-nextStepSmall :: (SystemStatus, SimState) -> IO (SystemStatus, SimState)
-nextStepSmall = nextStepWith nextStepSmall'
-
-nextStepSmall' :: (SystemStatus, SimState) -> IO (SystemStatus, SimState)
-nextStepSmall' (sys,ss) = do
- let mcs = present history
- ns   <- execStepSmall ss
- mcs' <- updateFromSimState mcs ns
- let sys' = sys { multiCoreStatus = historyBranch history mcs' }
- return (sys',ns)
- where history = multiCoreStatus sys
-
--- | Executes one simulation step and updates the multi-core status or moves
--- to a future step if available
-nextStepWith :: ((SystemStatus, SimState) -> IO (SystemStatus, SimState)) -> (SystemStatus, SimState) -> IO (SystemStatus, SimState)
+-- | Moves to a future step if available, otherwise executes one simulation
+-- step and updates the multi-core status
+nextStepWith :: (SimState -> IO SimState) -> (SystemStatus, SimState) -> IO (SystemStatus, SimState)
 nextStepWith f (sys, ss) = 
  case future history of
-   [] -> f (sys,ss)
+   [] -> nextStepWith' f (sys,ss)
    _  -> return (sys { multiCoreStatus = historyNext history}, ss)
+ where history = multiCoreStatus sys
+ 
+nextStepWith' :: (SimState -> IO SimState) -> (SystemStatus, SimState) -> IO (SystemStatus, SimState)
+nextStepWith' f (sys,ss) = do
+ let mcs = present history
+ ns   <- f ss
+ mcs' <- updateFromSimState mcs ns
+ let sys' = sys { multiCoreStatus = historyBranch history mcs' }
+ return (sys',ns)
  where history = multiCoreStatus sys
