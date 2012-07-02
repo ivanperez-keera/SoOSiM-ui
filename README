@@ -6,7 +6,7 @@ means adding $HOME/.cabal/bin to your PATH.
 
 1) Download all the dependencies, unpack each one of them and install.
 You will need:
- * keera-hails:     https://github.com/ivanperez-keera/keera-hails
+ * keera-hails:     https://github.com/keera-studios/keera-hails
  * keera-callbacks: https://github.com/ivanperez-keera/keera-callbacks
  * gloss-gtk:       https://github.com/ivanperez-keera/gloss-gtk
  * SoOSiM:          https://github.com/ivanperez-keera/SoOSiM
