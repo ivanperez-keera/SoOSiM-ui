@@ -16,8 +16,9 @@ module Controller.Conditions.Speed
 
 -- External imports
 import Control.Monad
+import Data.ReactiveValue
 import Graphics.UI.Gtk
-import Hails.Graphics.UI.Gtk.Reactive
+import Graphics.UI.Gtk.Reactive
 import Hails.MVC.Model.ProtectedModel.Reactive
 
 -- Internal imports
@@ -53,8 +54,9 @@ installHandlers cenv = void $ do
   slowDown `onToolButtonClicked` conditionSlowDown cenv
 
   -- Handle the speed slider in the status bar
-  hscale <- fmap reactiveScale $ speedScale vw
-  installCondition cenv (hscale =:= speedField)
+  hscale <- fmap scaleValueReactive $ speedScale vw
+  let speedField' = mkFieldAccessor speedField (model cenv)
+  hscale =:= speedField'
   
 -- | Sets the system as running
 conditionRun :: CEnv -> IO()

@@ -59,8 +59,7 @@ Executable SoOSiM-ui
   ghc-options: -threaded -Wall -fno-warn-unused-do-bind -O2
   
   -- Packages needed in order to build this package.
-  Build-depends: hails
-               , glib
+  Build-depends: glib
                , gtk
                , glade
                , gloss-gtk
@@ -74,6 +73,13 @@ Executable SoOSiM-ui
                , IfElse
                , mtl
                , stm
+               -- , hails
+               , hails-mvc-model-protectedmodel
+               , gtk-helpers
+               , hails-mvc-view-gtk
+               , hails-mvc-environment-gtk
+               , hails-reactive-gtk
+               , hails-reactivevalues
   
   -- Modules not exported by this package.
   Other-modules:    CombinedEnvironment
