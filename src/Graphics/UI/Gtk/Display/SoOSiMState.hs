@@ -59,7 +59,7 @@ soosimStateNew cfg = do
   glossIOStartGame gloss 0.5 (-400, -100) initialAnimationSize fps state
                    (makePicture cfg soosim) queueEvent (stepWorld soosim)
   return soosim
- where state = (State [])
+ where state = State []
        fps   = 100
 
 -- | Convert the state into a picture.
@@ -89,7 +89,7 @@ makeImage' cfg soosim = do
 stepWorld :: SoOSiMState -> Float -> State -> IO State
 stepWorld soosim _ (State evs) = do
   -- Build basic status
-  st <- soosimGetSimState soosim
+  st  <- soosimGetSimState soosim
   sel <- soosimGetSelection soosim
   mcs <- soosimGetMCS soosim
   when (isJust st && isJust sel && isJust mcs) $ do

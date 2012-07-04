@@ -53,5 +53,5 @@ previousState :: SimGLState -> SimGLState
 previousState state = state { simGLSystemStatus = previousStatus (simGLSystemStatus state) }
 
 previousStatus :: SystemStatus -> SystemStatus
-previousStatus (SystemStatus hist sel) = (SystemStatus hist' sel)
+previousStatus (SystemStatus hist sel) = SystemStatus hist' sel
  where hist' = historyBack hist

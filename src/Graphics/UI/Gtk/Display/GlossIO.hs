@@ -64,7 +64,7 @@ glossIOStartAnimation gloss size f = void $
   gloss `on` realize $ glossIOStartAnimation' gloss size f
   
 glossIOStartAnimation' :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
-glossIOStartAnimation' (GlossIO ev params) size f = do
+glossIOStartAnimation' (GlossIO ev params) size f =
   animateIO (InWidget ev size) white f'
  where f' x = do x' <- f x
                  zoom <- readCBMVar $ glossIOZoom params
@@ -122,7 +122,7 @@ glossIONewWithGame initZ initO size fps state mkPic queue stepW = do
   -- return gloss
 
 -- Process the event queue and return an empty state
-stepWorld :: GlossIO -> (Float -> a -> IO a) -> Float -> (GameState a) -> IO (GameState a)
+stepWorld :: GlossIO -> (Float -> a -> IO a) -> Float -> GameState a -> IO (GameState a)
 stepWorld glossIO internalTrans f (GameState sc o no internalSt) = do
   internalSt' <- internalTrans f internalSt
   glossIOSetZoom glossIO sc

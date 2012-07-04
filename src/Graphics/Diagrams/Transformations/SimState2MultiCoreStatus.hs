@@ -20,9 +20,9 @@ import Graphics.Diagrams.MultiCoreStatus
 updateFromSimState :: MultiCoreStatus -> S.SimState -> IO MultiCoreStatus
 updateFromSimState mcs ss = do
    let ns = I.toList $ S.nodes ss
-   ms <- mapM (collectMessages ns) ns
+   ms <- concatMapM (collectMessages ns) ns
    ps <- mapM (updateNode mcs) ns
-   return $ MultiCoreStatus ps (concat ms)
+   return $ MultiCoreStatus ps ms
 
 -- | Updates a node in a MultiCore System from a SoOSiM node
 updateNode :: MultiCoreStatus -> (Int, S.Node) -> IO ProcessingUnit
@@ -55,19 +55,17 @@ compStateName (S.CC _ _ s _ _ _ _) =
 -- | Obtains the component state from its context
 compStateState :: S.ComponentContext -> IO ElementState
 compStateState (S.CC _ s _ _ mb _ _) = do
-  s' <- readTVarIO s
+  s'  <- readTVarIO s
   mb' <- readTVarIO mb
-  case s' of
-    S.Running           -> return Active
-    S.WaitingForMsg _ _ -> return Waiting
-    S.Idle              -> if (null mb')
-                              then (return Idle)
-                              else (return Active)
+  return $ case (s', mb') of
+            (S.Running,           _)  -> Active
+            (S.WaitingForMsg _ _, _)  -> Waiting
+            (S.Idle             , []) -> Idle
+            (S.Idle             , _)  -> Active
 
 compStatistics :: S.ComponentContext -> IO Statistics
 compStatistics (S.CC _cid csu cse _cr _buf trc smd) = do
     metaData <- readTVarIO smd
-
     return $ Statistics (S.cyclesRunning metaData)
                         (S.cyclesWaiting metaData)
                         (S.cyclesIdling metaData)
@@ -76,21 +74,19 @@ compStatistics (S.CC _cid csu cse _cr _buf trc smd) = do
 
 -- | Transforms the SoOSiM messages into MultiCore description messages
 collectMessages :: [(Int, S.Node)] -> (Int, S.Node) -> IO [Message]
-collectMessages nodes (nid,n) = do
-  msgs <- mapM (collectMessagesCC nodes nid) $ I.toList $ S.nodeComponents n
-  return $ concat msgs
+collectMessages nodes (nid,n) = concatMapM getMessages nodeComponentsL
+ where nodeComponentsL = I.toList $ S.nodeComponents n
+       getMessages     = collectMessagesCC nodes nid
 
 -- | Gets the list of messages from a given node and component
 collectMessagesCC :: [(Int, S.Node)] -> Int -> (Int, S.ComponentContext) -> IO [Message]
-collectMessagesCC nodes nid (cid, cc) = do
-  inputs <- compPendingInputs cc
-  msgs   <- mapM (collectMessagesInput nodes nid cid) inputs
-  return $ concat msgs
+collectMessagesCC nodes nid (cid, cc) =
+   concatMapM getMessagesInput =<< compPendingInputs cc
+  where getMessagesInput = collectMessagesInput nodes nid cid
 
 -- | Transforms an input SoOSiM message into a MCS message
 collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.ComponentInput -> IO [Message]
 collectMessagesInput nodes nid cid input
-
  | (S.ComponentMsg sid _) <- input
  , Just senderNode <- findComponentNode sid nodes
  = return [ Message [show senderNode, show sid] dest "" ]
@@ -112,3 +108,6 @@ compPendingInputs (S.CC _ _ _ _ b _ _) = readTVarIO b
 findComponentNode :: S.ComponentId -> [(Int, S.Node)] -> Maybe S.NodeId
 findComponentNode cid ns = listToMaybe
   [ S.nodeId n | (_,n) <- ns, I.member (getKey cid) (S.nodeComponents n) ]
+
+concatMapM :: (Functor m, Monad m) => (a -> m [b]) -> [a] -> m [b]
+concatMapM f = fmap concat . mapM f
