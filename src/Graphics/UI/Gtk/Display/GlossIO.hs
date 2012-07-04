@@ -80,7 +80,7 @@ glossIOStartGame :: GlossIO
                  -> (Int, Int) -> Int -> a -> (a -> IO Picture)
                  -> (Event -> a -> a)
                  -> (Float -> a -> IO a) -> IO ()
-glossIOStartGame gloss initZ initO size fps state mkPic queue stepW = do
+glossIOStartGame gloss initZ initO size fps state mkPic queue stepW = void $ do
   let (GlossIO e paramsR) = gloss
   glossIOSetZoom gloss initZ
   glossIOSetOrig gloss initO
@@ -96,7 +96,6 @@ glossIOStartGame gloss initZ initO size fps state mkPic queue stepW = do
       stepW' = stepWorld gloss stepW
       play = playIO (InWidget e size) white fps state' mkPic' queue' stepW'
   gloss `on` realize $ play
-  return ()
 
 glossIONewWithGame :: Float -> G.Point
                    -> (Int, Int) -> Int -> a -> (a -> IO Picture)
@@ -225,9 +224,9 @@ instance GlossIOClass GlossIO where
   glossIOGetPicture (GlossIO _ params) = readCBMVar (glossIOPicture params)
   
   -- glossIOOnZoomChange :: GlossIO -> IO () -> IO ()
-  glossIOOnZoomChange (GlossIO _ (GlossIOParams zoomV _ _)) p = do
+  glossIOOnZoomChange (GlossIO _ (GlossIOParams zoomV _ _)) p =
     installCallbackCBMVar zoomV p
   
   -- glossIOOnOrigChange :: GlossIO -> IO () -> IO ()
-  glossIOOnOrigChange (GlossIO _ (GlossIOParams _ diffV _)) p = do
+  glossIOOnOrigChange (GlossIO _ (GlossIOParams _ diffV _)) p =
     installCallbackCBMVar diffV p

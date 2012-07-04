@@ -23,7 +23,7 @@ initialiseTooltips bldr = do
 --
 -- FIXME: Move to hails?
 initialiseTooltips' :: Builder -> Tooltips -> IO ()
-initialiseTooltips' bldr tlts = do
+initialiseTooltips' bldr tlts =
   mapM_ (installTooltip bldr tlts) tooltipsWithIds
  where tooltipsWithIds = zip tooltipsTable identifiers
        identifiers     = map (("T" ++) . show) ([1..] :: [Int])
