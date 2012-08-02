@@ -1,6 +1,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PackageImports  #-}
 {-# LANGUAGE PatternGuards  #-}
+-- | A Gtk widget that displays a gloss animation/game.
 module Graphics.UI.Gtk.Display.GlossIO
     ( glossIONewWithAnimation
     , glossIONewWithGame
@@ -23,12 +24,15 @@ import Control.Monad
 import Data.CBMVar
 import Graphics.UI.Gtk (WidgetClass, EventBox, eventBoxNew, ObjectClass, GObjectClass, toGObject, on, realize, eventBoxSetAboveChild)
 import Graphics.Zoom
-import System.Glib.Types
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Animate
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game as G
+import System.Glib.Types
+
 import Graphics.Diagrams.Types ( Name, addPos, subPos, unScale )
 
+-- | A GlossIO Widget displays a gloss animation inside. The animation/game is
+-- reactive.
 data GlossIO = GlossIO EventBox (GlossIOParams)
 data GlossIOParams = GlossIOParams 
   { glossIOZoom        :: CBMVar Float
@@ -42,6 +46,7 @@ instance GObjectClass GlossIO where
   toGObject (GlossIO e _) = toGObject e
   unsafeCastGObject x = GlossIO (unsafeCastGObject x) undefined
 
+-- | Creates a new empty gloss animation
 glossIONew :: IO GlossIO
 glossIONew = do
   ev    <- eventBoxNew 
@@ -50,19 +55,22 @@ glossIONew = do
   pic   <- newCBMVar Nothing
   return $ GlossIO ev (GlossIOParams zoomL orig pic)
 
-reposition :: Float -> G.Point -> Picture -> Picture
-reposition progScale orig = uncurry translate orig . scale progScale progScale
-
+-- | Creates a new animation with a given size and an animation generation
+-- function (based on time)
 glossIONewWithAnimation :: (Int, Int) -> (Float -> IO Picture) -> IO GlossIO
 glossIONewWithAnimation size f = do
   gloss <- glossIONew 
   glossIOStartAnimation gloss size f
   return gloss
 
+-- | Starts a new animation inside an empty gloss widget.
+--
+-- PRE: the gloss widget is not currently playing any animation.
 glossIOStartAnimation :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
 glossIOStartAnimation gloss size f = void $
   gloss `on` realize $ glossIOStartAnimation' gloss size f
-  
+
+-- Refreshes the gloss animation  
 glossIOStartAnimation' :: GlossIO -> (Int, Int) -> (Float -> IO Picture) -> IO ()
 glossIOStartAnimation' (GlossIO ev params) size f =
   animateIO (InWidget ev size) white f'
@@ -73,8 +81,13 @@ glossIOStartAnimation' (GlossIO ev params) size f =
                  writeCBMVar (glossIOPicture params) $ Just x'
                  return picture
 
+-- The zoom, origin, mouse and other internal state that must be held inside
+-- the gloss game for proper interaction
 data GameState a = GameState Float G.Point (Maybe G.Point) a
 
+-- | Starts a game inside a gloss widget.
+--
+-- PRE: no gloss game/animation can be associated to that widget already
 glossIOStartGame :: GlossIO
                  -> Float -> G.Point
                  -> (Int, Int) -> Int -> a -> (a -> IO Picture)
@@ -82,21 +95,31 @@ glossIOStartGame :: GlossIO
                  -> (Float -> a -> IO a) -> IO ()
 glossIOStartGame gloss initZ initO size fps state mkPic queue stepW = void $ do
   let (GlossIO e paramsR) = gloss
+
+  -- Set zoom and origin
   glossIOSetZoom gloss initZ
   glossIOSetOrig gloss initO
-  let mkPic' x = do let (GameState _ _ _ x') = x
+
+  -- Define how the game will be presented
+  let -- Draw adjusted for zoom and translation
+      mkPic' x = do let (GameState _ _ _ x') = x
                     zoom <- glossIOGetZoom gloss
                     diff <- glossIOGetOrig gloss
                     x'' <- mkPic x'
                     let picture = reposition zoom diff x''
                     writeCBMVar (glossIOPicture paramsR) $ Just x''
                     return picture
+      -- Initial state
       state' = GameState initZ initO Nothing state
+      -- Input event queing function
       queue' = transformEvent queue
+      -- Calculate next animation step 
       stepW' = stepWorld gloss stepW
+      -- Gloss game
       play = playIO (InWidget e size) white fps state' mkPic' queue' stepW'
   gloss `on` realize $ play
 
+-- | Create a new gloss widget with an embedded game
 glossIONewWithGame :: Float -> G.Point
                    -> (Int, Int) -> Int -> a -> (a -> IO Picture)
                    -> (Event -> a -> a)
@@ -105,21 +128,6 @@ glossIONewWithGame initZ initO size fps state mkPic queue stepW = do
   gloss@(GlossIO e paramsR) <- glossIONew 
   glossIOStartGame gloss initZ initO size fps state mkPic queue stepW
   return gloss
-  -- glossIOSetZoom gloss initZ
-  -- glossIOSetOrig gloss initO
-  -- let mkPic' x = do let (GameState _ _ _ x') = x
-  --                   zoom <- glossIOGetZoom gloss
-  --                   diff <- glossIOGetOrig gloss
-  --                   x'' <- mkPic x'
-  --                   let picture = reposition zoom diff x''
-  --                   writeCBMVar (glossIOPicture paramsR) $ Just picture
-  --                   return picture
-  --     state' = GameState initZ initO Nothing state
-  --     queue' = transformEvent queue
-  --     stepW' = stepWorld gloss stepW
-  --     play = playIO (InWidget e size) white fps state' mkPic' queue' stepW'
-  -- gloss `on` realize $ play
-  -- return gloss
 
 -- Process the event queue and return an empty state
 stepWorld :: GlossIO -> (Float -> a -> IO a) -> Float -> GameState a -> IO (GameState a)
@@ -129,6 +137,8 @@ stepWorld glossIO internalTrans f (GameState sc o no internalSt) = do
   glossIOSetOrig glossIO o
   return (GameState sc o no internalSt')
 
+-- | Transforms an event relative to the widget into an event relative to the animation
+-- (taking zoom and translation into account)
 transformEvent ::(Event -> a -> a) -> Event -> GameState a -> GameState a
 transformEvent internalTrans event (GameState zoomL orig moving state)
   -- Adds a click event to the event queue
@@ -182,6 +192,7 @@ transformEvent internalTrans event (GameState zoomL orig moving state)
 stdZoomStep :: Float
 stdZoomStep = 0.8
 
+-- | Gloss Widget class definition
 class WidgetClass a => GlossIOClass a where
  glossIOSetSensitive :: a -> Bool -> IO ()
  glossIOSetZoom :: a -> Float -> IO ()
@@ -193,6 +204,7 @@ class WidgetClass a => GlossIOClass a where
  glossIOOnZoomChange :: a -> IO () -> IO ()
  glossIOOnOrigChange :: a -> IO () -> IO ()
 
+-- | To be used for widget derivations
 instance GlossIOClass GlossIO where
   -- glossIOSetSensitive :: GlossIO -> Bool -> IO ()
   glossIOSetSensitive (GlossIO ev _) sensitive =
@@ -230,3 +242,7 @@ instance GlossIOClass GlossIO where
   -- glossIOOnOrigChange :: GlossIO -> IO () -> IO ()
   glossIOOnOrigChange (GlossIO _ (GlossIOParams _ diffV _)) p =
     installCallbackCBMVar diffV p
+
+-- | Reposition a picture based on a zoom level and translation origin
+reposition :: Float -> G.Point -> Picture -> Picture
+reposition progScale orig = uncurry translate orig . scale progScale progScale
