@@ -24,10 +24,11 @@ import Hails.MVC.Model.ProtectedModel.Reactive
 -- Internal imports
 import CombinedEnvironment
 import Data.History
+import Data.Maybe
 import Graphics.Diagrams.MultiCoreStatus
 import Model.Model
 import Model.SystemStatus
-import SoOSiM.Samples.Initializer
+-- import SoOSiM.Samples.Initializer
 
 -- | Adjusts the system speed and running/paused status
 -- to the user selection
@@ -79,12 +80,14 @@ conditionStop cenv = do
   setter statusField pm Stopped
 
   -- Starts a fresh new simulation
-  ss <- simstate
-  let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
-      mcs'              = SimGLState emptySystemStatus ss []
-  setter simStateField pm (Just mcs')
-
-  setter statusField  pm Paused
+  simst <- getter simStateField pm
+  when (isJust simst) $ do
+    let simst' = fromJust simst
+    ss <- simGLInitialState simst'
+    let emptySystemStatus = SystemStatus (historyNew emptyMultiCoreStatus) []
+        mcs'              = SimGLState emptySystemStatus ss (simGLInitialState simst') []
+    setter simStateField pm (Just mcs')
+    setter statusField  pm Paused
  where pm = model cenv
 
 -- | Increases the simulation speed by a factor of 2

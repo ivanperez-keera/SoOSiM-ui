@@ -7,7 +7,7 @@ module Controller.Conditions.Step
 import Control.Monad
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
-import SoOSiM.Simulator (execStep,execStepSmall)
+import SoOSiM (tick)
 
 -- Internal imports
 import CombinedEnvironment
@@ -34,13 +34,13 @@ installHandlers cenv = void $ do
 conditionF :: CEnv -> IO()
 conditionF cenv = void $ do
   st <- getter statusField $ model cenv
-  when (st == Paused) $ modelUpdateNextStepWith cenv execStep
+  when (st == Paused) $ modelUpdateNextStepWith cenv tick
 
 -- | Updates the state with the next step only if the system is paused
 conditionFS :: CEnv -> IO()
 conditionFS cenv = void $ do
   st <- getter statusField $ model cenv
-  when (st == Paused) $ modelUpdateNextStepWith cenv execStepSmall
+  when (st == Paused) $ modelUpdateNextStepWith cenv tick
 
 -- | Go back one step
 conditionB :: CEnv -> IO()

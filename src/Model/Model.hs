@@ -20,6 +20,7 @@ data Model = Model
 data SimGLState = SimGLState
   { simGLSystemStatus :: SystemStatus
   , simGLSimState     :: SimState
+  , simGLInitialState :: IO SimState
   , simGLSelection    :: [Name]
   }
 

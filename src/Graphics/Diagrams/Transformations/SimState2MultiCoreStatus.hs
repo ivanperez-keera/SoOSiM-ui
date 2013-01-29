@@ -7,6 +7,7 @@ module Graphics.Diagrams.Transformations.SimState2MultiCoreStatus
 
 -- External imports
 import           Control.Concurrent.STM
+import           Data.Dynamic
 import           Data.Maybe             (listToMaybe)
 import qualified Data.IntMap            as I
 import qualified SoOSiM.Types           as S
@@ -49,22 +50,24 @@ component2RunningElement mcs (i, c) = do
 
 -- | Obtains the component name from its context
 compStateName :: S.ComponentContext -> IO String
-compStateName (S.CC _ _ s _ _ _ _) =
-  fmap S.componentName $ readTVarIO s
+compStateName (S.CC s _ _ _ _ _ _ _) =
+  return (S.componentName s)
 
 -- | Obtains the component state from its context
 compStateState :: S.ComponentContext -> IO ElementState
-compStateState (S.CC _ s _ _ mb _ _) = do
+compStateState (S.CC _ _ _ s _ mb _ _) = do
   s'  <- readTVarIO s
   mb' <- readTVarIO mb
   return $ case (s', mb') of
-            (S.Running,           _)  -> Active
-            (S.WaitingForMsg _ _, _)  -> Waiting
-            (S.Idle             , []) -> Idle
-            (S.Idle             , _)  -> Active
+            (S.Running _ _   , _)  -> Active
+            (S.WaitingFor _ _, _)  -> Waiting
+            (S.ReadyToIdle   , []) -> Idle
+            (S.ReadyToRun    , []) -> Idle
+            (S.ReadyToIdle   , _)  -> Active
+            (S.ReadyToRun    , _)  -> Active
 
 compStatistics :: S.ComponentContext -> IO Statistics
-compStatistics (S.CC _cid csu cse _cr _buf trc smd) = do
+compStatistics (S.CC _s _cid _csu cse _cr _buf trc smd) = do
     metaData <- readTVarIO smd
     return $ Statistics (S.cyclesRunning metaData)
                         (S.cyclesWaiting metaData)
@@ -85,14 +88,14 @@ collectMessagesCC nodes nid (cid, cc) =
   where getMessagesInput = collectMessagesInput nodes nid cid
 
 -- | Transforms an input SoOSiM message into a MCS message
-collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.ComponentInput -> IO [Message]
+collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.Input a -> IO [Message]
 collectMessagesInput nodes nid cid input
- | (S.ComponentMsg sid _) <- input
- , Just senderNode <- findComponentNode sid nodes
- = return [ Message [show senderNode, show sid] dest "" ]
+ | (S.Message _ sid) <- input
+ , Just senderNode <- findComponentNode (fst (S.unRA sid)) nodes
+ = return [ Message [show senderNode, show (fst (S.unRA sid))] dest "" ]
 
- | (S.NodeMsg sid _) <- input
- = return [ Message [show sid] dest "" ]
+ -- | (S.NodeMsg sid _) <- input
+ -- = return [ Message [show sid] dest "" ]
 
  | otherwise
  = return []
@@ -100,14 +103,14 @@ collectMessagesInput nodes nid cid input
  where dest = map (show . getUnique) [nid, cid]
 
 -- | Gets the list of pending inputs from a component context
-compPendingInputs :: S.ComponentContext -> IO [S.ComponentInput]
-compPendingInputs (S.CC _ _ _ _ b _ _) = readTVarIO b
+compPendingInputs :: S.ComponentContext -> IO [S.Input Dynamic]
+compPendingInputs (S.CC _ _ _ _ _ b _ _) = readTVarIO b
 
 -- | Returns the node id of the node that the given component is running in,
 -- if any.
 findComponentNode :: S.ComponentId -> [(Int, S.Node)] -> Maybe S.NodeId
 findComponentNode cid ns = listToMaybe
-  [ S.nodeId n | (_,n) <- ns, I.member (getKey cid) (S.nodeComponents n) ]
+  [ S.nodeId n | (_,n) <- ns, I.member cid (S.nodeComponents n) ]
 
 concatMapM :: (Functor m, Monad m) => (a -> m [b]) -> [a] -> m [b]
 concatMapM f = fmap concat . mapM f

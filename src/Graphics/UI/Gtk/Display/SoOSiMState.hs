@@ -10,7 +10,7 @@ import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import             Graphics.UI.Gtk (ObjectClass, WidgetClass)
 import             System.Glib.Types
-import             SoOSiM.Types
+import             SoOSiM.Types hiding (State)
 
 -- Local imports
 import Config.Config

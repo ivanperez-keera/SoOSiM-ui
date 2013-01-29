@@ -5,7 +5,7 @@ module Controller.Helpers.NextSimState where
 -- External imports
 import Control.Monad
 import Hails.MVC.Model.ProtectedModel.Reactive
-import SoOSiM.Simulator (execStep,execStepSmall)
+import SoOSiM (tick)
 import SoOSiM.Types (SimState)
 
 -- Internal imports
@@ -21,7 +21,7 @@ modelUpdateNextStep :: CEnv -> IO ()
 modelUpdateNextStep cenv = do
   st <- getter statusField (model cenv)
   when (isActiveState st) $
-    let f = if st == Running then execStep else execStepSmall
+    let f = if st == Running then tick else tick
     in modelUpdateNextStepWith cenv f
  where isActiveState Running     = True
        isActiveState SlowRunning = True

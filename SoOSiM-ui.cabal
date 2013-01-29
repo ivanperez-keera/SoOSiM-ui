@@ -69,6 +69,7 @@ Executable SoOSiM-ui
                , IfElse
                , mtl
                , stm
+               , concurrent-supply
                
                -- Keera packages
                , keera-callbacks
@@ -81,7 +82,8 @@ Executable SoOSiM-ui
 
                -- SoOS packages
                , gloss-gtk
-               , SoOSiM          == 0.1
+               , SoOSiM
+               , SoOSiM-components
   
   -- Modules not exported by this package.
   Other-modules:    CombinedEnvironment
@@ -89,12 +91,15 @@ Executable SoOSiM-ui
                     Config.Preferences
                     Controller
                     Controller.Conditions
+                    Controller.Conditions.FlowChartWindowVisible
                     Controller.Conditions.Fullscreen
                     Controller.Conditions.InfoBasicInfo
                     Controller.Conditions.InfoSelectionArea
                     Controller.Conditions.InfoTooltip
+                    Controller.Conditions.InitialiseExample
                     Controller.Conditions.Quit
                     Controller.Conditions.Selection
+                    Controller.Conditions.ShowState
                     Controller.Conditions.Speed
                     Controller.Conditions.Step
                     Controller.Conditions.UpdateStatus
@@ -128,18 +133,25 @@ Executable SoOSiM-ui
                     Model.ReactiveModel.ReactiveModelInternals
                     Paths
                     Paths.CustomPaths
-                    SoOSiM.Components.HeatMap.Application
-                    SoOSiM.Components.HeatMap.Types
-                    SoOSiM.Components.HeatMap.Util
-                    SoOSiM.Components.Initializer
-                    SoOSiM.Components.MemoryManager
-                    SoOSiM.Components.MemoryManager.Types
-                    SoOSiM.Components.MemoryManager.Util
-                    SoOSiM.Components.ResourceDiscovery
-                    SoOSiM.Components.ResourceDiscovery.Types
-                    SoOSiM.Components.Scheduler
-                    SoOSiM.Components.Scheduler.Types
-                    SoOSiM.Samples.Initializer
+                    --SoOSiM.Components.ApplicationHandler
+                    --SoOSiM.Components.CodeAdapter
+                    --SoOSiM.Components.DeploymentManager
+                    --SoOSiM.Components.HeatMap.Application
+                    --SoOSiM.Components.HeatMap.Types
+                    --SoOSiM.Components.HeatMap.Util
+                    --SoOSiM.Components.Initializer
+                    --SoOSiM.Components.MemoryManager
+                    --SoOSiM.Components.MemoryManager.Interface
+                    --SoOSiM.Components.MemoryManager.Types
+                    --SoOSiM.Components.MemoryManager.Util
+                    --SoOSiM.Components.ProcessManager
+                    --SoOSiM.Components.ResourceDiscovery
+                    --SoOSiM.Components.ResourceDiscovery.Types
+                    --SoOSiM.Components.Scheduler
+                    --SoOSiM.Components.Scheduler.Types
+                    --SoOSiM.Components.Types
+                    --SoOSiM.Components.Utils
+                    --SoOSiM.Samples.Initializer
                     View
                     View.InitAnimationArea
                     View.InitIconsInfoArea
