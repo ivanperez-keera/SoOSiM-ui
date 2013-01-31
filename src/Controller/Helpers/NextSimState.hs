@@ -35,6 +35,14 @@ modelUpdateNextStepWith cenv nextStepCalc =
                     , simGLSimState     = b'
                     }
 
+-- newSelection :: SystemStatus -> SystemStatus
+-- newSelection ss
+--   | [] <- selection ss
+--   = ss
+--   | [nn,cn] <- selection ss
+--   , isJust (findRunningElement (nn,cn) (present (multiCoreStatus ss')))
+--   | otherwise = ss 
+
 -- FIXME: To be moved to monad extra (or Control.Monad.IfElse)
 maybeM :: Monad m => (a -> m b) -> Maybe a -> m (Maybe b)
 maybeM f v = maybe (return Nothing) (liftM Just . f) v

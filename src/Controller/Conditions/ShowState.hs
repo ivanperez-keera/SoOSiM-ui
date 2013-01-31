@@ -31,7 +31,9 @@ condition cenv = do
   awhen stateM $ \state -> do
     let systemSt = simGLSystemStatus state
         simstate = simGLSimState state
+        sel      = selection $ systemSt
         mcs      = present $ multiCoreStatus systemSt
     soosimSetSimState soosim $ Just simstate
     soosimSetMCS soosim $ Just mcs
+    soosimSetSelection soosim $ Just sel
     where soosim = soosimView (view cenv)

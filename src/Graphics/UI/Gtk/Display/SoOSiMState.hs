@@ -6,7 +6,6 @@ module Graphics.UI.Gtk.Display.SoOSiMState where
 import             Control.Monad
 import             Data.CBMVar
 import             Data.Maybe
-import             Debug.Trace
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import             Graphics.UI.Gtk (ObjectClass, WidgetClass)
@@ -63,7 +62,7 @@ soosimStateNew cfg = do
                    (makePicture cfg soosim) queueEvent (stepWorld soosim)
   return soosim
  where state = State []
-       fps   = 100
+       fps   = 20
 
 -- | Convert the state into a picture.
 makePicture :: Config -> SoOSiMState -> State -> IO Picture
@@ -160,8 +159,8 @@ handleClicks p state = state { soosimStaticStatus = st' }
 
 -- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SoOSiMStaticStatus -> SoOSiMStaticStatus
-handleDoubleClicks p state = trace (show $ selection st') $ state { soosimStaticStatus = st'
-                                                                  , soosimStaticSel    = fromMaybe [] ss }
+handleDoubleClicks p state = state { soosimStaticStatus = st'
+                                   , soosimStaticSel    = fromMaybe [] ss }
  where ss = simpleBoxName =<< checkSetSelection p st -- Select simple boxes only
        ns = checkToggleVisibility p st
        st = soosimStaticStatus state

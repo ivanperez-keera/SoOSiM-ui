@@ -29,10 +29,7 @@ conditionShowPage :: CEnv -> IO()
 conditionShowPage cenv = do
   stM <- getter simStateField (model cenv) -- readCBMVar $ mcs $ view cenv
   let hasSelection = maybe False (not . null . selection . simGLSystemStatus) stM
-  -- selection <- soosimGetSelection soosim
-  -- let hasSelection = maybe False (not . null) selection
 
-  putStrLn $ show hasSelection
   notebook <- infoNotebook vw
 
   -- Show notebook page
@@ -44,8 +41,6 @@ conditionShowPage cenv = do
 -- | Shows component info only when a component is selected
 conditionUpdateSelection :: CEnv -> IO()
 conditionUpdateSelection cenv = do
-  -- stM <- getter simStateField (model cenv) -- readCBMVar $ mcs $ view cenv
-  -- let hasSelection = maybe False (not . null . selection . simGLSystemStatus) stM
   selection <- soosimGetSelection soosim
   stM <- getter simStateField (model cenv)
   when (isJust stM) $ do

@@ -36,9 +36,13 @@ conditionShowCompInfo cenv = do
    let sel   = selection $ simGLSystemStatus st
        mcs   = present $ multiCoreStatus $ simGLSystemStatus st
 
-   awhen (getElemInfo sel mcs) $ \(ni,nt) -> do
-     textBufferUpdateText bf1 ni
-     textBufferUpdateText bf2 nt
+   case (sel, getElemInfo sel mcs) of
+     ([], _) -> do textBufferUpdateText bf1 "" 
+                   textBufferUpdateText bf2 ""
+     (_, Nothing) -> do textBufferUpdateText bf1 "The selected component has ceased to exist" 
+                        textBufferUpdateText bf2 ""
+     (_, Just (ni,nt)) -> do textBufferUpdateText bf1 ni
+                             textBufferUpdateText bf2 nt
 
 -- | Renders the info relative to a given element (both basic info and a trace)
 getElemInfo :: [Name]                 -- ^ The qualified name of the element whose info we need
