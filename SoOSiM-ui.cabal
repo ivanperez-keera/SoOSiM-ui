@@ -56,7 +56,7 @@ Executable SoOSiM-ui
 
   -- Ignore monadic values when not captured
   -- Show all warnings
-  ghc-options: -threaded -Wall -fno-warn-unused-do-bind -O2
+  ghc-options: -threaded -Wall -fno-warn-unused-do-bind -O2 -debug
   
   -- Packages needed in order to build this package.
   Build-depends: glib

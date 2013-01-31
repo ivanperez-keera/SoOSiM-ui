@@ -6,6 +6,7 @@ module Graphics.Diagrams.Transformations.PositionedDiagram2Picture
 
 -- External imports
 import "gloss-gtk" Graphics.Gloss
+import Debug.Trace
 
 -- Local imports
 import Graphics.Diagrams.Positioned.PositionedDiagram
@@ -14,7 +15,10 @@ import Graphics.Gloss.AdvancedShapes
 -- | Transforms a plain diagram into a gloss picture
 -- by transforming the arrows and the boxes
 paintDiagram :: PositionedDiagram -> Picture
-paintDiagram (PositionedDiagram bs as) = Pictures [pbs, pas]
+paintDiagram (PositionedDiagram bs as) =
+    trace (show bs) $
+     trace (show as) $
+      Pictures [pbs, pas]
   where pbs = Pictures $ map paintBox bs
         pas = Pictures $ map paintArrow as
 

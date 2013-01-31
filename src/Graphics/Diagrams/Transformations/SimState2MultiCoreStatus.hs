@@ -46,7 +46,7 @@ component2RunningElement mcs (i, c) = do
   state <- compStateState c
   stats <- compStatistics c
   return $ Component pid name state Nothing stats
- where pid = show (getUnique i)
+ where pid = show (getKey (getUnique i))
 
 -- | Obtains the component name from its context
 compStateName :: S.ComponentContext -> IO String
@@ -100,7 +100,7 @@ collectMessagesInput nodes nid cid input
  | otherwise
  = return []
 
- where dest = map (show . getUnique) [nid, cid]
+ where dest = map (show . getKey . getUnique) [nid, cid]
 
 -- | Gets the list of pending inputs from a component context
 compPendingInputs :: S.ComponentContext -> IO [S.Input Dynamic]
@@ -110,7 +110,7 @@ compPendingInputs (S.CC _ _ _ _ _ b _ _) = readTVarIO b
 -- if any.
 findComponentNode :: S.ComponentId -> [(Int, S.Node)] -> Maybe S.NodeId
 findComponentNode cid ns = listToMaybe
-  [ S.nodeId n | (_,n) <- ns, I.member cid (S.nodeComponents n) ]
+  [ S.nodeId n | (_, n) <- ns, I.member cid (S.nodeComponents n) ]
 
 concatMapM :: (Functor m, Monad m) => (a -> m [b]) -> [a] -> m [b]
 concatMapM f = fmap concat . mapM f

@@ -5,7 +5,7 @@ module Controller.Conditions where
 import CombinedEnvironment
 
 import qualified Controller.Conditions.Fullscreen             as Fullscreen
-import qualified Controller.Conditions.FlowChartWindowVisible as FlowChartWindowVisible
+-- import qualified Controller.Conditions.FlowChartWindowVisible as FlowChartWindowVisible
 import qualified Controller.Conditions.InfoSelectionArea      as InfoSel
 import qualified Controller.Conditions.InfoBasicInfo          as InfoBasic
 import qualified Controller.Conditions.InfoTooltip            as InfoTooltip
@@ -22,7 +22,7 @@ import qualified Controller.Conditions.InitialiseExample      as LoadExample
 installHandlers :: CEnv -> IO ()
 installHandlers =
   Fullscreen.installHandlers ## 
-  FlowChartWindowVisible.flowChartWindowVisibleCondition ## 
+  -- FlowChartWindowVisible.flowChartWindowVisibleCondition ## 
   Quit.installHandlers         ## 
   ShowState.installHandlers    ## 
   LoadExample.installHandlers  ## 

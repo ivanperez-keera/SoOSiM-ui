@@ -25,7 +25,7 @@ labelledBox :: String -> Maybe Bool -> BoxDescription -> Color -> Picture
 labelledBox n expandable ((x,y),(w,h)) c = shadowed $
  translate x y $ Pictures
   [ drawBox
-  , translate xc yc $ scale 0.11 0.11 $ text n
+  , color black $ translate xc yc $ scale 0.11 0.11 $ text n
   ]
  where tw  = fontWidth * fromIntegral (length n)
        w'  = (max w tw) + 2 * boxPadding
