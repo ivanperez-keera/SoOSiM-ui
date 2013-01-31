@@ -6,6 +6,7 @@ module Graphics.UI.Gtk.Display.SoOSiMState where
 import             Control.Monad
 import             Data.CBMVar
 import             Data.Maybe
+import             Debug.Trace
 import "gloss-gtk" Graphics.Gloss
 import "gloss-gtk" Graphics.Gloss.Interface.IO.Game
 import             Graphics.UI.Gtk (ObjectClass, WidgetClass)
@@ -37,6 +38,7 @@ data SoOSiMState = SoOSiMState
 
 data SoOSiMStateParams = SoOSiMStateParams
   { soosimState     :: CBMVar (Maybe SimState)
+  , soosimOver      :: CBMVar (Maybe [Name])
   , soosimSelection :: CBMVar (Maybe [Name])
   , soosimMCS       :: CBMVar (Maybe MultiCoreStatus)
   }
@@ -49,12 +51,13 @@ instance GObjectClass SoOSiMState where
 
 soosimStateNew :: Config -> IO SoOSiMState
 soosimStateNew cfg = do
-  -- glossIO <- glossIONewWithGame 
+
   gloss <- glossIONew
   st    <- newCBMVar Nothing
   sel   <- newCBMVar Nothing
+  over  <- newCBMVar Nothing
   mcs   <- newCBMVar Nothing
-  let soosim = SoOSiMState gloss (SoOSiMStateParams st sel mcs)
+  let soosim = SoOSiMState gloss (SoOSiMStateParams st over sel mcs)
 
   glossIOStartGame gloss 0.5 (-400, -100) initialAnimationSize fps state
                    (makePicture cfg soosim) queueEvent (stepWorld soosim)
@@ -70,9 +73,10 @@ makePicture cfg st _ = makeImage' cfg st
 makeImage' :: Config -> SoOSiMState -> IO Picture
 makeImage' cfg soosim = do
   st  <- soosimGetSimState soosim
+  over <- soosimGetOver soosim
   sel <- soosimGetSelection soosim
   mcs <- soosimGetMCS soosim
-  if (isNothing st || isNothing sel || isNothing mcs)
+  if (isNothing st  || isNothing over || isNothing sel || isNothing mcs)
    then return $ Pictures []
    else do
     let hist = historyNew (fromJust mcs)
@@ -90,20 +94,23 @@ stepWorld :: SoOSiMState -> Float -> State -> IO State
 stepWorld soosim _ (State evs) = do
   -- Build basic status
   st  <- soosimGetSimState soosim
+  over <- soosimGetOver soosim
   sel <- soosimGetSelection soosim
   mcs <- soosimGetMCS soosim
-  when (isJust st && isJust sel && isJust mcs) $ do
+  when (isJust st && isJust over && isJust sel && isJust mcs) $ do
     let hist = historyNew (fromJust mcs)
         systemSt     = SystemStatus hist (fromJust sel)
         staticStatus = SoOSiMStaticStatus (fromJust st)
                                           systemSt
+                                          (fromJust over)
                                           (fromJust sel)
     -- Calculate status
     let newStaticStatus = foldr handleEvent staticStatus evs
 
     -- Update status
-    -- soosimSetSimState soosim (soosimStaticState newStaticStatus)
+    -- soosimSetSimState soosim $ Just (soosimStaticState newStaticStatus)
     soosimSetSelection soosim $ Just (soosimStaticSel newStaticStatus)
+    soosimSetOver soosim $ Just (soosimStaticOver newStaticStatus)
     soosimSetMCS soosim $ Just (present $ multiCoreStatus $ soosimStaticStatus newStaticStatus)
 
   -- mapM_ (\ev -> modifyCBMVar mcsRef (return . handleEvent ev)) evs
@@ -120,6 +127,7 @@ queueEvent event (State evs) = State (event : evs)
 data SoOSiMStaticStatus = SoOSiMStaticStatus
   { soosimStaticState  :: SimState
   , soosimStaticStatus :: SystemStatus
+  , soosimStaticOver    :: [Name]
   , soosimStaticSel    :: [Name]
   -- , soosimStaticMCS    :: MultiCoreStatus
   }
@@ -152,7 +160,8 @@ handleClicks p state = state { soosimStaticStatus = st' }
 
 -- | Process double clicks in component boxes
 handleDoubleClicks :: Point -> SoOSiMStaticStatus -> SoOSiMStaticStatus
-handleDoubleClicks p state = state { soosimStaticStatus = st' }
+handleDoubleClicks p state = trace (show $ selection st') $ state { soosimStaticStatus = st'
+                                                                  , soosimStaticSel    = fromMaybe [] ss }
  where ss = simpleBoxName =<< checkSetSelection p st -- Select simple boxes only
        ns = checkToggleVisibility p st
        st = soosimStaticStatus state
@@ -161,14 +170,15 @@ handleDoubleClicks p state = state { soosimStaticStatus = st' }
 
 -- | Process moving the mouse over component boxes
 handleMouseOver :: Point -> SoOSiMStaticStatus -> SoOSiMStaticStatus
-handleMouseOver p state = state { soosimStaticSel = fromMaybe [] ss }
+handleMouseOver p state = state { soosimStaticOver = fromMaybe [] ss }
  where ss = simpleBoxName =<< checkSetSelection p st -- Hovering over simple boxes only
        st = soosimStaticStatus state
 
 -- | Returns the qualified name of the box who's visibility
 -- must be toggled (if any)
 checkToggleVisibility :: Point -> SystemStatus -> Maybe [Name]
-checkToggleVisibility p st = anyMenu p $ transformDiagram $ transformStatus defaultConfig st
+checkToggleVisibility p st =
+  anyMenu p $ transformDiagram $ transformStatus defaultConfig st
   
 -- | Returns the qualified name of the box that the user
 -- selected (if any)
@@ -190,23 +200,41 @@ soosimOnStateChanged = installCallbackCBMVar . soosimState . soosimParams
 soosimOnSelectionChanged :: SoOSiMState -> IO () -> IO ()
 soosimOnSelectionChanged = installCallbackCBMVar . soosimSelection . soosimParams
 
+soosimOnOverChanged :: SoOSiMState -> IO () -> IO ()
+soosimOnOverChanged = installCallbackCBMVar . soosimOver . soosimParams
+
 -- soosimUpdateSimState :: SoOSiMState -> SimState -> IO ()
 -- soosimUpdateSimState = undefined
 
 soosimSetSimState    :: SoOSiMState -> Maybe SimState -> IO ()
-soosimSetSimState    = writeCBMVar . soosimState . soosimParams
+soosimSetSimState     = writeCBMVar . soosimState . soosimParams 
+  --do
+  --curV <- readCBMVar $ soosimState $ soosimParams s
+  --when (v /= curV) $ writeCBMVar (soosimState $ soosimParams s) v
 
 soosimGetSimState    :: SoOSiMState -> IO (Maybe SimState)
 soosimGetSimState    = readCBMVar . soosimState . soosimParams
 
-soosimSetSelection   :: SoOSiMState -> Maybe [Name] -> IO()
-soosimSetSelection   = writeCBMVar . soosimSelection . soosimParams
+soosimSetSelection :: SoOSiMState -> Maybe [Name] -> IO()
+soosimSetSelection s v = do
+  curV <- soosimGetSelection s
+  when (v /= curV) $ writeCBMVar (soosimSelection $ soosimParams s) v
 
 soosimGetSelection   :: SoOSiMState -> IO (Maybe [Name])
 soosimGetSelection   = readCBMVar . soosimSelection . soosimParams
 
+soosimSetOver   :: SoOSiMState -> Maybe [Name] -> IO()
+soosimSetOver s v = do
+  curV <- soosimGetOver s
+  when (v /= curV) $ writeCBMVar (soosimOver (soosimParams s)) v
+
+soosimGetOver   :: SoOSiMState -> IO (Maybe [Name])
+soosimGetOver   = readCBMVar . soosimOver . soosimParams
+
 soosimSetMCS   :: SoOSiMState -> Maybe MultiCoreStatus -> IO()
-soosimSetMCS   = writeCBMVar . soosimMCS . soosimParams
+soosimSetMCS s v = do
+  curV <- soosimGetMCS s
+  when (v /= curV) $ writeCBMVar (soosimMCS (soosimParams s)) v
 
 soosimGetMCS         :: SoOSiMState -> IO (Maybe MultiCoreStatus)
 soosimGetMCS         = readCBMVar . soosimMCS . soosimParams

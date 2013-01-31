@@ -30,5 +30,6 @@ installHandlers cenv = void $ do
   setter simStateField (model cenv) $ Just $ SimGLState initialSystemStatus ss simstate []
   soosimSetMCS soosim (Just initialMcs)
   soosimSetSimState soosim (Just ss)
+  soosimSetOver soosim (Just [])
   soosimSetSelection soosim (Just [])
   where soosim = soosimView (view cenv)

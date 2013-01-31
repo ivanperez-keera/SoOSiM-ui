@@ -24,7 +24,7 @@ import Model.SystemStatus
 installHandlers :: CEnv -> IO()
 installHandlers cenv = void $
   onEvent (model cenv) SimStateChanged $ condition cenv
-  
+
 condition :: CEnv -> IO ()
 condition cenv = do
   stateM <- getter simStateField (model cenv)

@@ -6,6 +6,7 @@ module Controller.Conditions.InfoTooltip
 -- External imports
 import Control.Monad
 import Control.Monad.IfElse
+import Data.List
 import Data.Maybe
 import Graphics.UI.Gtk
 import Hails.MVC.Model.ProtectedModel.Reactive
@@ -44,7 +45,7 @@ getElemInfo :: [Name]          -- ^ The qualified name of the element whose info
             -> Maybe String    -- ^ If the element exists, it's associated info, and
                                --   Nothing otherwise
 getElemInfo [x,y] ss = getCompInfo x y ss
-getElemInfo _     _  = Nothing
+getElemInfo _     _  = Nothing -- Just (concat $ intersperse ":" xs)
 
 -- | Compiles the component info
 getCompInfo :: Name -> Name -> MultiCoreStatus -> Maybe String
