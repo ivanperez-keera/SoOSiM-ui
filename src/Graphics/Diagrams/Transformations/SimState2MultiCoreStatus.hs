@@ -72,7 +72,7 @@ compStatistics (S.CC _s _cid _csu cse _cr _buf trc smd) = do
     return $ Statistics (S.cyclesRunning metaData)
                         (S.cyclesWaiting metaData)
                         (S.cyclesIdling metaData)
-                        trc
+                        (map fst trc)
 
 
 -- | Transforms the SoOSiM messages into MultiCore description messages
@@ -90,7 +90,7 @@ collectMessagesCC nodes nid (cid, cc) =
 -- | Transforms an input SoOSiM message into a MCS message
 collectMessagesInput :: [(Int, S.Node)] -> Int -> Int -> S.Input a -> IO [Message]
 collectMessagesInput nodes nid cid input
- | (S.Message _ sid) <- input
+ | (S.Message _ _ sid) <- input
  , Just senderNode <- findComponentNode (fst (S.unRA sid)) nodes
  = return [ Message [show senderNode, show (fst (S.unRA sid))] dest "" ]
 
