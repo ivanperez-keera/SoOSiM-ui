@@ -26,7 +26,7 @@ installHandlers cenv = void $
   onEvent (model cenv) SimStateChanged $ condition cenv
 
 condition :: CEnv -> IO ()
-condition cenv = do
+condition cenv = onViewAsync $ do
   stateM <- getter simStateField (model cenv)
   awhen stateM $ \state -> do
     let systemSt = simGLSystemStatus state

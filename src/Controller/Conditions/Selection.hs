@@ -26,7 +26,7 @@ installHandlers cenv = void $ do
   
 -- | Shows component info only when a component is selected
 conditionShowPage :: CEnv -> IO()
-conditionShowPage cenv = do
+conditionShowPage cenv = onViewAsync $ do
   stM <- getter simStateField (model cenv) -- readCBMVar $ mcs $ view cenv
   let hasSelection = maybe False (not . null . selection . simGLSystemStatus) stM
 
@@ -40,7 +40,7 @@ conditionShowPage cenv = do
 
 -- | Shows component info only when a component is selected
 conditionUpdateSelection :: CEnv -> IO()
-conditionUpdateSelection cenv = do
+conditionUpdateSelection cenv = onViewAsync $ do
   selection <- soosimGetSelection soosim
   stM <- getter simStateField (model cenv)
   when (isJust stM) $ do

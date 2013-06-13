@@ -23,7 +23,7 @@ import SoOSiM.Examples.Example1
 -- | Closes the application when the user closes the main window
 -- or clicks on Quit in the File menu
 installHandlers :: CEnv -> IO()
-installHandlers cenv = void $ do
+installHandlers cenv = void $ onViewAsync $ do
   ss         <- simstate 
   initialMcs <- updateFromSimState emptyMultiCoreStatus ss
   let initialSystemStatus = SystemStatus (historyNew initialMcs) []
