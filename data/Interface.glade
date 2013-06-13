@@ -119,6 +119,7 @@
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="toolbar_style">both</property>
             <child>
               <object class="GtkToolButton" id="fullScreenToolBtn">
                 <property name="visible">True</property>
@@ -153,6 +154,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="use_action_appearance">False</property>
+                <property name="visible_horizontal">False</property>
+                <property name="visible_vertical">False</property>
                 <property name="label" translatable="yes">Run Slow</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-media-play</property>
@@ -220,9 +223,10 @@
             </child>
             <child>
               <object class="GtkToolButton" id="stepBackToolBtn">
-                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="use_action_appearance">False</property>
+                <property name="visible_horizontal">False</property>
+                <property name="visible_vertical">False</property>
                 <property name="label" translatable="yes">Step Back</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-undo</property>

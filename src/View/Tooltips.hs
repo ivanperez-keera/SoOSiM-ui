@@ -48,7 +48,7 @@ tooltipsTable =
  , (asWidget pauseToolBtn,            "Pause"                           )  
  , (asWidget stepBackToolBtn,         "One step back"                   ) 
  , (asWidget stepForwardToolBtn,      "One step forward"                ) 
- , (asWidget stepForwardSmallToolBtn, "One small step forward"          ) 
+ -- , (asWidget stepForwardSmallToolBtn, "One small step forward"          ) 
  , (asWidget fullScreenToolBtn,       "Toggle fullscreen"               )
  , (asWidget fullScreenMenuItem,      "Toggle fullscreen"               )
  , (asWidget speedScale,              "Simulation speed (steps/second)" )

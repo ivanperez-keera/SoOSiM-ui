@@ -26,7 +26,7 @@ import View.Objects as Builder
 -- | Initialises the GUI. This must be called before
 -- any other GUI operation.
 initView :: IO ()
-initView = void initGUI
+initView = void unsafeInitGUIForThreadedRTS -- initGUI
 
 -- | Starts a thread for the view.
 startView :: IO ()
@@ -92,7 +92,7 @@ gtkViewAccessor "Builder" "uiBuilder" "stopToolBtn"          "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "slowDownToolBtn"      "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "speedUpToolBtn"       "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "stepForwardToolBtn"   "ToolButton"
-gtkViewAccessor "Builder" "uiBuilder" "stepForwardSmallToolBtn"   "ToolButton"
+-- gtkViewAccessor "Builder" "uiBuilder" "stepForwardSmallToolBtn"   "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "stepBackToolBtn"      "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "fullScreenToolBtn"    "ToolButton"
 gtkViewAccessor "Builder" "uiBuilder" "fullScreenMenuItem"   "ImageMenuItem"
