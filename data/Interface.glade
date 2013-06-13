@@ -18,16 +18,11 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <!--object class="GtkWindow" id="flowChartWindow">
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <child>
-      <object class="GtkLabel" id="label12">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">To be completed</property>
-      </object>
-    </child>
-  </object-->
+    <property name="pixbuf">slow.png</property>
+  </object>
   <object class="GtkImage" id="image20">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -37,6 +32,11 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-close</property>
+  </object>
+  <object class="GtkImage" id="imageFast">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">fast.png</property>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="width_request">1024</property>
@@ -92,15 +92,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="ubuntu_local">True</property>
-                    <!--child>
-                      <object class="GtkMenuItem" id="showFlowChartMenuItem">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="label" translatable="yes">Show flowchart</property>
-                        <property name="use_underline">True</property>
-                      </object>
-                    </child-->
                     <child>
                       <object class="GtkImageMenuItem" id="fullScreenMenuItem">
                         <property name="label">gtk-fullscreen</property>
@@ -206,7 +197,7 @@
                 <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Slow down</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-media-rewind</property>
+                <property name="icon_widget">image1</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -220,7 +211,7 @@
                 <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Speed up</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-media-forward</property>
+                <property name="icon_widget">imageFast</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -247,20 +238,6 @@
                 <property name="can_focus">False</property>
                 <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Step</property>
-                <property name="use_underline">True</property>
-                <property name="stock_id">gtk-redo</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="stepForwardSmallToolBtn">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">Small Step</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-redo</property>
               </object>

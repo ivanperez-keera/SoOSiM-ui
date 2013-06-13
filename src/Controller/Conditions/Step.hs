@@ -23,8 +23,8 @@ installHandlers cenv = void $ do
   stepF <- stepForwardToolBtn ui
   stepF `onToolButtonClicked` conditionF cenv
 
-  stepFS <- stepForwardSmallToolBtn ui
-  stepFS `onToolButtonClicked` conditionFS cenv
+  -- stepFS <- stepForwardSmallToolBtn ui
+  -- stepFS `onToolButtonClicked` conditionFS cenv
 
   stepB <- stepBackToolBtn ui
   stepB `onToolButtonClicked` conditionB cenv
@@ -36,11 +36,11 @@ conditionF cenv = void $ do
   st <- getter statusField $ model cenv
   when (st == Paused) $ modelUpdateNextStepWith cenv tick
 
--- | Updates the state with the next step only if the system is paused
-conditionFS :: CEnv -> IO()
-conditionFS cenv = void $ do
-  st <- getter statusField $ model cenv
-  when (st == Paused) $ modelUpdateNextStepWith cenv tick
+-- -- | Updates the state with the next step only if the system is paused
+-- conditionFS :: CEnv -> IO()
+-- conditionFS cenv = void $ do
+--   st <- getter statusField $ model cenv
+--   when (st == Paused) $ modelUpdateNextStepWith cenv tick
 
 -- | Go back one step
 conditionB :: CEnv -> IO()
