@@ -10,11 +10,17 @@ cabal install cabal-dev
 (you need to add cabal's bin dir to your path.  In *nix OSs, this usually
 means adding $HOME/.cabal/bin to your PATH.)
 
-2) Take the file instructions.sh from SoOSiM-ui's repository:
+2) Take the file install-with-deps.sh from SoOSiM-ui's repository:
 https://github.com/ivanperez-keera/SoOSiM-ui/blob/master/install-with-deps.sh
 
 3) Create a directory where everything will be installed and compiled, and run install-with-deps.sh.
 You'll need glade, ciaro, gtk, opengl development libraries, and possibly others.
+
+    $ mkdir soosim-all
+    $ cd soosim-all
+    $ wget https://raw.github.com/ivanperez-keera/SoOSiM-ui/master/install-with-deps.sh
+    $ chmod a+x install-with-deps.sh
+    $ ./install-with-deps.sh
 
 The executable should be produced inside cabal-dev/bin/SoOSiM-ui
 
