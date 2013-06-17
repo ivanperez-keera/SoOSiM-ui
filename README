@@ -5,7 +5,7 @@ to have your cabal bin directory in your path. I recommend using cabal-dev,
 unless you want to install SoOSim for all users or produce a distributable file.
 
 0) You will need ghc, cabal-install, and some libraries. Under ubuntu, the following
-installation covers everything starting from a fresh Ubuntu installation:
+installation covers everything starting from a fresh, just-installed Ubuntu (probably works in Debian too):
 
     $ apt-get install ghc cabal-install libz-dev git libftgl-dev libglade2-dev alex happy libgtkglext1-dev
 
