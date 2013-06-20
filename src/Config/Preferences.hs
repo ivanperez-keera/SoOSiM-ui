@@ -7,11 +7,19 @@ import Graphics.Diagrams.Types
 
 -- | Default angle of arrow heads (in pi-radians)
 arrowDegrees :: Float
-arrowDegrees = 0.3
+arrowDegrees = 0.5
 
 -- | Default arrow length
 arrowLength :: Float
-arrowLength = 25
+arrowLength = 35
+
+-- | Default arrow length
+arrowThickness :: Float
+arrowThickness = 3
+
+-- | Color used for shadows
+arrowColor :: Color
+arrowColor = makeColor 0.0 0.0 0.0 0.9
 
 -- | Color used for shadows
 shadowColor :: Color

@@ -4,16 +4,16 @@
 module Graphics.Gloss.AdvancedShapes.Arrows where
 
 import "gloss-gtk" Graphics.Gloss
-import Config.Preferences (arrowDegrees, arrowLength)
+import Config.Preferences (arrowDegrees, arrowLength, arrowColor, arrowThickness)
 
 -- | Plain arrow with no head
 arrow :: Path -> Picture
 arrow p 
   | [p1, p2] <- p, p1 /= p2
   , (v1, v2) <- calcArrowHeadVertex (p1, p2)
-  = Pictures [ line [p1, p2]
-             , polygon [p2, v1, v2]
-             ]
+  = color arrowColor $ Pictures [ thickLine arrowThickness [p1, p2]
+                                , polygon [p2, v1, v2]
+                                ]
 arrow _ = blank
 
 -- | Taken from Keera Gale IDE

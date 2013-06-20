@@ -47,6 +47,9 @@ Data-files: data/Interface.glade
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2
 
+Flag PORTABLE
+  Description: Create a portable version that expects data/libs to be in the same directory
+  Default:     False
 
 Executable SoOSiM-ui
   -- .hs or .lhs file containing the Main module.
@@ -160,4 +163,6 @@ Executable SoOSiM-ui
   
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
+  If flag(PORTABLE)
+     CPP-Options: -Dportable_install
   
