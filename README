@@ -1,8 +1,36 @@
 This is the UI for the SoOSiM simulator.
 
 There are two ways of installing this package. In both cases, you need
-to have your cabal bin directory in your path. In *nix OSs, this usually
-means adding $HOME/.cabal/bin to your PATH.
+to have your cabal bin directory in your path. I recommend using cabal-dev,
+unless you want to install SoOSim for all users or produce a distributable file.
+
+0) You will need ghc, cabal-install, and some libraries. Under ubuntu, the following
+installation covers everything starting from a fresh, just-installed Ubuntu (probably works in Debian too):
+
+    $ apt-get install ghc cabal-install libz-dev git libftgl-dev libglade2-dev alex happy libgtkglext1-dev
+
+1) Install cabal-dev
+
+    $ cabal install cabal-dev
+    $ export PATH=$HOME/.cabal/bin:$PATH
+
+(you need to add cabal's bin dir to your path.  In *nix OSs, this usually
+means adding $HOME/.cabal/bin to your PATH.)
+
+2) Create a directory where everything will be installed and compiled and run install-with-deps.sh.
+
+    $ mkdir soosim-all
+    $ cd soosim-all
+    $ wget https://raw.github.com/ivanperez-keera/SoOSiM-ui/master/install-with-deps.sh
+    $ chmod a+x install-with-deps.sh
+    $ ./install-with-deps.sh
+
+The executable should be produced inside cabal-dev/bin/SoOSiM-ui
+
+Let me know if other libs are necessary, or if anything fails (feel free to open an issue).
+
+
+== What follows are old instructions. Follow the instructions above instead.
 
 1) Download all the dependencies, unpack each one of them and install.
 You will need:
